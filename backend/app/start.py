@@ -14,7 +14,7 @@ from .database.tables import SessionLocal, engine, Base
 from .database.tables import Category, Brand, Product, User, Order, Notification, Address
 # Import schemas
 from .schemas.schemas import (
-    CategoryOut, BrandOut, ProductOut, UserOut, OrderOut, NotificationOut
+    CategoryOut, BrandOut, ProductOut, UserOut, OrderOut, NotificationOut, AddressIn, AddressOut
 )
 
 # Create tables automatically (for simplicity in development)
@@ -66,29 +66,44 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def get_current_user(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)):
+def get_current_user(authorization: Optional[str] = Header(None, alias="Authorization"), db: Session = Depends(get_db)):
+    print(f"DEBUG: Authorization header received: {authorization}")
+    
     if not authorization:
+        print("DEBUG: No authorization header found")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token missing")
     
     # Extract token from "Bearer <token>"
     try:
-        scheme, token = authorization.split()
+        parts = authorization.split()
+        if len(parts) != 2:
+            print(f"DEBUG: Invalid authorization format, parts: {len(parts)}")
+            raise ValueError("Invalid format")
+        scheme, token = parts
         if scheme.lower() != "bearer":
+            print(f"DEBUG: Invalid scheme: {scheme}")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid auth scheme")
-    except ValueError:
+    except ValueError as e:
+        print(f"DEBUG: Error parsing authorization header: {e}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authorization header")
     
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("sub")
-        if user_id is None:
+        user_id_str: str = payload.get("sub")
+        if user_id_str is None:
+            print("DEBUG: No user_id in token payload")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    except JWTError:
+        user_id = int(user_id_str)
+    except (JWTError, ValueError) as e:
+        print(f"DEBUG: JWT decode error: {e}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
+        print(f"DEBUG: User not found for id: {user_id}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    
+    print(f"DEBUG: User authenticated: {user.email}")
     return user
 
 app = FastAPI(
@@ -112,11 +127,12 @@ def root():
     return {"status": "API is running"}
 
 # --- Categories ---
-@app.get("/categories", response_model=List[CategoryOut])
+@app.get("/api/products/categories", response_model=List[CategoryOut])
 def get_categories(db: Session = Depends(get_db)):
-    return db.query(Category).all()
+    categories = db.query(Category).all()
+    return categories
 
-@app.get("/categories/{id}", response_model=CategoryOut)
+@app.get("/api/products/categories/{id}", response_model=CategoryOut)
 def get_category(id: int, db: Session = Depends(get_db)):
     category = db.query(Category).filter(Category.id == id).first()
     if not category:
@@ -124,17 +140,18 @@ def get_category(id: int, db: Session = Depends(get_db)):
     return category
 
 # --- Brands ---
-@app.get("/brands", response_model=List[BrandOut])
+@app.get("/api/products/brands", response_model=List[BrandOut])
 def get_brands(db: Session = Depends(get_db)):
-    return db.query(Brand).all()
+    brands = db.query(Brand).all()
+    return brands
 
 # --- Products ---
-@app.get("/products", response_model=List[ProductOut])
+@app.get("/api/products", response_model=List[ProductOut])
 def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     # Returns products with nested reviews included (eager loading is handled by relationship default)
     return db.query(Product).offset(skip).limit(limit).all()
 
-@app.get("/products/{slug}", response_model=ProductOut)
+@app.get("/api/products/{slug}", response_model=ProductOut)
 def get_product_by_slug(slug: str, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.slug == slug).first()
     if not product:
@@ -167,6 +184,59 @@ def get_user_orders(user_id: int, db: Session = Depends(get_db)):
 def get_notifications(user_id: int, db: Session = Depends(get_db)):
     return db.query(Notification).filter(Notification.user_id == user_id).all()
 
+# --- Addresses ---
+@app.post("/api/addresses", response_model=UserOut)
+def create_address(address_data: AddressIn, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Create a new address for the current user"""
+    new_address = Address(
+        user_id=current_user.id,
+        name=address_data.name,
+        line1=address_data.line1,
+        line2=address_data.line2,
+        city=address_data.city,
+        state=address_data.state,
+        postal_code=address_data.postal_code,
+        country=address_data.country,
+        is_default=address_data.is_default
+    )
+    
+    db.add(new_address)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@app.put("/api/addresses/{address_id}", response_model=UserOut)
+def update_address(address_id: int, address_data: AddressIn, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Update an existing address"""
+    address = db.query(Address).filter(Address.id == address_id, Address.user_id == current_user.id).first()
+    if not address:
+        raise HTTPException(status_code=404, detail="Address not found")
+    
+    address.name = address_data.name
+    address.line1 = address_data.line1
+    address.line2 = address_data.line2
+    address.city = address_data.city
+    address.state = address_data.state
+    address.postal_code = address_data.postal_code
+    address.country = address_data.country
+    address.is_default = address_data.is_default
+    
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@app.delete("/api/addresses/{address_id}", response_model=UserOut)
+def delete_address(address_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Delete an address"""
+    address = db.query(Address).filter(Address.id == address_id, Address.user_id == current_user.id).first()
+    if not address:
+        raise HTTPException(status_code=404, detail="Address not found")
+    
+    db.delete(address)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 # ===== Authentication Endpoints =====
 @app.post("/api/auth/login", response_model=LoginResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
@@ -181,7 +251,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
     
     return LoginResponse(user=UserOut.from_orm(user), token=access_token)
 
@@ -212,7 +282,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": new_user.id}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": str(new_user.id)}, expires_delta=access_token_expires)
     
     return LoginResponse(user=UserOut.from_orm(new_user), token=access_token)
 

@@ -1,7 +1,7 @@
 import os
 import sys
 
-VENV_PYTHON = os.path.join(".venv", "bin", "python")
+VENV_PYTHON = os.path.join(".venv", "Scripts", "python.exe")
 
 if not os.path.exists(VENV_PYTHON):
     print("❌ .venv not found")

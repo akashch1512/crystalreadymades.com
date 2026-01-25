@@ -28,17 +28,17 @@ const fetchJson = async <T>(endpoint: string): Promise<T[]> => {
 
 // 1. Categories
 export const getCategories = async (): Promise<Category[]> => {
-  return await fetchJson<Category>('/categories');
+  return await fetchJson<Category>('/api/products/categories');
 };
 
 // 2. Brands
 export const getBrands = async (): Promise<Brand[]> => {
-  return await fetchJson<Brand>('/brands');
+  return await fetchJson<Brand>('/api/products/brands');
 };
 
 // 3. Products
 export const getProducts = async (): Promise<Product[]> => {
-  return await fetchJson<Product>('/products');
+  return await fetchJson<Product>('/api/products');
 };
 
 // 4. Users (Admin/Auth use mostly)

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { X, Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { FilterOptions } from '../../types';
+import { FilterOptions, Category, Brand } from '../../types';
 
 interface ProductFilterProps {
-  categories: string[];
-  brands: string[];
+  categories: Category[];
+  brands: Brand[];
   filterOptions: FilterOptions;
   setFilterOptions: (options: FilterOptions) => void;
   clearFilters: () => void;
@@ -32,17 +32,17 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
     }));
   };
   
-  const handleCategoryChange = (category: string) => {
+  const handleCategoryChange = (categoryId: string, categoryName: string) => {
     setFilterOptions({
       ...filterOptions,
-      category: filterOptions.category === category ? undefined : category
+      category: filterOptions.category === categoryName ? undefined : categoryName
     });
   };
   
-  const handleBrandChange = (brand: string) => {
+  const handleBrandChange = (brandId: string, brandName: string) => {
     setFilterOptions({
       ...filterOptions,
-      brand: filterOptions.brand === brand ? undefined : brand
+      brand: filterOptions.brand === brandName ? undefined : brandName
     });
   };
   
@@ -102,20 +102,20 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
             {expandedSections.categories && (
               <div className="mt-2 space-y-1">
                 {categories.map(category => (
-                  <div key={category} className="flex items-center">
+                  <div key={category.id} className="flex items-center">
                     <input
-                      id={`category-${category}`}
+                      id={`category-${category.id}`}
                       name="category"
                       type="radio"
-                      checked={filterOptions.category === category}
-                      onChange={() => handleCategoryChange(category)}
+                      checked={filterOptions.category === category.name}
+                      onChange={() => handleCategoryChange(category.id, category.name)}
                       className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
                     />
                     <label
-                      htmlFor={`category-${category}`}
+                      htmlFor={`category-${category.id}`}
                       className="ml-3 text-sm text-gray-600"
                     >
-                      {category}
+                      {category.name}
                     </label>
                   </div>
                 ))}
@@ -136,20 +136,20 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
             {expandedSections.brands && (
               <div className="mt-2 space-y-1">
                 {brands.map(brand => (
-                  <div key={brand} className="flex items-center">
+                  <div key={brand.id} className="flex items-center">
                     <input
-                      id={`brand-${brand}`}
+                      id={`brand-${brand.id}`}
                       name="brand"
                       type="radio"
-                      checked={filterOptions.brand === brand}
-                      onChange={() => handleBrandChange(brand)}
+                      checked={filterOptions.brand === brand.name}
+                      onChange={() => handleBrandChange(brand.id, brand.name)}
                       className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
                     />
                     <label
-                      htmlFor={`brand-${brand}`}
+                      htmlFor={`brand-${brand.id}`}
                       className="ml-3 text-sm text-gray-600"
                     >
-                      {brand}
+                      {brand.name}
                     </label>
                   </div>
                 ))}
@@ -355,20 +355,20 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                   <h3 className="text-sm font-medium text-gray-900 mb-2">Categories</h3>
                   <div className="space-y-2">
                     {categories.map(category => (
-                      <div key={category} className="flex items-center">
+                      <div key={category.id} className="flex items-center">
                         <input
-                          id={`mobile-category-${category}`}
+                          id={`mobile-category-${category.id}`}
                           name="mobile-category"
                           type="radio"
-                          checked={filterOptions.category === category}
-                          onChange={() => handleCategoryChange(category)}
+                          checked={filterOptions.category === category.name}
+                          onChange={() => handleCategoryChange(category.id, category.name)}
                           className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
                         />
                         <label
-                          htmlFor={`mobile-category-${category}`}
+                          htmlFor={`mobile-category-${category.id}`}
                           className="ml-3 text-sm text-gray-600"
                         >
-                          {category}
+                          {category.name}
                         </label>
                       </div>
                     ))}
@@ -380,20 +380,20 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                   <h3 className="text-sm font-medium text-gray-900 mb-2">Brands</h3>
                   <div className="space-y-2">
                     {brands.map(brand => (
-                      <div key={brand} className="flex items-center">
+                      <div key={brand.id} className="flex items-center">
                         <input
-                          id={`mobile-brand-${brand}`}
+                          id={`mobile-brand-${brand.id}`}
                           name="mobile-brand"
                           type="radio"
-                          checked={filterOptions.brand === brand}
-                          onChange={() => handleBrandChange(brand)}
+                          checked={filterOptions.brand === brand.name}
+                          onChange={() => handleBrandChange(brand.id, brand.name)}
                           className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
                         />
                         <label
-                          htmlFor={`mobile-brand-${brand}`}
+                          htmlFor={`mobile-brand-${brand.id}`}
                           className="ml-3 text-sm text-gray-600"
                         >
-                          {brand}
+                          {brand.name}
                         </label>
                       </div>
                     ))}

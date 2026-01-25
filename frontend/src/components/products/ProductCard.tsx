@@ -36,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     ? Math.round(((product.price - product.salePrice) / product.price) * 100) 
     : 0;
 
-    const isOutOfStock = typeof product.stock !== 'number' || product.stock <= 0;
+  const isOutOfStock = product.quantity <= 0;
 
   return (
     <Link 

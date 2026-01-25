@@ -73,18 +73,27 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
+      
+      console.log('Token from localStorage:', token ? 'exists' : 'missing');
+      console.log('Full token:', token);
+      
+      if (!token) {
+        throw new Error('You must be logged in to save addresses. Please login and try again.');
+      }
+
       const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-      const response = await fetch(`${apiUrl}/api/addresses`, {
+      const endpoint = address ? `/api/addresses/${address.id}` : '/api/addresses';
+      console.log('Sending request to:', `${apiUrl}${endpoint}`);
+      console.log('Auth header:', `Bearer ${token}`);
+      
+      const response = await fetch(`${apiUrl}${endpoint}`, {
         method: address ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          id: address?.id || `address-${Date.now()}`,
-          ...formData,
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {

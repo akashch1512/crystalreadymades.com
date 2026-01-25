@@ -60,6 +60,16 @@ class ProductOut(BaseSchema):
     # Note: We return IDs for category/brand usually, but you can nest objects if needed
 
 # --- User & Address Schemas ---
+class AddressIn(BaseSchema):
+    name: str
+    line1: str
+    line2: Optional[str] = None
+    city: str
+    state: str
+    postal_code: str
+    country: str
+    is_default: bool = False
+
 class AddressOut(BaseSchema):
     id: int
     name: str

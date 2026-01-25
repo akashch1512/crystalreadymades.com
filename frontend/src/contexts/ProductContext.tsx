@@ -5,12 +5,12 @@ import React, {
   useMemo,
   useEffect,
 } from "react";
-import { Product, FilterOptions } from "../types";
+import { Product, FilterOptions, Category, Brand } from "../types";
 
 interface ProductContextValue {
   products: Product[];
-  categories: string[];
-  brands: string[];
+  categories: Category[];
+  brands: Brand[];
   filteredProducts: Product[];
   filterOptions: FilterOptions;
   setFilterOptions: React.Dispatch<React.SetStateAction<FilterOptions>>;
@@ -43,8 +43,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [brands, setBrands] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({});
 
   const fetchWithRetry = async (url: string, options = {}, retries = 3) => {
@@ -81,8 +81,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
         ]);
 
         setProducts(productData.map((p: any) => ({ ...p, id: p.id || p._id })));
-        setCategories(categoryData);
-        setBrands(brandData);
+        setCategories(categoryData.map((c: any) => ({ ...c, id: String(c.id) })));
+        setBrands(brandData.map((b: any) => ({ ...b, id: String(b.id) })));
       } catch (error) {
         console.error("Failed to fetch product data:", error);
       }

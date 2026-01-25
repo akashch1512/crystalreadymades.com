@@ -38,9 +38,25 @@
       const storedUser = localStorage.getItem('user');
       const storedToken = localStorage.getItem('token');
       if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
-        // Attach the token to axios default headers
-        axios.defaults.headers.Authorization = `Bearer ${storedToken}`;
+        try {
+          // Verify token is valid by checking if it's a valid JWT
+          const parts = storedToken.split('.');
+          if (parts.length === 3) {
+            setUser(JSON.parse(storedUser));
+            // Attach the token to axios default headers
+            axios.defaults.headers.Authorization = `Bearer ${storedToken}`;
+          } else {
+            // Invalid token format, clear it
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            console.warn('Invalid token format, cleared localStorage');
+          }
+        } catch (error) {
+          // Error parsing token, clear it
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+          console.warn('Error validating token, cleared localStorage');
+        }
       }
       setLoading(false);
     }, []);

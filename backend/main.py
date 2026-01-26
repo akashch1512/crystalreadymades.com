@@ -2,15 +2,13 @@ import uvicorn
 import os
 
 if __name__ == "__main__":
-    # 1. Get the PORT from Railway's environment variables (default to 8000 locally)
+    # Railway provides the port via an environment variable
     port = int(os.environ.get("PORT", 8000))
     
-    # 2. Run Uvicorn directly
-    # host="0.0.0.0" is MANDATORY for Railway to route traffic to your container
+    # host="0.0.0.0" is required for the service to be reachable externally
     uvicorn.run(
         "app.start:app", 
         host="0.0.0.0", 
         port=port, 
-        reload=False,  # Disable reload for production performance
-        workers=1      # Standard for simple deployments; increase if scaling manually
+        reload=False  # Always disable reload in production
     )

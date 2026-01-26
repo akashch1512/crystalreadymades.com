@@ -1,19 +1,14 @@
+import uvicorn
 import os
-import sys
 
-VENV_PYTHON = os.path.join(".venv", "Scripts", "python.exe")
-
-if not os.path.exists(VENV_PYTHON):
-    print("❌ .venv not found")
-    sys.exit(1)
-
-os.execv(
-    VENV_PYTHON,
-    [
-        VENV_PYTHON,
-        "-m",
-        "uvicorn",
-        "app.start:app",
-        "--reload"
-    ]
-)
+if __name__ == "__main__":
+    # Railway provides the port via an environment variable
+    port = int(os.environ.get("PORT", 8000))
+    
+    # host="0.0.0.0" is required for the service to be reachable externally
+    uvicorn.run(
+        "app.start:app", 
+        host="0.0.0.0", 
+        port=port, 
+        reload=False  # Always disable reload in production
+    )

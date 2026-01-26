@@ -64,7 +64,7 @@
     const login = async (email: string, password: string): Promise<boolean> => {
       try {
         setLoading(true);
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+        const apiUrl = import.meta.env.VITE_API_URL;
         const response = await axios.post(`${apiUrl}/api/auth/login`, { email, password });
         const { user: loggedInUser, token } = response.data;
         // crystal-readymade-production.up.railway.app
@@ -91,7 +91,7 @@
     const register = async (name: string, email: string, password: string): Promise<boolean> => {
       try {
         setLoading(true);
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+        const apiUrl = import.meta.env.VITE_API_URL;
         const response = await axios.post(`${apiUrl}/api/auth/register`, { name, email, password });
         const { user: newUser, token } = response.data;
 
@@ -124,7 +124,7 @@
 
     const refreshUser = async (): Promise<void> => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+        const apiUrl = import.meta.env.VITE_API_URL;
         const res = await axios.get(`${apiUrl}/api/user/me`);
         const updatedUser: User = res.data.user;
     

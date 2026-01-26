@@ -14,7 +14,7 @@ const AddressList: React.FC = () => {
   //  function to update addresses
   const handleSetDefault = async (addressId: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const apiUrl = import.meta.env.VITE_API_URL;
       await fetch(`${apiUrl}/api/addresses/${addressId}/set-default`, { method: 'PATCH' });
       await refreshUser();
       toast.success('Default address updated'); // if using a toast library
@@ -26,7 +26,7 @@ const AddressList: React.FC = () => {
   //  function to delete an address
   const handleDelete = async (addressId: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const apiUrl = import.meta.env.VITE_API_URL;
       await fetch(`${apiUrl}/api/addresses/${addressId}`, { method: 'DELETE' });
       await refreshUser();
     } catch (error) {

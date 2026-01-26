@@ -61,7 +61,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+  const API_BASE = import.meta.env.VITE_API_URL;
   
   useEffect(() => {
     const fetchData = async () => {

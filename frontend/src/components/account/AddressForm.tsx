@@ -81,7 +81,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
         throw new Error('You must be logged in to save addresses. Please login and try again.');
       }
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const apiUrl = import.meta.env.VITE_API_URL;
 
       const endpoint = address ? `/api/addresses/${address.id}` : '/api/addresses';
       console.log('Sending request to:', `${apiUrl}${endpoint}`);

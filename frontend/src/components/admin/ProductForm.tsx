@@ -147,7 +147,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit }) => {
       };
 
       const token = localStorage.getItem("token");
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const apiUrl = import.meta.env.VITE_API_URL;
 
       const response = await fetch(`${apiUrl}/api/products`, {
         method: "POST",

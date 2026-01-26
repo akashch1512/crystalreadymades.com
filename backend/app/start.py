@@ -159,11 +159,11 @@ def get_product_by_slug(slug: str, db: Session = Depends(get_db)):
     return product
 
 # --- Users ---
-@app.get("/users", response_model=List[UserOut])
+@app.get("/api/users", response_model=List[UserOut])
 def get_users(db: Session = Depends(get_db)):
     return db.query(User).all()
 
-@app.get("/users/{id}", response_model=UserOut)
+@app.get("/api/users/{id}", response_model=UserOut)
 def get_user(id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == id).first()
     if not user:
@@ -171,16 +171,16 @@ def get_user(id: int, db: Session = Depends(get_db)):
     return user
 
 # --- Orders ---
-@app.get("/orders", response_model=List[OrderOut])
+@app.get("/api/orders", response_model=List[OrderOut])
 def get_orders(db: Session = Depends(get_db)):
     return db.query(Order).all()
 
-@app.get("/orders/user/{user_id}", response_model=List[OrderOut])
+@app.get("/api/orders/user/{user_id}", response_model=List[OrderOut])
 def get_user_orders(user_id: int, db: Session = Depends(get_db)):
     return db.query(Order).filter(Order.user_id == user_id).all()
 
 # --- Notifications ---
-@app.get("/notifications/{user_id}", response_model=List[NotificationOut])
+@app.get("/api/notifications/{user_id}", response_model=List[NotificationOut])
 def get_notifications(user_id: int, db: Session = Depends(get_db)):
     return db.query(Notification).filter(Notification.user_id == user_id).all()
 

@@ -11,5 +11,9 @@ export default defineConfig({
     proxy: {
       '/api': 'https://crystal-readymade-production.up.railway.app', // point to your Express backend
     }
+  },
+  preview: {
+    port: Number(process.env.PORT) || 4173,
+    host: '0.0.0.0',
   }
 });

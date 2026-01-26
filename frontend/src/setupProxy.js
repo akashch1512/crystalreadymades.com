@@ -4,9 +4,9 @@ module.exports = function (app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'https://crystal-readymade-production.up.railway.app', // Add port
+      target: process.env.VITE_API_URL, // correct
       changeOrigin: true,
-      secure: false, // Try adding this if you have SSL issues
+      secure: false, // ignore SSL errors (dev only)
     })
   );
 };

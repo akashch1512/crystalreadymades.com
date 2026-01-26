@@ -43,18 +43,18 @@ export const getProducts = async (): Promise<Product[]> => {
 
 // 4. Users (Admin/Auth use mostly)
 export const getUsers = async (): Promise<User[]> => {
-  return await fetchJson<User>('/users');
+  return await fetchJson<User>('/api/users');
 };
 
 // 5. Orders
 export const getOrders = async (): Promise<Order[]> => {
-  return await fetchJson<Order>('/orders');
+  return await fetchJson<Order>('/api/orders');
 };
 
 // 6. Notifications (Specific to a user, example user 1)
 export const getNotifications = async (userId: string): Promise<Notification[]> => {
   try {
-    const response = await fetch(`${BASE_URL}/notifications/${userId}`);
+    const response = await fetch(`${BASE_URL}/api/notifications/${userId}`);
     if (!response.ok) throw new Error("Failed to fetch notifications");
     return await response.json();
   } catch (error) {

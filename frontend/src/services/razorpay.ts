@@ -27,7 +27,7 @@ interface RazorpayOptions {
 
 export const createRazorpayOrder = async (amount: number): Promise<string> => {
   try {
-    const response = await axios.post<RazorpayOrderResponse>(`${import.meta.env.VITE_API_BASE_URL}/api/payment/create-order`, { amount });
+    const response = await axios.post<RazorpayOrderResponse>(`${import.meta.env.VITE_API_URL}/api/payment/create-order`, { amount });
     return response.data.order.id;
   } catch (error) {
     console.error('Failed to create Razorpay order:', error);

@@ -5,6 +5,7 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
+  avatar?: string;
   addresses: Address[];
   role: 'user' | 'admin';
 }
@@ -93,24 +94,24 @@ export interface OrderItem {
   image: string;
 }
 
-export type OrderStatus = 
-  | 'pending' 
-  | 'processing' 
-  | 'shipped' 
-  | 'delivered' 
+export type OrderStatus =
+  | 'pending'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
   | 'cancelled';
 
-export type PaymentMethod = 
-  | 'card' 
-  | 'upi' 
-  | 'wallet' 
-  | 'netbanking' 
+export type PaymentMethod =
+  | 'card'
+  | 'upi'
+  | 'wallet'
+  | 'netbanking'
   | 'cod';
 
-export type PaymentStatus = 
-  | 'pending' 
-  | 'paid' 
-  | 'failed' 
+export type PaymentStatus =
+  | 'pending'
+  | 'paid'
+  | 'failed'
   | 'refunded';
 
 export interface Category {

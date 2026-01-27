@@ -8,7 +8,7 @@ const LoginPage: React.FC = () => {
   const location = useLocation();
 
   const [formData, setFormData] = useState({
-    email: '',
+    phone: '',
     password: '',
   });
 
@@ -50,10 +50,10 @@ const LoginPage: React.FC = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
+      newErrors.phone = 'Phone number must be 10 digits';
     }
 
     if (!formData.password.trim()) {
@@ -76,12 +76,12 @@ const LoginPage: React.FC = () => {
     setLoginError('');
 
     try {
-      const success = await login(formData.email, formData.password);
+      const success = await login(formData.phone, formData.password);
 
       if (success) {
         navigate(redirectTo === 'checkout' ? '/checkout' : redirectTo);
       } else {
-        setLoginError('Invalid email or password');
+        setLoginError('Invalid phone or password');
       }
     } catch (error) {
       setLoginError('An error occurred during login');
@@ -107,21 +107,21 @@ const LoginPage: React.FC = () => {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number
             </label>
             <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={formData.email}
+              id="phone"
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              value={formData.phone}
               onChange={handleChange}
-              className={`appearance-none relative block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'
+              className={`appearance-none relative block w-full px-3 py-2 border ${errors.phone ? 'border-red-500' : 'border-gray-300'
                 } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm`}
-              placeholder="Email"
+              placeholder="10-digit phone number"
             />
-            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
           </div>
 
           <div>

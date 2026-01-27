@@ -7,8 +7,8 @@
     setUser: (user: User | null) => void; // <-- Add this line
     isAuthenticated: boolean;
     isAdmin: boolean;
-    login: (email: string, password: string) => Promise<boolean>;
-    register: (name: string, email: string, password: string) => Promise<boolean>;
+    login: (phone: string, password: string) => Promise<boolean>;
+    register: (name: string, phone: string, password: string) => Promise<boolean>;
     logout: () => void;
     refreshUser: () => Promise<void>;
     loading: boolean;
@@ -61,11 +61,11 @@
       setLoading(false);
     }, []);
 
-    const login = async (email: string, password: string): Promise<boolean> => {
+    const login = async (phone: string, password: string): Promise<boolean> => {
       try {
         setLoading(true);
         const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await axios.post(`${apiUrl}/api/auth/login`, { email, password });
+        const response = await axios.post(`${apiUrl}/api/auth/login`, { phone, password });
         const { user: loggedInUser, token } = response.data;
         // crystal-readymade-production.up.railway.app
         // Save user and token to localStorage
@@ -88,11 +88,11 @@
       }
     };
 
-    const register = async (name: string, email: string, password: string): Promise<boolean> => {
+    const register = async (name: string, phone: string, password: string, email?: string): Promise<boolean> => {
       try {
         setLoading(true);
         const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await axios.post(`${apiUrl}/api/auth/register`, { name, email, password });
+        const response = await axios.post(`${apiUrl}/api/auth/register`, { name, phone, password, email });
         const { user: newUser, token } = response.data;
 
         // Save user and token to localStorage

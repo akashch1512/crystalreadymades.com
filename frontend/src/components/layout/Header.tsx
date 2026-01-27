@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Heart, Bell, User, Menu, X, LogOut } from 'lucide-react';
+import { Search, ShoppingCart, ShoppingBag, Heart, Bell, User, Menu, X, LogOut, Shield, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
@@ -19,6 +19,8 @@ const Header: React.FC = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [mobileClothingsOpen, setMobileClothingsOpen] = useState(false);
+  const [mobileUniformsOpen, setMobileUniformsOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +88,7 @@ const Header: React.FC = () => {
 
               {/* Search Results Dropdown */}
               {showSearchResults && searchResults.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
                   {searchResults.map(product => (
                     <div
                       key={product.id}
@@ -113,17 +115,67 @@ const Header: React.FC = () => {
 
           {/* Navigation Links - Desktop */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/products" className="text-gray-700 hover:text-pink-600 transition-colors">
-              Shop
-            </Link>
-            <Link to="/categories" className="text-gray-700 hover:text-pink-600 transition-colors">
-              Categories
-            </Link>
+            {/* Clothings Dropdown */}
+            <div className="relative group py-2">
+              <button className="flex items-center text-gray-700 hover:text-pink-600 transition-colors">
+                Clothings
+                <ChevronDown size={16} className="ml-1" />
+              </button>
+              <div className="absolute left-0 mt-0 w-56 bg-white rounded-lg shadow-xl py-2 z-50 
+                              opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                              transition-all duration-200 border border-gray-100">
+                <Link to="/products?category=mens-wear" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600" onClick={() => { }}>
+                  Men's Wear
+                </Link>
+                <Link to="/products?category=womens-wear" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                  Women's Wear
+                </Link>
+                <Link to="/products?category=kids-wear" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                  Kids Wear
+                </Link>
+                <Link to="/products?category=ethnic-wear" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                  Ethnic Wear
+                </Link>
+                <hr className="my-1 border-gray-100" />
+                <Link to="/products" className="block px-4 py-2.5 text-sm font-medium text-pink-600 hover:bg-pink-50">
+                  View All Clothings
+                </Link>
+              </div>
+            </div>
+
+            {/* Uniforms Dropdown */}
+            <div className="relative group py-2">
+              <button className="flex items-center text-gray-700 hover:text-pink-600 transition-colors">
+                Uniforms
+                <ChevronDown size={16} className="ml-1" />
+              </button>
+              <div className="absolute left-0 mt-0 w-56 bg-white rounded-lg shadow-xl py-2 z-50 
+                              opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                              transition-all duration-200 border border-gray-100">
+                <Link to="/categories/school-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                  School Uniforms
+                </Link>
+                <Link to="/categories/college-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                  College Uniforms
+                </Link>
+                <Link to="/categories/corporate-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                  Corporate Uniforms
+                </Link>
+                <Link to="/categories/hospital-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                  Hospital & Medical
+                </Link>
+                <Link to="/categories/hotel-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                  Hotel & Hospitality
+                </Link>
+                <hr className="my-1 border-gray-100" />
+                <Link to="/categories" className="block px-4 py-2.5 text-sm font-medium text-pink-600 hover:bg-pink-50">
+                  View All Uniforms
+                </Link>
+              </div>
+            </div>
+
             <Link to="/about" className="text-gray-700 hover:text-pink-600 transition-colors">
               About
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-pink-600 transition-colors">
-              Contact
             </Link>
           </nav>
 
@@ -155,29 +207,27 @@ const Header: React.FC = () => {
                     </span>
                   )}
                 </Link>
-                <div className="relative group">
-                  <button className="flex items-center text-gray-700 hover:text-pink-600">
+                <div className="relative group py-2"> {/* Added padding to bridge the gap for hover */}
+                  <button className="flex items-center text-gray-700 hover:text-pink-600 transition-all duration-200">
                     <User size={22} />
-                    <span className="ml-1">{user?.name ? user.name.split(' ')[0] : 'Guest'}</span>
+                    <span className="ml-1 font-medium">{user?.name ? user.name.split(' ')[0] : 'Guest'}</span>
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 hidden group-hover:block">
-                    <Link to="/account" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-                      My Account
+
+                  {/* Dropdown Menu with improved hover behavior */}
+                  <div className="absolute right-0 mt-0 w-48 bg-white rounded-lg shadow-xl py-2 z-50 
+                                  opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                                  transition-all duration-200 border border-gray-100">
+                    <Link to="/account" className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                      <User size={16} className="mr-2" /> My Account
                     </Link>
-                    <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-                      My Orders
-                    </Link> 
+                    <Link to="/orders" className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                      <ShoppingBag size={16} className="mr-2" /> My Orders
+                    </Link>
                     {user?.role === 'admin' && (
-                      <Link to="/admin" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-                        Admin Dashboard
+                      <Link to="/admin" className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                        <Shield size={16} className="mr-2" /> Admin Dashboard
                       </Link>
                     )}
-                    <button
-                      onClick={logout}
-                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    >
-                      Logout
-                    </button>
                   </div>
                 </div>
               </>
@@ -233,7 +283,7 @@ const Header: React.FC = () => {
 
             {/* Mobile Search Results Dropdown */}
             {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
                 {searchResults.map(product => (
                   <div
                     key={product.id}
@@ -263,33 +313,52 @@ const Header: React.FC = () => {
       {showMobileMenu && (
         <div className="md:hidden bg-white border-t border-gray-200 shadow-inner">
           <nav className="flex flex-col px-4 py-2">
-            <Link
-              to="/products"
-              className="py-3 text-gray-700 border-b border-gray-100"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Shop
-            </Link>
-            <Link
-              to="/categories"
-              className="py-3 text-gray-700 border-b border-gray-100"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Categories
-            </Link>
+            {/* Clothings Accordion */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => setMobileClothingsOpen(!mobileClothingsOpen)}
+                className="flex items-center justify-between w-full py-3 text-gray-700"
+              >
+                Clothings
+                <ChevronDown size={16} className={`transition-transform ${mobileClothingsOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileClothingsOpen && (
+                <div className="pl-4 pb-2 space-y-1">
+                  <Link to="/products?category=mens-wear" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Men's Wear</Link>
+                  <Link to="/products?category=womens-wear" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Women's Wear</Link>
+                  <Link to="/products?category=kids-wear" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Kids Wear</Link>
+                  <Link to="/products?category=ethnic-wear" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Ethnic Wear</Link>
+                  <Link to="/products" className="block py-2 text-sm font-medium text-pink-600" onClick={() => setShowMobileMenu(false)}>View All Clothings</Link>
+                </div>
+              )}
+            </div>
+
+            {/* Uniforms Accordion */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => setMobileUniformsOpen(!mobileUniformsOpen)}
+                className="flex items-center justify-between w-full py-3 text-gray-700"
+              >
+                Uniforms
+                <ChevronDown size={16} className={`transition-transform ${mobileUniformsOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileUniformsOpen && (
+                <div className="pl-4 pb-2 space-y-1">
+                  <Link to="/categories/school-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>School Uniforms</Link>
+                  <Link to="/categories/college-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>College Uniforms</Link>
+                  <Link to="/categories/corporate-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Corporate Uniforms</Link>
+                  <Link to="/categories/hospital-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Hospital & Medical</Link>
+                  <Link to="/categories/hotel-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Hotel & Hospitality</Link>
+                  <Link to="/categories" className="block py-2 text-sm font-medium text-pink-600" onClick={() => setShowMobileMenu(false)}>View All Uniforms</Link>
+                </div>
+              )}
+            </div>
             <Link
               to="/about"
               className="py-3 text-gray-700 border-b border-gray-100"
               onClick={() => setShowMobileMenu(false)}
             >
               About
-            </Link>
-            <Link
-              to="/contact"
-              className="py-3 text-gray-700 border-b border-gray-100"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Contact
             </Link>
 
             {isAuthenticated ? (

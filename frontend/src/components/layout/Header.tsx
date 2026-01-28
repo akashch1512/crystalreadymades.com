@@ -354,7 +354,7 @@ const Header: React.FC = () => {
               )}
             </div>
             <Link
-              to="/about"
+              to="/aboutus"
               className="py-3 text-gray-700 border-b border-gray-100"
               onClick={() => setShowMobileMenu(false)}
             >

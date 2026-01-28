@@ -32,7 +32,6 @@ const FeaturedCategories: React.FC = () => {
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">Shop by Category</h2>
         <p className="text-gray-600 text-center mb-8">Explore our range of crystal-enhanced products</p>
         
-        {/* UPDATED: Added flex-grow and auto-fit logic to ensure 2 items occupy 50% width each on large screens */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-center gap-6">
           {categories.map((category) => (
             <Link 
@@ -49,12 +48,20 @@ const FeaturedCategories: React.FC = () => {
               <div className="absolute inset-0 flex flex-col justify-end p-6 z-20">
                 <h3 className="text-white text-xl font-semibold mb-2">{category.name}</h3>
                 <p className="text-white/80 text-sm mb-3 line-clamp-2">{category.description}</p>
+                
+                {/* ----- BUTTON CHANGES HERE ----- */}
                 <Link
                   to={`/products?category=${encodeURIComponent(category.name)}`}
-                  className="inline-block bg-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-700 transition-colors"
+                  // Changed:
+                  // 1. Added 'text-sm' for mobile, 'md:text-base' for desktop
+                  // 2. Reduced mobile padding to 'px-4 py-2'
+                  // 3. Moved original padding 'px-6 py-3' behind an 'md:' breakpoint
+                  className="inline-block bg-pink-600 text-white text-sm px-4 py-2 md:text-base md:px-6 md:py-3 rounded-lg font-semibold hover:bg-pink-700 transition-colors"
                 >
                   Shop Now
                 </Link>
+                {/* ------------------------------- */}
+                
               </div>
             </Link>
           ))}

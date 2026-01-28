@@ -1,28 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Facebook, 
-  Instagram, 
-  Twitter, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Github, 
-  Linkedin 
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Mail,
+  Phone,
+  MapPin,
+  Github,
+  Linkedin
 } from 'lucide-react';
 
 // Custom WhatsApp Icon Component
 const WhatsAppIcon = ({ size = 20, className = "" }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     className={className}
   >
     <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
@@ -32,7 +32,7 @@ const WhatsAppIcon = ({ size = 20, className = "" }) => (
 const Footer: React.FC = () => {
   return (
     <footer className="bg-slate-950 text-white py-12 border-t border-gray-900 relative overflow-hidden">
-      
+
       {/* Background glow effect */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-pink-900/50 to-transparent"></div>
 
@@ -44,7 +44,7 @@ const Footer: React.FC = () => {
           {/* 1. Brand, Socials & Developer Card */}
           {/* UPDATED: Added 'items-center text-center' for mobile centering, reset with 'lg:items-start lg:text-left' for desktop */}
           <div className="col-span-2 lg:col-span-1 flex flex-col space-y-6 items-center text-center lg:items-start lg:text-left">
-            
+
             {/* Logo */}
             <div>
               <h3 className="text-2xl font-bold">
@@ -69,7 +69,7 @@ const Footer: React.FC = () => {
             {/* --- DEVELOPER CARD --- */}
             <div className="pt-2">
               <div className="group relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 hover:border-pink-500/50 rounded-xl px-4 py-3 flex flex-row items-center gap-3 transition-all duration-300 shadow-lg hover:shadow-pink-900/20 w-fit sm:w-max">
-                
+
                 {/* Developer Text */}
                 <div className="flex flex-col text-left">
                   <p className="text-[10px] uppercase tracking-widest text-gray-500 font-medium leading-tight">Developed By</p>
@@ -100,9 +100,15 @@ const Footer: React.FC = () => {
           <div className="col-span-1">
             <h4 className="text-lg font-semibold mb-4 text-gray-100">Terms</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link to="/terms" className="hover:text-pink-400 transition-colors">Privacy Policy</Link></li>
-              <li><Link to="/privacy-policy" className="hover:text-pink-400 transition-colors">Terms of Service</Link></li>
-              <li><Link to="/refund-policy" className="hover:text-pink-400 transition-colors">Refund Policy</Link></li>
+              <li>
+                <Link to="/terms#privacy" className="hover:text-pink-400 transition-colors">Privacy Policy</Link>
+              </li>
+              <li>
+                <Link to="/terms#terms" className="hover:text-pink-400 transition-colors">Terms of Service</Link>
+              </li>
+              <li>
+                <Link to="/terms#refund" className="hover:text-pink-400 transition-colors">Refund Policy</Link>
+              </li>
             </ul>
           </div>
 
@@ -110,8 +116,7 @@ const Footer: React.FC = () => {
           <div className="col-span-1">
             <h4 className="text-lg font-semibold mb-4 text-gray-100">Support</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link to="/contact" className="hover:text-pink-400 transition-colors">Contact Us</Link></li>
-              <li><Link to="/shipping" className="hover:text-pink-400 transition-colors">Shipping</Link></li>
+              <li><Link to="/aboutus#contact" className="hover:text-pink-400 transition-colors">Contact Us</Link></li>
               <li><Link to="/faq" className="hover:text-pink-400 transition-colors">FAQ</Link></li>
             </ul>
           </div>

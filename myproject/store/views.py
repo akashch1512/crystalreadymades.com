@@ -184,3 +184,11 @@ class AddressDetailView(APIView):
         address = get_object_or_404(Address, id=address_id, user=request.user)
         address.delete()
         return Response(UserSerializer(request.user).data)
+
+class HeroSlideListView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        slides = HeroSlide.objects.all()
+        serializer = HeroSlideSerializer(slides, many=True)
+        return Response(serializer.data)

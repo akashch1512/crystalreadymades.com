@@ -2,38 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const slides = [
-  {
-    id: 1,
-    title: 'Luxury Crystal Jewelry',
-    subtitle: 'Shimmer with elegance',
-    description: 'Discover our new collection of crystal jewelry that adds sparkle to any outfit.',
-    buttonText: 'Shop Jewelry',
-    buttonLink: '/products?category=Jewelry',
-    image: 'https://images.pexels.com/photos/1191531/pexels-photo-1191531.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-  },
-  {
-    id: 2,
-    title: 'Crystal Home Decor',
-    subtitle: 'Transform your space',
-    description: 'Elevate your home with our stunning crystal decor pieces. Limited time offers available.',
-    buttonText: 'Shop Home Decor',
-    buttonLink: '/products?category=Home%20Decor',
-    image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-  },
-  {
-    id: 3,
-    title: 'Elegant Evening Wear',
-    subtitle: 'Stand out at any event',
-    description: 'Our crystal-embellished evening wear collection is perfect for special occasions.',
-    buttonText: 'Explore Collection',
-    buttonLink: '/products?category=Clothing',
-    image: 'https://images.pexels.com/photos/291759/pexels-photo-291759.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-  }
-];
+interface Slide {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
+  image: string;
+}
 
 const Hero: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [slides, setSlides] = useState<Slide[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Fetch hero slides from API
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const response = await fetch('/api/hero-slides');
+        const data = await response.json();
+        setSlides(data);
+      } catch (error) {
+        console.error('Failed to fetch hero slides:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSlides();
+  }, []);
   
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
@@ -44,9 +43,14 @@ const Hero: React.FC = () => {
   };
   
   useEffect(() => {
+    if (slides.length === 0) return;
     const interval = setInterval(nextSlide, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
+  
+  if (loading || slides.length === 0) {
+    return <section className="relative h-[70vh] min-h-[500px] bg-gray-900"></section>;
+  }
   
   const currentSlideData = slides[currentSlide];
 

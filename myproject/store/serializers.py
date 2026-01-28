@@ -60,3 +60,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ['id', 'title', 'message', 'type', 'is_read', 'created_at']
+
+class HeroSlideSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HeroSlide
+        fields = ['id', 'title', 'subtitle', 'description', 'buttonText', 'buttonLink', 'image']

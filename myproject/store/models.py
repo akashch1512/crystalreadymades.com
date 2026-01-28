@@ -104,3 +104,22 @@ class Notification(models.Model):
     type = models.CharField(max_length=50)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class HeroSlide(models.Model):
+    id = models.IntegerField(primary_key=True)
+    title = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255)
+    description = models.TextField()
+    buttonText = models.CharField(max_length=255)
+    buttonLink = models.CharField(max_length=500)
+    image = models.CharField(max_length=1000)
+    
+    class Meta:
+        ordering = ['id']
+    
+    def __str__(self):
+        return self.title
+
+class Terms(models.Model):
+    content = models.TextField()
+    updated_at = models.DateTimeField(auto_now=True)

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
     User, Address, Category, Brand, Product, 
-    Review, Order, OrderItem, Notification
+    Review, Order, OrderItem, Notification, HeroSlide
 )
 
 # 1. Custom User Admin
@@ -74,3 +74,8 @@ class AddressAdmin(admin.ModelAdmin):
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'title', 'type', 'is_read', 'created_at')
+
+@admin.register(HeroSlide)
+class HeroSlideAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'subtitle')
+    fields = ('id', 'title', 'subtitle', 'description', 'buttonText', 'buttonLink', 'image')

@@ -39,6 +39,10 @@ urlpatterns = [
     # Addresses
     path('api/addresses', views.AddressListCreateView.as_view()),
     path('api/addresses/<int:address_id>', views.AddressDetailView.as_view()),
+    
+    # Hero Slides
+    path('api/hero-slides', views.HeroSlideListView.as_view()),
+
 ]
 
 # Helper for root

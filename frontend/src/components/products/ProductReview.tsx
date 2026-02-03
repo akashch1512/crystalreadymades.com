@@ -19,7 +19,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ review }) => {
   const hasHalfStar = review.rating % 1 >= 0.5;
   
   return (
-    <div className="border-b border-gray-200 py-4">
+    <div className="border-b border-line py-4">
       <div className="flex items-center mb-2">
         <div className="flex items-center">
           {[...Array(5)].map((_, index) => (
@@ -31,21 +31,21 @@ const ProductReview: React.FC<ProductReviewProps> = ({ review }) => {
                   ? 'text-yellow-400 fill-current'
                   : index === fullStars && hasHalfStar
                   ? 'text-yellow-400 fill-current'
-                  : 'text-gray-300'
+                  : 'text-line'
               } mr-1`}
             />
           ))}
         </div>
-        <span className="text-gray-700 ml-2 font-medium">{review.rating.toFixed(1)}</span>
+        <span className="text-muted ml-2 font-medium">{review.rating.toFixed(1)}</span>
       </div>
       
       <div className="flex items-center mb-2">
-        <h4 className="font-medium text-gray-900">{review.userName}</h4>
-        <span className="mx-2 text-gray-300">•</span>
-        <span className="text-gray-500 text-sm">{formattedDate}</span>
+        <h4 className="font-medium text-text">{review.userName}</h4>
+        <span className="mx-2 text-line">•</span>
+        <span className="text-muted text-sm">{formattedDate}</span>
       </div>
       
-      <p className="text-gray-700">{review.comment}</p>
+      <p className="text-muted">{review.comment}</p>
     </div>
   );
 };

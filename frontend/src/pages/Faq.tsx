@@ -50,19 +50,19 @@ export const FAQ = () => {
   ];
 
   return (
-    <div className="bg-white text-gray-900 font-sans">
+    <div className="page">
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-pink-50 to-white py-20 px-4 border-b border-gray-100">
+      <section className="section-hero section-muted border-b border-line">
         <div className="container mx-auto max-w-7xl">
           <div>
-            <p className="text-pink-600 font-semibold uppercase tracking-wider text-sm mb-4">
+            <p className="caption text-brand mb-4">
               Help & Support
             </p>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              Frequently Asked <span className="text-pink-600">Questions</span>
+            <h1 className="h1 mb-6">
+              Frequently Asked <span className="text-brand">Questions</span>
             </h1>
-            <p className="text-gray-600 text-lg max-w-3xl">
+            <p className="text-muted text-lg max-w-3xl">
               Find answers to common questions about shipping, payments, returns, and more. Can't find what you're looking for? Our support team is here to help.
             </p>
           </div>
@@ -70,29 +70,30 @@ export const FAQ = () => {
       </section>
 
       {/* FAQ Content */}
-      <div className="container mx-auto max-w-7xl px-4 py-20">
+      <div className="section">
+        <div className="container mx-auto max-w-7xl">
         <div className="grid gap-16">
           {faqCategories.map((category) => (
             <section key={category.id} id={category.id} className="scroll-mt-24">
               <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 bg-pink-100 rounded-lg text-pink-600">
+                <div className="p-3 bg-brand/10 rounded-2xl text-brand">
                   {category.icon}
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">
+                <h2 className="h2">
                   {category.title}
                 </h2>
               </div>
 
               <div className="space-y-3">
                 {category.questions.map((faq, idx) => (
-                  <details key={idx} className="group border border-gray-100 rounded-lg bg-white hover:border-pink-200 hover:shadow-md transition-all">
+                  <details key={idx} className="group card rounded-2xl hover:border-brand/40 hover:shadow-soft transition-all">
                     <summary className="flex items-center justify-between p-5 cursor-pointer list-none">
-                      <h3 className="text-lg font-semibold text-gray-800 pr-4">{faq.q}</h3>
-                      <div className="text-pink-600 group-open:rotate-180 transition-transform shrink-0">
+                      <h3 className="text-lg font-semibold text-text pr-4">{faq.q}</h3>
+                      <div className="text-brand group-open:rotate-180 transition-transform shrink-0">
                         <ChevronDown size={20} />
                       </div>
                     </summary>
-                    <div className="px-5 pb-5 text-gray-600 leading-relaxed">
+                    <div className="px-5 pb-5 text-muted leading-relaxed">
                       {faq.a}
                     </div>
                   </details>
@@ -103,27 +104,28 @@ export const FAQ = () => {
         </div>
 
         {/* Support CTA */}
-        <div className="mt-20 border-t border-gray-100 pt-16">
-          <div className="bg-gradient-to-r from-pink-50 to-pink-100 rounded-lg p-12 text-center border border-pink-200">
+        <div className="mt-20 border-t border-line pt-16">
+          <div className="bg-surface-muted rounded-2xl p-12 text-center border border-brand/20">
             <div className="flex justify-center mb-6">
-              <MessageCircle className="w-12 h-12 text-pink-600" />
+              <MessageCircle className="w-12 h-12 text-brand" />
             </div>
             
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h3>
-            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+            <h3 className="h3 mb-4">Still have questions?</h3>
+            <p className="text-muted mb-8 max-w-2xl mx-auto">
               Can't find what you're looking for? Reach out to our support team. We're here to help!
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/aboutus#contact" className="bg-pink-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-pink-700 transition-colors text-center">
+              <Link to="/aboutus#contact" className="btn btn-primary text-center">
                 Contact Support
               </Link>
-              <a href="mailto:support@crystalreadymade.com" className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold border border-gray-200 hover:border-pink-300 hover:bg-pink-50 transition-colors text-center">
+              <a href="mailto:support@crystalreadymade.com" className="btn btn-secondary text-center">
                 Send Email
               </a>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

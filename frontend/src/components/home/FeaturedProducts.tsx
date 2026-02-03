@@ -20,9 +20,9 @@ const FeaturedProducts: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="py-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-600">Loading featured products...</p>
+      <section className="section">
+        <div className="container mx-auto text-center">
+          <p className="text-muted">Loading featured products...</p>
         </div>
       </section>
     );
@@ -34,16 +34,16 @@ const FeaturedProducts: React.FC = () => {
     .slice(0, 4);
 
   return (
-    <section className="py-12">
-      <div className="container mx-auto px-4">
+    <section className="section">
+      <div className="container mx-auto">
         <div className="flex flex-wrap items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">Featured Products</h2>
-            <p className="text-gray-600">Our most popular products based on sales</p>
+            <h2 className="h2 mb-2">Featured Products</h2>
+            <p className="text-muted">Our most popular products based on sales</p>
           </div>
           <Link
             to="/products"
-            className="flex items-center text-pink-600 hover:text-pink-800 transition-colors mt-4 md:mt-0"
+            className="flex items-center text-brand hover:text-brand-strong transition-colors mt-4 md:mt-0 text-sm font-medium"
           >
             View All Products
             <ChevronRight size={16} className="ml-1" />

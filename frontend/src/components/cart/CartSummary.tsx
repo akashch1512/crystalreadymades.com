@@ -39,19 +39,19 @@ const CartSummary: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6 sticky top-20">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
+    <div className="card p-6 sticky top-24">
+      <h2 className="text-lg font-medium text-text mb-4">Order Summary</h2>
       
       <div className="space-y-3 mb-6">
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between text-muted">
           <span>Subtotal</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between text-muted">
           <span>Tax</span>
           <span>${tax.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between text-muted">
           <span>Shipping</span>
           <span>
             {shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}
@@ -63,7 +63,7 @@ const CartSummary: React.FC = () => {
             <span>-${discount.toFixed(2)}</span>
           </div>
         )}
-        <div className="border-t pt-3 mt-3 flex justify-between font-medium text-gray-900">
+        <div className="divider pt-3 mt-3 flex justify-between font-medium text-text">
           <span>Total</span>
           <span>${total.toFixed(2)}</span>
         </div>
@@ -71,7 +71,7 @@ const CartSummary: React.FC = () => {
       
       {/* Discount Code Form */}
       <form onSubmit={handleApplyDiscount} className="mb-6">
-        <label htmlFor="discount-code" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="discount-code" className="label mb-2">
           Discount Code
         </label>
         <div className="flex">
@@ -79,14 +79,14 @@ const CartSummary: React.FC = () => {
             type="text"
             id="discount-code"
             name="discount-code"
-            className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+            className="input rounded-l-xl rounded-r-none"
             placeholder="Enter code"
             value={discountCode}
             onChange={(e) => setDiscountCode(e.target.value)}
           />
           <button
             type="submit"
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-r-md hover:bg-gray-300 transition-colors"
+            className="btn btn-secondary rounded-l-none rounded-r-xl px-4 py-2"
           >
             Apply
           </button>
@@ -101,12 +101,12 @@ const CartSummary: React.FC = () => {
       
       <button
         onClick={handleCheckout}
-        className="w-full bg-pink-600 text-white py-3 rounded-md hover:bg-pink-700 transition-colors font-medium"
+        className="btn btn-primary w-full"
       >
         Proceed to Checkout
       </button>
       
-      <div className="mt-4 text-center text-sm text-gray-500">
+      <div className="mt-4 text-center text-sm text-muted">
         <p>Secure checkout powered by Razorpay</p>
       </div>
     </div>

@@ -27,17 +27,17 @@ const Newsletter: React.FC = () => {
   };
 
   return (
-    <section className="py-12 bg-pink-700 text-white">
-      <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">Subscribe to Our Newsletter</h2>
-          <p className="text-purple-100 mb-6">
+    <section className="section section-muted">
+      <div className="container mx-auto">
+        <div className="max-w-2xl mx-auto text-center card p-8">
+          <h2 className="h2 mb-3">Subscribe to Our Newsletter</h2>
+          <p className="text-muted mb-6">
             Stay updated with our latest products, exclusive offers, and styling tips.
           </p>
           
           {subscribed ? (
-            <div className="bg-purple-800 rounded-lg p-4 mb-4 text-center animate-fade-in">
-              <p className="text-white font-medium">
+            <div className="alert alert-success mb-4 text-center animate-fade-in">
+              <p className="font-medium">
                 Thank you for subscribing! Please check your email for confirmation.
               </p>
             </div>
@@ -49,21 +49,21 @@ const Newsletter: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="w-full px-4 py-3 rounded-md bg-white/10 border border-purple-400 text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-white"
+                  className="input"
                   required
                 />
-                {error && <p className="text-red-300 text-sm mt-1 text-left">{error}</p>}
+                {error && <p className="text-red-600 text-sm mt-1 text-left">{error}</p>}
               </div>
               <button
                 type="submit"
-                className="px-6 py-3 bg-white text-purple-700 font-medium rounded-md hover:bg-purple-100 transition-colors duration-300"
+                className="btn btn-primary"
               >
                 Subscribe
               </button>
             </form>
           )}
           
-          <p className="text-purple-200 text-sm mt-4">
+          <p className="text-muted text-sm mt-4">
             We respect your privacy and will never share your information.
           </p>
         </div>

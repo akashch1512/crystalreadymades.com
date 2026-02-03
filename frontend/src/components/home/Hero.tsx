@@ -49,13 +49,13 @@ const Hero: React.FC = () => {
   }, [slides.length]);
   
   if (loading || slides.length === 0) {
-    return <section className="relative h-[70vh] min-h-[500px] bg-gray-900"></section>;
+    return <section className="relative h-[70vh] min-h-[500px] bg-surface-muted"></section>;
   }
   
   const currentSlideData = slides[currentSlide];
 
   return (
-    <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
+    <section className="relative h-[70vh] min-h-[500px] overflow-hidden bg-bg">
       {slides.map((slide, index) => (
         <div
           key={slide.id}
@@ -63,7 +63,7 @@ const Hero: React.FC = () => {
             index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
           }`}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/60 to-transparent z-10"></div>
           <img
             src={slide.image}
             alt={slide.title}
@@ -73,21 +73,21 @@ const Hero: React.FC = () => {
           <div className="absolute inset-0 z-20 flex items-center">
             <div className="container mx-auto px-4 md:px-10">
               <div className="max-w-lg">
-                <p className="text-pink-400 text-sm md:text-base uppercase tracking-wider mb-2 transform translate-y-4 opacity-0 animate-fade-in"
+                <p className="caption text-brand mb-2 transform translate-y-4 opacity-0 animate-fade-in"
                    style={{ animationDelay: '0.2s' }}>
                   {slide.subtitle}
                 </p>
-                <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 transform translate-y-4 opacity-0 animate-fade-in"
+                <h1 className="h1 text-text mb-4 transform translate-y-4 opacity-0 animate-fade-in"
                    style={{ animationDelay: '0.4s' }}>
                   {slide.title}
                 </h1>
-                <p className="text-white/80 mb-6 transform translate-y-4 opacity-0 animate-fade-in"
+                <p className="text-muted mb-6 transform translate-y-4 opacity-0 animate-fade-in"
                    style={{ animationDelay: '0.6s' }}>
                   {slide.description}
                 </p>
                 <Link
                   to={slide.buttonLink}
-                  className="inline-block bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-md transition-colors transform translate-y-4 opacity-0 animate-fade-in"
+                  className="btn btn-primary transform translate-y-4 opacity-0 animate-fade-in"
                   style={{ animationDelay: '0.8s' }}
                 >
                   {slide.buttonText}
@@ -101,17 +101,17 @@ const Hero: React.FC = () => {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute top-1/2 left-4 transform -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 p-2 rounded-full transition-colors"
+        className="absolute top-1/2 left-4 transform -translate-y-1/2 z-30 bg-surface/80 hover:bg-surface p-2 rounded-full transition-colors border border-line"
         aria-label="Previous slide"
       >
-        <ChevronLeft size={24} className="text-white" />
+        <ChevronLeft size={24} className="text-text" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute top-1/2 right-4 transform -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 p-2 rounded-full transition-colors"
+        className="absolute top-1/2 right-4 transform -translate-y-1/2 z-30 bg-surface/80 hover:bg-surface p-2 rounded-full transition-colors border border-line"
         aria-label="Next slide"
       >
-        <ChevronRight size={24} className="text-white" />
+        <ChevronRight size={24} className="text-text" />
       </button>
       
       {/* Dots */}
@@ -122,7 +122,7 @@ const Hero: React.FC = () => {
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`w-3 h-3 rounded-full transition-all ${
-                index === currentSlide ? 'bg-white scale-110' : 'bg-white/50'
+                index === currentSlide ? 'bg-brand scale-110' : 'bg-line'
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />

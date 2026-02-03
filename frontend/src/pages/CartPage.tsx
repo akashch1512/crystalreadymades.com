@@ -13,15 +13,17 @@ const CartPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">Shopping Cart</h1>
+    <div className="page">
+      <div className="section">
+        <div className="container mx-auto">
+      <h1 className="h1 mb-6">Shopping Cart</h1>
       
       {items.length > 0 ? (
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}
           <div className="lg:w-2/3">
             {/* Cart Headers - Desktop */}
-            <div className="hidden sm:flex py-4 border-b border-gray-200 text-sm font-medium text-gray-500">
+            <div className="hidden sm:flex py-4 border-b border-line text-sm font-medium text-muted">
               <div className="sm:w-3/4">Product</div>
               <div className="text-right sm:w-1/4">Total</div>
             </div>
@@ -37,7 +39,7 @@ const CartPage: React.FC = () => {
             <div className="mt-6 flex justify-between">
               <Link
                 to="/products"
-                className="flex items-center text-pink-600 hover:text-pink-800"
+                className="flex items-center text-brand hover:text-brand-strong"
               >
                 <ArrowLeft size={16} className="mr-1" />
                 Continue Shopping
@@ -45,7 +47,7 @@ const CartPage: React.FC = () => {
               
               <button
                 onClick={clearCart}
-                className="text-red-600 hover:text-red-800"
+                className="text-red-600 hover:text-red-700"
               >
                 Clear Cart
               </button>
@@ -58,20 +60,22 @@ const CartPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
+        <div className="text-center py-16 bg-surface-muted rounded-2xl border border-line">
           <div className="flex justify-center mb-4">
-            <Package size={48} className="text-gray-400" />
+            <Package size={48} className="text-muted" />
           </div>
-          <h2 className="text-xl font-medium text-gray-900 mb-2">Your cart is empty</h2>
-          <p className="text-gray-500 mb-6">Looks like you haven't added any products to your cart yet.</p>
+          <h2 className="h3 mb-2">Your cart is empty</h2>
+          <p className="text-muted mb-6">Looks like you haven't added any products to your cart yet.</p>
           <Link
             to="/products"
-            className="inline-block bg-pink-600 text-white px-6 py-3 rounded-md hover:bg-pink-700 transition-colors"
+            className="btn btn-primary"
           >
             Start Shopping
           </Link>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };

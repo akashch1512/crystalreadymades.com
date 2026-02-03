@@ -41,10 +41,10 @@ const Testimonials: React.FC = () => {
   };
 
   return (
-    <section className="py-16 bg-pink-50">
-      <div className="container mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">What Our Customers Say</h2>
-        <p className="text-gray-600 text-center mb-12">Hear from our satisfied customers</p>
+    <section className="section section-muted">
+      <div className="container mx-auto">
+        <h2 className="h2 text-center mb-2">What Our Customers Say</h2>
+        <p className="text-muted text-center mb-12">Hear from our satisfied customers</p>
         
         <div className="relative max-w-4xl mx-auto">
           <div className="overflow-hidden">
@@ -54,9 +54,9 @@ const Testimonials: React.FC = () => {
             >
               {testimonials.map((testimonial) => (
                 <div key={testimonial.id} className="w-full flex-shrink-0 px-4">
-                  <div className="bg-white rounded-lg shadow-md p-8 flex flex-col md:flex-row items-center">
+                  <div className="card p-8 flex flex-col md:flex-row items-center">
                     <div className="md:w-1/3 mb-6 md:mb-0 md:mr-8">
-                      <div className="w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full overflow-hidden border-4 border-pink-100">
+                      <div className="w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full overflow-hidden border-4 border-brand/20">
                         <img
                           src={testimonial.image}
                           alt={testimonial.name}
@@ -65,11 +65,11 @@ const Testimonials: React.FC = () => {
                       </div>
                     </div>
                     <div className="md:w-2/3 text-center md:text-left">
-                      <div className="text-pink-600 text-4xl font-serif leading-tight mb-4">"</div>
-                      <p className="text-gray-700 mb-6">{testimonial.content}</p>
+                      <div className="text-brand text-4xl font-serif leading-tight mb-4">"</div>
+                      <p className="text-muted mb-6">{testimonial.content}</p>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
-                        <p className="text-gray-500">{testimonial.role}</p>
+                        <h3 className="font-semibold text-text">{testimonial.name}</h3>
+                        <p className="text-muted">{testimonial.role}</p>
                       </div>
                     </div>
                   </div>
@@ -81,17 +81,17 @@ const Testimonials: React.FC = () => {
           {/* Navigation Arrows */}
           <button
             onClick={prevTestimonial}
-            className="absolute top-1/2 -left-4 md:-left-8 transform -translate-y-1/2 bg-white rounded-full shadow-md p-2 hover:bg-gray-50 transition-colors"
+            className="absolute top-1/2 -left-4 md:-left-8 transform -translate-y-1/2 bg-surface rounded-full shadow-soft p-2 hover:bg-surface-muted transition-colors border border-line"
             aria-label="Previous testimonial"
           >
-            <ChevronLeft size={24} className="text-gray-600" />
+            <ChevronLeft size={24} className="text-muted" />
           </button>
           <button
             onClick={nextTestimonial}
-            className="absolute top-1/2 -right-4 md:-right-8 transform -translate-y-1/2 bg-white rounded-full shadow-md p-2 hover:bg-gray-50 transition-colors"
+            className="absolute top-1/2 -right-4 md:-right-8 transform -translate-y-1/2 bg-surface rounded-full shadow-soft p-2 hover:bg-surface-muted transition-colors border border-line"
             aria-label="Next testimonial"
           >
-            <ChevronRight size={24} className="text-gray-600" />
+            <ChevronRight size={24} className="text-muted" />
           </button>
           
           {/* Dots */}
@@ -102,8 +102,8 @@ const Testimonials: React.FC = () => {
                 onClick={() => goToTestimonial(index)}
                 className={`w-3 h-3 mx-1 rounded-full transition-all ${
                   index === activeIndex 
-                    ? 'bg-pink-600 scale-110' 
-                    : 'bg-gray-300 hover:bg-gray-400'
+                    ? 'bg-brand scale-110' 
+                    : 'bg-line hover:bg-accent'
                 }`}
                 aria-label={`Go to testimonial ${index + 1}`}
               />

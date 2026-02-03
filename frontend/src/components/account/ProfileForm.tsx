@@ -45,13 +45,13 @@ const ProfileForm: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="card p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
+        <h2 className="h3">Profile Information</h2>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="text-pink-600 hover:text-pink-800 text-sm font-medium"
+            className="text-brand hover:text-brand-strong text-sm font-medium"
           >
             Edit
           </button>
@@ -61,7 +61,7 @@ const ProfileForm: React.FC = () => {
       {message.text && (
         <div
           className={`mb-4 p-3 rounded ${
-            message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-pink-50 text-red-700'
+            message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
           }`}
         >
           {message.text}
@@ -71,7 +71,7 @@ const ProfileForm: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="label mb-1">
               Full Name
             </label>
             <input
@@ -81,14 +81,14 @@ const ProfileForm: React.FC = () => {
               value={formData.name}
               onChange={handleChange}
               disabled={!isEditing}
-              className={`w-full p-2 border rounded-md ${
-                isEditing ? 'border-gray-300' : 'bg-gray-50 border-gray-200'
+              className={`input ${
+                isEditing ? '' : 'bg-surface-muted border-line'
               }`}
             />
           </div>
           
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="label mb-1">
               Email Address
             </label>
             <input
@@ -98,14 +98,14 @@ const ProfileForm: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               disabled={!isEditing}
-              className={`w-full p-2 border rounded-md ${
-                isEditing ? 'border-gray-300' : 'bg-gray-50 border-gray-200'
+              className={`input ${
+                isEditing ? '' : 'bg-surface-muted border-line'
               }`}
             />
           </div>
           
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="phone" className="label mb-1">
               Phone Number
             </label>
             <input
@@ -115,8 +115,8 @@ const ProfileForm: React.FC = () => {
               value={formData.phone}
               onChange={handleChange}
               disabled={!isEditing}
-              className={`w-full p-2 border rounded-md ${
-                isEditing ? 'border-gray-300' : 'bg-gray-50 border-gray-200'
+              className={`input ${
+                isEditing ? '' : 'bg-surface-muted border-line'
               }`}
               placeholder="e.g. 555-123-4567"
             />
@@ -128,7 +128,7 @@ const ProfileForm: React.FC = () => {
             <button
               type="submit"
               disabled={isSaving}
-              className="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors disabled:bg-pink-300"
+              className="btn btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -142,7 +142,7 @@ const ProfileForm: React.FC = () => {
                   phone: user?.phone || ''
                 });
               }}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              className="btn btn-secondary"
             >
               Cancel
             </button>

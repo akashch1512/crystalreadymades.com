@@ -92,85 +92,85 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600 mb-4">Sign in to your CrystalReadymade account</p>
-        </div>
-
-        {loginError && (
-          <div className="bg-pink-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
-            {loginError}
-          </div>
-        )}
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              value={formData.phone}
-              onChange={handleChange}
-              className={`appearance-none relative block w-full px-3 py-2 border ${errors.phone ? 'border-red-500' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm`}
-              placeholder="10-digit phone number"
-            />
-            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <Link to="/forgot-password" className="text-sm text-pink-600 hover:text-pink-800">
-                Forgot password?
-              </Link>
+    <div className="page">
+      <div className="section">
+        <div className="container mx-auto">
+          <div className="max-w-md w-full mx-auto card p-8">
+            <div className="text-center">
+              <h1 className="h2 mb-2">Welcome Back</h1>
+              <p className="text-muted mb-4">Sign in to your CrystalReadymade account</p>
             </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`appearance-none relative block w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm`}
-              placeholder="Password"
-            />
-            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+
+            {loginError && (
+              <div className="alert alert-error">
+                {loginError}
+              </div>
+            )}
+
+            <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="phone" className="label mb-1">
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className={`input ${errors.phone ? 'border-red-500' : ''}`}
+                  placeholder="10-digit phone number"
+                />
+                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label htmlFor="password" className="label">
+                    Password
+                  </label>
+                  <Link to="/forgot-password" className="text-sm text-brand hover:text-brand-strong">
+                    Forgot password?
+                  </Link>
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`input ${errors.password ? 'border-red-500' : ''}`}
+                  placeholder="Password"
+                />
+                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Signing in...' : 'Sign in'}
+                </button>
+              </div>
+
+              <div className="text-center">
+                <p className="text-sm text-muted">
+                  Don't have an account?{' '}
+                  <Link
+                    to={`/register${redirectTo !== '/' ? `?redirect=${redirectTo}` : ''}`}
+                    className="text-brand hover:text-brand-strong font-medium"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </div>
+            </form>
           </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:bg-pink-300"
-            >
-              {isSubmitting ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link
-                to={`/register${redirectTo !== '/' ? `?redirect=${redirectTo}` : ''}`}
-                className="text-pink-600 hover:text-pink-800 font-medium"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
-
-
-        </form>
+        </div>
       </div>
     </div>
   );

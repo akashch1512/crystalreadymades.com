@@ -121,14 +121,14 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Address Name</label>
+        <label htmlFor="name" className="label mb-1">Address Name</label>
         <input
           type="text"
           id="name"
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className={`w-full p-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-pink-500 focus:border-pink-500`}
+          className={`input ${errors.name ? 'border-red-500' : ''}`}
           placeholder="Home, Work, etc."
         />
         {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
@@ -136,14 +136,14 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
 
       {/* Line 1 */}
       <div>
-        <label htmlFor="line1" className="block text-sm font-medium text-gray-700 mb-1">Address Line 1</label>
+        <label htmlFor="line1" className="label mb-1">Address Line 1</label>
         <input
           type="text"
           id="line1"
           name="line1"
           value={formData.line1}
           onChange={handleChange}
-          className={`w-full p-2 border ${errors.line1 ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-pink-500 focus:border-pink-500`}
+          className={`input ${errors.line1 ? 'border-red-500' : ''}`}
           placeholder="Street address, P.O. box, etc."
         />
         {errors.line1 && <p className="mt-1 text-sm text-red-600">{errors.line1}</p>}
@@ -151,14 +151,14 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
 
       {/* Line 2 */}
       <div>
-        <label htmlFor="line2" className="block text-sm font-medium text-gray-700 mb-1">Address Line 2</label>
+        <label htmlFor="line2" className="label mb-1">Address Line 2</label>
         <input
           type="text"
           id="line2"
           name="line2"
           value={formData.line2}
           onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
+          className="input"
           placeholder="Apartment, suite, unit, building, floor, etc."
         />
       </div>
@@ -166,27 +166,27 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
       {/* City & State */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">City</label>
+          <label htmlFor="city" className="label mb-1">City</label>
           <input
             type="text"
             id="city"
             name="city"
             value={formData.city}
             onChange={handleChange}
-            className={`w-full p-2 border ${errors.city ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-pink-500 focus:border-pink-500`}
+            className={`input ${errors.city ? 'border-red-500' : ''}`}
           />
           {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
         </div>
 
         <div>
-          <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">State / Province</label>
+          <label htmlFor="state" className="label mb-1">State / Province</label>
           <input
             type="text"
             id="state"
             name="state"
             value={formData.state}
             onChange={handleChange}
-            className={`w-full p-2 border ${errors.state ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-pink-500 focus:border-pink-500`}
+            className={`input ${errors.state ? 'border-red-500' : ''}`}
           />
           {errors.state && <p className="mt-1 text-sm text-red-600">{errors.state}</p>}
         </div>
@@ -195,26 +195,26 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
       {/* Postal & Country */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+          <label htmlFor="postalCode" className="label mb-1">Postal Code</label>
           <input
             type="text"
             id="postalCode"
             name="postalCode"
             value={formData.postalCode}
             onChange={handleChange}
-            className={`w-full p-2 border ${errors.postalCode ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-pink-500 focus:border-pink-500`}
+            className={`input ${errors.postalCode ? 'border-red-500' : ''}`}
           />
           {errors.postalCode && <p className="mt-1 text-sm text-red-600">{errors.postalCode}</p>}
         </div>
 
         <div>
-          <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+          <label htmlFor="country" className="label mb-1">Country</label>
           <select
             id="country"
             name="country"
             value={formData.country}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
+            className="select"
           >
             <option value="">Select a country</option>
             <option value="United States">United States</option>
@@ -235,9 +235,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
           name="isDefault"
           checked={formData.isDefault}
           onChange={handleChange}
-          className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+          className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
         />
-        <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-700">
+        <label htmlFor="isDefault" className="ml-2 block text-sm text-muted">
           Make this my default address
         </label>
       </div>
@@ -247,14 +247,14 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
         <button
           type="button"
           onClick={() => navigate('/account/addresses')}
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+          className="btn btn-secondary"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors disabled:bg-pink-300"
+          className="btn btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? 'Saving...' : address ? 'Update Address' : 'Add Address'}
         </button>

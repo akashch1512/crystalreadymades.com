@@ -1,3 +1,165 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #f9f6f2;
+    --surface: #ffffff;
+    --surface-muted: #f3efe9;
+    --text: #1f1b1c;
+    --muted: #6f6764;
+    --brand: #e05b7a;
+    --brand-strong: #c84b67;
+    --accent: #d8c7b6;
+    --line: #e7e1da;
+  }
+
+  html {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  body {
+    @apply bg-bg text-text antialiased text-base leading-7;
+  }
+}
+
+@layer components {
+  .page {
+    @apply min-h-screen bg-bg text-text font-sans;
+  }
+
+  .section {
+    @apply py-12 sm:py-16;
+  }
+
+  .section-hero {
+    @apply py-16 sm:py-24;
+  }
+
+  .section-muted {
+    @apply bg-surface-muted;
+  }
+
+  .container-standard {
+    @apply container mx-auto;
+  }
+
+  .card {
+    @apply bg-surface border border-line rounded-2xl shadow-sm;
+  }
+
+  .card-hover {
+    @apply transition-shadow hover:shadow-soft;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3
+    text-sm font-medium tracking-wide transition-colors
+    focus-visible:outline-none
+    focus-visible:ring-2
+    focus-visible:ring-brand
+    focus-visible:ring-opacity-60
+    focus-visible:ring-offset-2
+    focus-visible:ring-offset-bg;
+  }
+
+  .btn-primary {
+    @apply bg-brand text-white hover:bg-brand-strong;
+  }
+
+  .btn-secondary {
+    @apply bg-surface border border-line text-text hover:border-accent hover:bg-surface-muted;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-text hover:bg-surface-muted;
+  }
+
+  .btn-disabled {
+    @apply bg-surface-muted text-muted cursor-not-allowed;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface px-4 py-2.5
+    text-sm text-text placeholder:text-muted
+    focus:border-brand
+    focus:ring-2
+    focus:ring-brand
+    focus:ring-opacity-30;
+  }
+
+  .select {
+  @apply w-full rounded-xl border border-line bg-surface px-4 py-2.5
+  text-sm text-text
+  focus:border-brand
+  focus:ring-2
+  focus:ring-brand
+  focus:ring-opacity-30;
+}
+
+
+  .textarea {
+  @apply w-full rounded-xl border border-line bg-surface px-4 py-2.5
+  text-sm text-text
+  focus:border-brand
+  focus:ring-2
+  focus:ring-brand
+  focus:ring-opacity-30;
+}
+
+
+  .label {
+    @apply text-sm font-medium tracking-wide text-text;
+  }
+
+  .helper {
+    @apply text-xs text-muted;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full border border-line bg-surface px-3 py-1 text-xs text-muted;
+  }
+
+  .alert {
+    @apply rounded-2xl border px-4 py-3 text-sm;
+  }
+
+  .alert-success {
+    @apply border-green-200 bg-green-50 text-green-700;
+  }
+
+  .alert-error {
+    @apply border-red-200 bg-red-50 text-red-700;
+  }
+
+  .divider {
+    @apply border-t border-line;
+  }
+
+  .caption {
+    @apply text-xs uppercase tracking-widest text-muted;
+  }
+
+  .h1 {
+    @apply text-3xl sm:text-4xl font-semibold tracking-tight leading-tight;
+  }
+
+  .h2 {
+    @apply text-2xl sm:text-3xl font-semibold tracking-tight;
+  }
+
+  .h3 {
+    @apply text-xl font-semibold;
+  }
+
+  .body {
+    @apply text-base leading-7 text-text;
+  }
+}

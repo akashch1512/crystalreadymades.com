@@ -105,139 +105,133 @@ const RegisterPage: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create an Account</h1>
-          <p className="text-gray-600 mb-4">Join CrystalReadymade to start shopping</p>
-        </div>
-        
-        {registerError && (
-          <div className="bg-pink-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
-            {registerError}
-          </div>
-        )}
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              autoComplete="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={`appearance-none relative block w-full px-3 py-2 border ${
-                errors.name ? 'border-red-500' : 'border-gray-300'
-              } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm`}
-              placeholder="Full Name"
-            />
-            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-          </div>
-          
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              value={formData.phone}
-              onChange={handleChange}
-              className={`appearance-none relative block w-full px-3 py-2 border ${
-                errors.phone ? 'border-red-500' : 'border-gray-300'
-              } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm`}
-              placeholder="10-digit phone number"
-            />
-            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
-          </div>
-          
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address (Optional)
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`appearance-none relative block w-full px-3 py-2 border ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm`}
-              placeholder="Email (optional)"
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-          </div>
-          
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`appearance-none relative block w-full px-3 py-2 border ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
-              } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm`}
-              placeholder="Password"
-            />
-            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
-          </div>
-          
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={`appearance-none relative block w-full px-3 py-2 border ${
-                errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-              } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm`}
-              placeholder="Confirm Password"
-            />
-            {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+    <div className="page">
+      <div className="section">
+        <div className="container mx-auto">
+          <div className="max-w-md w-full mx-auto card p-8">
+            <div className="text-center">
+              <h1 className="h2 mb-2">Create an Account</h1>
+              <p className="text-muted mb-4">Join CrystalReadymade to start shopping</p>
+            </div>
+            
+            {registerError && (
+              <div className="alert alert-error">
+                {registerError}
+              </div>
             )}
+            
+            <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="name" className="label mb-1">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`input ${errors.name ? 'border-red-500' : ''}`}
+                  placeholder="Full Name"
+                />
+                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="phone" className="label mb-1">
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className={`input ${errors.phone ? 'border-red-500' : ''}`}
+                  placeholder="10-digit phone number"
+                />
+                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="email" className="label mb-1">
+                  Email Address (Optional)
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`input ${errors.email ? 'border-red-500' : ''}`}
+                  placeholder="Email (optional)"
+                />
+                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="password" className="label mb-1">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`input ${errors.password ? 'border-red-500' : ''}`}
+                  placeholder="Password"
+                />
+                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="confirmPassword" className="label mb-1">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`input ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                  placeholder="Confirm Password"
+                />
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                )}
+              </div>
+              
+              <div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Creating account...' : 'Create Account'}
+                </button>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-sm text-muted">
+                  Already have an account?{' '}
+                  <Link
+                    to={`/login${redirectTo !== '/' ? `?redirect=${redirectTo}` : ''}`}
+                    className="text-brand hover:text-brand-strong font-medium"
+                  >
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </form>
           </div>
-          
-          <div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:bg-pink-300"
-            >
-              {isSubmitting ? 'Creating account...' : 'Create Account'}
-            </button>
-          </div>
-          
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link
-                to={`/login${redirectTo !== '/' ? `?redirect=${redirectTo}` : ''}`}
-                className="text-pink-600 hover:text-pink-800 font-medium"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

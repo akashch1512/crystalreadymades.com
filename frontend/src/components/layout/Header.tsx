@@ -55,8 +55,8 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 bg-white shadow-md z-50 transition-all duration-300">
-      <div className="container mx-auto px-4">
+    <header className="sticky top-0 bg-surface/90 backdrop-blur border-b border-line z-50 transition-all duration-300">
+      <div className="container mx-auto">
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center">
@@ -74,35 +74,35 @@ const Header: React.FC = () => {
               <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full px-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="input rounded-full pr-10"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
               />
               <button
                 type="submit"
-                className="absolute right-0 top-0 mt-2 mr-3 text-gray-500 hover:text-pink-500"
+                className="absolute right-0 top-0 mt-2.5 mr-4 text-muted hover:text-brand"
               >
                 <Search size={20} />
               </button>
 
               {/* Search Results Dropdown */}
               {showSearchResults && searchResults.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+                <div className="absolute z-50 w-full mt-2 bg-surface border border-line rounded-2xl shadow-soft overflow-hidden">
                   {searchResults.map(product => (
                     <div
                       key={product.id}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                      className="px-4 py-3 hover:bg-surface-muted cursor-pointer flex items-center"
                       onClick={() => handleSearchResultClick(product.slug)}
                     >
                       <img
                         src={product.images[0]}
                         alt={product.name}
-                        className="w-10 h-10 object-cover rounded mr-2"
+                        className="w-10 h-10 object-cover rounded-lg mr-3"
                       />
                       <div>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-sm text-gray-500">
+                        <div className="font-medium text-text">{product.name}</div>
+                        <div className="text-sm text-muted">
                           ${product.salePrice || product.price}
                         </div>
                       </div>
@@ -114,30 +114,30 @@ const Header: React.FC = () => {
           </div>
 
           {/* Navigation Links - Desktop */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-6 text-sm">
             {/* Clothings Dropdown */}
             <div className="relative group py-2">
-              <button className="flex items-center text-gray-700 hover:text-pink-600 transition-colors">
+              <button className="flex items-center text-muted hover:text-brand transition-colors">
                 Clothings
                 <ChevronDown size={16} className="ml-1" />
               </button>
-              <div className="absolute left-0 mt-0 w-56 bg-white rounded-lg shadow-xl py-2 z-50 
+              <div className="absolute left-0 mt-0 w-56 bg-surface rounded-lg shadow-soft py-2 z-50 
                               opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                              transition-all duration-200 border border-gray-100">
-                <Link to="/products?category=mens-wear" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600" onClick={() => { }}>
+                              transition-all duration-200 border border-line shadow-soft bg-surface">
+                <Link to="/products?category=mens-wear" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand" onClick={() => { }}>
                   Men's Wear
                 </Link>
-                <Link to="/products?category=womens-wear" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                <Link to="/products?category=womens-wear" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                   Women's Wear
                 </Link>
-                <Link to="/products?category=kids-wear" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                <Link to="/products?category=kids-wear" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                   Kids Wear
                 </Link>
-                <Link to="/products?category=ethnic-wear" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                <Link to="/products?category=ethnic-wear" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                   Ethnic Wear
                 </Link>
-                <hr className="my-1 border-gray-100" />
-                <Link to="/products" className="block px-4 py-2.5 text-sm font-medium text-pink-600 hover:bg-pink-50">
+                <hr className="my-1 border-line" />
+                <Link to="/products" className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted">
                   View All Clothings
                 </Link>
               </div>
@@ -145,36 +145,36 @@ const Header: React.FC = () => {
 
             {/* Uniforms Dropdown */}
             <div className="relative group py-2">
-              <button className="flex items-center text-gray-700 hover:text-pink-600 transition-colors">
+              <button className="flex items-center text-muted hover:text-brand transition-colors">
                 Uniforms
                 <ChevronDown size={16} className="ml-1" />
               </button>
-              <div className="absolute left-0 mt-0 w-56 bg-white rounded-lg shadow-xl py-2 z-50 
+              <div className="absolute left-0 mt-0 w-56 bg-surface rounded-lg shadow-soft py-2 z-50 
                               opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                              transition-all duration-200 border border-gray-100">
-                <Link to="/categories/school-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                              transition-all duration-200 border border-line shadow-soft bg-surface">
+                <Link to="/categories/school-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                   School Uniforms
                 </Link>
-                <Link to="/categories/college-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                <Link to="/categories/college-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                   College Uniforms
                 </Link>
-                <Link to="/categories/corporate-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                <Link to="/categories/corporate-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                   Corporate Uniforms
                 </Link>
-                <Link to="/categories/hospital-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                <Link to="/categories/hospital-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                   Hospital & Medical
                 </Link>
-                <Link to="/categories/hotel-uniforms" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                <Link to="/categories/hotel-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                   Hotel & Hospitality
                 </Link>
-                <hr className="my-1 border-gray-100" />
-                <Link to="/categories" className="block px-4 py-2.5 text-sm font-medium text-pink-600 hover:bg-pink-50">
+                <hr className="my-1 border-line" />
+                <Link to="/categories" className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted">
                   View All Uniforms
                 </Link>
               </div>
             </div>
 
-            <Link to="/aboutus" className="text-gray-700 hover:text-pink-600 transition-colors">
+            <Link to="/aboutus" className="text-muted hover:text-brand transition-colors">
               About
             </Link>
           </nav>
@@ -183,48 +183,48 @@ const Header: React.FC = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <Link to="/wishlist" className="relative text-gray-700 hover:text-pink-600">
+                <Link to="/wishlist" className="relative text-muted hover:text-brand">
                   <Heart size={22} />
                   {wishlistItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 bg-brand text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {wishlistItemCount}
                     </span>
                   )}
                 </Link>
-                <Link to="/cart" className="relative text-gray-700 hover:text-pink-600">
+                <Link to="/cart" className="relative text-muted hover:text-brand">
                   <ShoppingCart size={22} />
                   {cartItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 bg-brand text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {cartItemCount}
                     </span>
                   )}
                 </Link>
-                <Link to="/notifications" className="relative text-gray-700 hover:text-pink-600">
+                <Link to="/notifications" className="relative text-muted hover:text-brand">
                   <Bell size={22} />
                   {notificationCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 bg-brand text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {notificationCount}
                     </span>
                   )}
                 </Link>
                 <div className="relative group py-2"> {/* Added padding to bridge the gap for hover */}
-                  <button className="flex items-center text-gray-700 hover:text-pink-600 transition-all duration-200">
+                  <button className="flex items-center text-muted hover:text-brand transition-all duration-200">
                     <User size={22} />
-                    <span className="ml-1 font-medium">{user?.name ? user.name.split(' ')[0] : 'Guest'}</span>
+                    <span className="ml-1 font-medium text-sm">{user?.name ? user.name.split(' ')[0] : 'Guest'}</span>
                   </button>
 
                   {/* Dropdown Menu with improved hover behavior */}
-                  <div className="absolute right-0 mt-0 w-48 bg-white rounded-lg shadow-xl py-2 z-50 
+                  <div className="absolute right-0 mt-0 w-48 bg-surface rounded-lg shadow-soft py-2 z-50 
                                   opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                                  transition-all duration-200 border border-gray-100">
-                    <Link to="/account" className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                                  transition-all duration-200 border border-line shadow-soft bg-surface">
+                    <Link to="/account" className="flex items-center px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                       <User size={16} className="mr-2" /> My Account
                     </Link>
-                    <Link to="/orders" className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                    <Link to="/orders" className="flex items-center px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                       <ShoppingBag size={16} className="mr-2" /> My Orders
                     </Link>
                     {user?.role === 'admin' && (
-                      <Link to="/admin" className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600">
+                      <Link to="/admin" className="flex items-center px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                         <Shield size={16} className="mr-2" /> Admin Dashboard
                       </Link>
                     )}
@@ -234,10 +234,10 @@ const Header: React.FC = () => {
             ) : (
               <Link
                 to="/login"
-                className="flex items-center text-gray-700 hover:text-pink-600"
+                className="flex items-center text-muted hover:text-brand"
               >
                 <User size={22} />
-                <span className="ml-1">Login</span>
+                <span className="ml-1 text-sm">Login</span>
               </Link>
             )}
           </div>
@@ -245,10 +245,10 @@ const Header: React.FC = () => {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
             {isAuthenticated && (
-              <Link to="/cart" className="relative mr-4 text-gray-700">
+              <Link to="/cart" className="relative mr-4 text-muted">
                 <ShoppingCart size={22} />
                 {cartItemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-brand text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {cartItemCount}
                   </span>
                 )}
@@ -256,7 +256,7 @@ const Header: React.FC = () => {
             )}
             <button
               onClick={toggleMobileMenu}
-              className="text-gray-700 focus:outline-none"
+              className="text-muted focus:outline-none"
             >
               {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -269,35 +269,35 @@ const Header: React.FC = () => {
             <input
               type="text"
               placeholder="Search products..."
-              className="w-full px-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              className="input rounded-full pr-10"
               value={searchQuery}
               onChange={handleSearchChange}
               onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
             />
             <button
               type="submit"
-              className="absolute right-0 top-0 mt-2 mr-3 text-gray-500 hover:text-pink-500"
+              className="absolute right-0 top-0 mt-2.5 mr-4 text-muted hover:text-brand"
             >
               <Search size={20} />
             </button>
 
             {/* Mobile Search Results Dropdown */}
             {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+              <div className="absolute z-50 w-full mt-2 bg-surface border border-line rounded-2xl shadow-soft overflow-hidden">
                 {searchResults.map(product => (
                   <div
                     key={product.id}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                    className="px-4 py-3 hover:bg-surface-muted cursor-pointer flex items-center"
                     onClick={() => handleSearchResultClick(product.slug)}
                   >
                     <img
                       src={product.images[0]}
                       alt={product.name}
-                      className="w-10 h-10 object-cover rounded mr-2"
+                      className="w-10 h-10 object-cover rounded-lg mr-3"
                     />
                     <div>
-                      <div className="font-medium">{product.name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="font-medium text-text">{product.name}</div>
+                      <div className="text-sm text-muted">
                         ${product.salePrice || product.price}
                       </div>
                     </div>
@@ -311,51 +311,51 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu */}
       {showMobileMenu && (
-        <div className="md:hidden bg-white border-t border-gray-200 shadow-inner">
+        <div className="md:hidden bg-surface border-t border-line shadow-soft">
           <nav className="flex flex-col px-4 py-2">
             {/* Clothings Accordion */}
-            <div className="border-b border-gray-100">
+            <div className="border-b border-line">
               <button
                 onClick={() => setMobileClothingsOpen(!mobileClothingsOpen)}
-                className="flex items-center justify-between w-full py-3 text-gray-700"
+                className="flex items-center justify-between w-full py-3 text-muted"
               >
                 Clothings
                 <ChevronDown size={16} className={`transition-transform ${mobileClothingsOpen ? 'rotate-180' : ''}`} />
               </button>
               {mobileClothingsOpen && (
                 <div className="pl-4 pb-2 space-y-1">
-                  <Link to="/products?category=mens-wear" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Men's Wear</Link>
-                  <Link to="/products?category=womens-wear" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Women's Wear</Link>
-                  <Link to="/products?category=kids-wear" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Kids Wear</Link>
-                  <Link to="/products?category=ethnic-wear" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Ethnic Wear</Link>
-                  <Link to="/products" className="block py-2 text-sm font-medium text-pink-600" onClick={() => setShowMobileMenu(false)}>View All Clothings</Link>
+                  <Link to="/products?category=mens-wear" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Men's Wear</Link>
+                  <Link to="/products?category=womens-wear" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Women's Wear</Link>
+                  <Link to="/products?category=kids-wear" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Kids Wear</Link>
+                  <Link to="/products?category=ethnic-wear" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Ethnic Wear</Link>
+                  <Link to="/products" className="block py-2 text-sm font-medium text-brand" onClick={() => setShowMobileMenu(false)}>View All Clothings</Link>
                 </div>
               )}
             </div>
 
             {/* Uniforms Accordion */}
-            <div className="border-b border-gray-100">
+            <div className="border-b border-line">
               <button
                 onClick={() => setMobileUniformsOpen(!mobileUniformsOpen)}
-                className="flex items-center justify-between w-full py-3 text-gray-700"
+                className="flex items-center justify-between w-full py-3 text-muted"
               >
                 Uniforms
                 <ChevronDown size={16} className={`transition-transform ${mobileUniformsOpen ? 'rotate-180' : ''}`} />
               </button>
               {mobileUniformsOpen && (
                 <div className="pl-4 pb-2 space-y-1">
-                  <Link to="/categories/school-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>School Uniforms</Link>
-                  <Link to="/categories/college-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>College Uniforms</Link>
-                  <Link to="/categories/corporate-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Corporate Uniforms</Link>
-                  <Link to="/categories/hospital-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Hospital & Medical</Link>
-                  <Link to="/categories/hotel-uniforms" className="block py-2 text-sm text-gray-600 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Hotel & Hospitality</Link>
-                  <Link to="/categories" className="block py-2 text-sm font-medium text-pink-600" onClick={() => setShowMobileMenu(false)}>View All Uniforms</Link>
+                  <Link to="/categories/school-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>School Uniforms</Link>
+                  <Link to="/categories/college-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>College Uniforms</Link>
+                  <Link to="/categories/corporate-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Corporate Uniforms</Link>
+                  <Link to="/categories/hospital-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Hospital & Medical</Link>
+                  <Link to="/categories/hotel-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Hotel & Hospitality</Link>
+                  <Link to="/categories" className="block py-2 text-sm font-medium text-brand" onClick={() => setShowMobileMenu(false)}>View All Uniforms</Link>
                 </div>
               )}
             </div>
             <Link
               to="/aboutus"
-              className="py-3 text-gray-700 border-b border-gray-100"
+              className="py-3 text-muted border-b border-line"
               onClick={() => setShowMobileMenu(false)}
             >
               About
@@ -363,67 +363,67 @@ const Header: React.FC = () => {
 
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/account"
-                  className="py-3 text-gray-700 border-b border-gray-100"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  My Account
-                </Link>
-                <Link
-                  to="/orders"
-                  className="py-3 text-gray-700 border-b border-gray-100"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  My Orders
-                </Link>
-                <Link
-                  to="/wishlist"
-                  className="py-3 text-gray-700 border-b border-gray-100"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  Wishlist
-                </Link>
-                <Link
-                  to="/notifications"
-                  className="py-3 text-gray-700 border-b border-gray-100"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  Notifications
-                  {notificationCount > 0 && (
-                    <span className="ml-2 bg-pink-500 text-white text-xs rounded-full px-2 py-1">
+              <Link
+                to="/account"
+                className="py-3 text-muted border-b border-line"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                My Account
+              </Link>
+              <Link
+                to="/orders"
+                className="py-3 text-muted border-b border-line"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                My Orders
+              </Link>
+              <Link
+                to="/wishlist"
+                className="py-3 text-muted border-b border-line"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Wishlist
+              </Link>
+              <Link
+                to="/notifications"
+                className="py-3 text-muted border-b border-line"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Notifications
+                {notificationCount > 0 && (
+                    <span className="ml-2 bg-brand text-white text-xs rounded-full px-2 py-1">
                       {notificationCount}
                     </span>
                   )}
-                </Link>
-                {user?.role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="py-3 text-gray-700 border-b border-gray-100"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Admin Dashboard
-                  </Link>
-                )}
-                <button
-                  onClick={() => {
-                    logout();
-                    setShowMobileMenu(false);
-                  }}
-                  className="flex items-center py-3 text-gray-700"
+              </Link>
+              {user?.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  className="py-3 text-muted border-b border-line"
+                  onClick={() => setShowMobileMenu(false)}
                 >
-                  <LogOut size={18} className="mr-2" />
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link
-                to="/login"
-                className="py-3 text-gray-700 flex items-center"
-                onClick={() => setShowMobileMenu(false)}
+                  Admin Dashboard
+                </Link>
+              )}
+              <button
+                onClick={() => {
+                  logout();
+                  setShowMobileMenu(false);
+                }}
+                className="flex items-center py-3 text-muted"
               >
-                <User size={18} className="mr-2" />
-                Login / Register
+                <LogOut size={18} className="mr-2" />
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="py-3 text-muted flex items-center"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              <User size={18} className="mr-2" />
+              Login / Register
               </Link>
             )}
           </nav>

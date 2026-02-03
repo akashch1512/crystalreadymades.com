@@ -27,10 +27,10 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const productSlug = item.name.toLowerCase().replace(/\s+/g, '-');
 
   return (
-    <div className="flex flex-col sm:flex-row py-6 border-b border-gray-200">
+    <div className="flex flex-col sm:flex-row py-6 border-b border-line">
       {/* Image and Product Info */}
       <div className="flex flex-grow sm:w-3/4">
-        <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+        <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-xl border border-line">
           <img
             src={item.image}
             alt={item.name}
@@ -41,19 +41,19 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
         <div className="ml-4 flex flex-1 flex-col">
           <div>
             <div className="flex justify-between">
-              <Link to={`/product/${productSlug}`} className="text-lg font-medium text-gray-900 hover:text-pink-600">
+              <Link to={`/product/${productSlug}`} className="text-lg font-medium text-text hover:text-brand">
                 {item.name}
               </Link>
               <button
                 onClick={handleRemove}
                 type="button"
-                className="text-gray-400 hover:text-gray-500 sm:hidden"
+                className="text-muted hover:text-text sm:hidden"
               >
                 <X size={18} />
               </button>
             </div>
             <div className="mt-1 flex text-sm">
-              <p className="text-gray-500">Quantity: {item.quantity}</p>
+              <p className="text-muted">Quantity: {item.quantity}</p>
             </div>
           </div>
           
@@ -61,28 +61,28 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             <div className="flex items-center mt-2">
               <button
                 onClick={() => handleQuantityChange(item.quantity - 1)}
-                className="text-gray-500 hover:text-gray-700 border border-gray-300 rounded-l p-1"
+                className="text-muted hover:text-text border border-line rounded-l-xl p-1"
                 disabled={item.quantity <= 1}
               >
                 <Minus size={16} />
               </button>
-              <span className="w-10 text-center border-t border-b border-gray-300 py-1">
+              <span className="w-10 text-center border-y border-line py-1">
                 {item.quantity}
               </span>
               <button
                 onClick={() => handleQuantityChange(item.quantity + 1)}
-                className="text-gray-500 hover:text-gray-700 border border-gray-300 rounded-r p-1"
+                className="text-muted hover:text-text border border-line rounded-r-xl p-1"
               >
                 <Plus size={16} />
               </button>
             </div>
             
             <div className="flex items-center">
-              <p className="text-lg font-medium text-gray-900">
+              <p className="text-lg font-medium text-text">
                 ${totalPrice.toFixed(2)}
               </p>
               {item.salePrice && (
-                <p className="ml-2 text-sm text-gray-500 line-through">
+                <p className="ml-2 text-sm text-muted line-through">
                   ${(item.price * item.quantity).toFixed(2)}
                 </p>
               )}
@@ -96,7 +96,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
         <button
           onClick={handleRemove}
           type="button"
-          className="text-gray-400 hover:text-gray-500"
+          className="text-muted hover:text-text"
         >
           <X size={20} />
         </button>

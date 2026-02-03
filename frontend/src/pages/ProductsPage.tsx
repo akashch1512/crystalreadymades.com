@@ -50,42 +50,46 @@ const ProductsPage: React.FC = () => {
   }, [location.search, setFilterOptions]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-bold mb-2">Shop Our Products</h1>
-      <p className="text-gray-600 mb-8">
-        Browse our collection of crystal-enhanced products
-      </p>
-      
-      <div className="flex flex-col md:flex-row">
-        {/* Filters - Desktop sidebar */}
-        <div className="hidden md:block md:w-1/4 lg:w-1/5 pr-8">
-          <ProductFilter
-            categories={categories}
-            brands={brands}
-            filterOptions={filterOptions}
-            setFilterOptions={setFilterOptions}
-            clearFilters={clearFilters}
-          />
-        </div>
-        
-        {/* Mobile Filters */}
-        <div className="md:hidden mb-6">
-          <ProductFilter
-            categories={categories}
-            brands={brands}
-            filterOptions={filterOptions}
-            setFilterOptions={setFilterOptions}
-            clearFilters={clearFilters}
-          />
-        </div>
-        
-        {/* Product Grid */}
-        <div className="md:w-3/4 lg:w-4/5">
-          <ProductGrid 
-            products={filteredProducts} 
-            loading={loading} 
-            emptyMessage="No products match your filters. Try adjusting your criteria or clear the filters to see all products."
-          />
+    <div className="page">
+      <div className="section">
+        <div className="container mx-auto">
+          <h1 className="h1 mb-2">Shop Our Products</h1>
+          <p className="text-muted mb-8">
+            Browse our collection of crystal-enhanced products
+          </p>
+          
+          <div className="flex flex-col md:flex-row">
+            {/* Filters - Desktop sidebar */}
+            <div className="hidden md:block md:w-1/4 lg:w-1/5 pr-8">
+              <ProductFilter
+                categories={categories}
+                brands={brands}
+                filterOptions={filterOptions}
+                setFilterOptions={setFilterOptions}
+                clearFilters={clearFilters}
+              />
+            </div>
+            
+            {/* Mobile Filters */}
+            <div className="md:hidden mb-6">
+              <ProductFilter
+                categories={categories}
+                brands={brands}
+                filterOptions={filterOptions}
+                setFilterOptions={setFilterOptions}
+                clearFilters={clearFilters}
+              />
+            </div>
+            
+            {/* Product Grid */}
+            <div className="md:w-3/4 lg:w-4/5">
+              <ProductGrid 
+                products={filteredProducts} 
+                loading={loading} 
+                emptyMessage="No products match your filters. Try adjusting your criteria or clear the filters to see all products."
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

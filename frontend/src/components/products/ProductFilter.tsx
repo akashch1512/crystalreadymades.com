@@ -75,13 +75,13 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
   return (
     <div className="mb-8">
       {/* Desktop Filters */}
-      <div className="hidden md:block">
+      <div className="hidden md:block card p-5">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium text-gray-900">Filters</h2>
+          <h2 className="text-lg font-medium text-text">Filters</h2>
           {activeFilterCount > 0 && (
             <button
               onClick={clearFilters}
-              className="text-sm text-pink-600 hover:text-pink-800"
+              className="text-sm text-brand hover:text-brand-strong"
             >
               Clear all filters
             </button>
@@ -95,7 +95,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               className="flex justify-between items-center cursor-pointer" 
               onClick={() => toggleSection('categories')}
             >
-              <h3 className="text-sm font-medium text-gray-900">Categories</h3>
+              <h3 className="text-sm font-medium text-text">Categories</h3>
               {expandedSections.categories ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             
@@ -109,11 +109,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                       type="radio"
                       checked={filterOptions.category === category.name}
                       onChange={() => handleCategoryChange(category.id, category.name)}
-                      className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                     />
                     <label
                       htmlFor={`category-${category.id}`}
-                      className="ml-3 text-sm text-gray-600"
+                      className="ml-3 text-sm text-muted"
                     >
                       {category.name}
                     </label>
@@ -129,7 +129,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               className="flex justify-between items-center cursor-pointer" 
               onClick={() => toggleSection('brands')}
             >
-              <h3 className="text-sm font-medium text-gray-900">Brands</h3>
+              <h3 className="text-sm font-medium text-text">Brands</h3>
               {expandedSections.brands ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             
@@ -143,11 +143,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                       type="radio"
                       checked={filterOptions.brand === brand.name}
                       onChange={() => handleBrandChange(brand.id, brand.name)}
-                      className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                     />
                     <label
                       htmlFor={`brand-${brand.id}`}
-                      className="ml-3 text-sm text-gray-600"
+                      className="ml-3 text-sm text-muted"
                     >
                       {brand.name}
                     </label>
@@ -163,7 +163,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               className="flex justify-between items-center cursor-pointer" 
               onClick={() => toggleSection('price')}
             >
-              <h3 className="text-sm font-medium text-gray-900">Price Range</h3>
+              <h3 className="text-sm font-medium text-text">Price Range</h3>
               {expandedSections.price ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             
@@ -176,11 +176,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     type="radio"
                     checked={!filterOptions.minPrice && !filterOptions.maxPrice}
                     onChange={() => handlePriceChange(undefined, undefined)}
-                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-any"
-                    className="ml-3 text-sm text-gray-600"
+                    className="ml-3 text-sm text-muted"
                   >
                     Any Price
                   </label>
@@ -192,11 +192,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     type="radio"
                     checked={filterOptions.maxPrice === 50}
                     onChange={() => handlePriceChange(0, 50)}
-                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-under-50"
-                    className="ml-3 text-sm text-gray-600"
+                    className="ml-3 text-sm text-muted"
                   >
                     Under $50
                   </label>
@@ -208,11 +208,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     type="radio"
                     checked={filterOptions.minPrice === 50 && filterOptions.maxPrice === 100}
                     onChange={() => handlePriceChange(50, 100)}
-                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-50-100"
-                    className="ml-3 text-sm text-gray-600"
+                    className="ml-3 text-sm text-muted"
                   >
                     $50 - $100
                   </label>
@@ -224,11 +224,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     type="radio"
                     checked={filterOptions.minPrice === 100 && filterOptions.maxPrice === 200}
                     onChange={() => handlePriceChange(100, 200)}
-                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-100-200"
-                    className="ml-3 text-sm text-gray-600"
+                    className="ml-3 text-sm text-muted"
                   >
                     $100 - $200
                   </label>
@@ -240,11 +240,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     type="radio"
                     checked={filterOptions.minPrice === 200}
                     onChange={() => handlePriceChange(200, undefined)}
-                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-over-200"
-                    className="ml-3 text-sm text-gray-600"
+                    className="ml-3 text-sm text-muted"
                   >
                     $200 and Above
                   </label>
@@ -259,7 +259,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               className="flex justify-between items-center cursor-pointer" 
               onClick={() => toggleSection('rating')}
             >
-              <h3 className="text-sm font-medium text-gray-900">Rating</h3>
+              <h3 className="text-sm font-medium text-text">Rating</h3>
               {expandedSections.rating ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             
@@ -273,11 +273,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                       type="radio"
                       checked={filterOptions.rating === rating}
                       onChange={() => handleRatingChange(rating)}
-                      className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                     />
                     <label
                       htmlFor={`rating-${rating}`}
-                      className="ml-3 text-sm text-gray-600 flex items-center"
+                      className="ml-3 text-sm text-muted flex items-center"
                     >
                       {rating}+ <span className="text-yellow-400 ml-1">★</span>
                     </label>
@@ -293,7 +293,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
       <div className="flex justify-between items-center md:hidden mb-4">
         <button
           onClick={() => setShowMobileFilters(true)}
-          className="flex items-center text-gray-700 bg-white border border-gray-300 rounded px-3 py-1"
+          className="btn btn-secondary px-4 py-2"
         >
           <Filter size={18} className="mr-1" />
           Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
@@ -302,7 +302,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
         <select
           value={filterOptions.sortBy || ""}
           onChange={handleSortChange}
-          className="border border-gray-300 rounded px-2 py-1 text-sm"
+          className="select text-sm"
         >
           <option value="">Sort By</option>
           <option value="price-asc">Price: Low to High</option>
@@ -315,11 +315,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
       {/* Desktop Sort */}
       <div className="hidden md:flex justify-end items-center mb-4">
         <div className="flex items-center">
-          <span className="text-sm text-gray-700 mr-2">Sort By:</span>
+          <span className="text-sm text-text mr-2">Sort By:</span>
           <select
             value={filterOptions.sortBy || ""}
             onChange={handleSortChange}
-            className="border border-gray-300 rounded px-3 py-1"
+            className="select text-sm"
           >
             <option value="">Featured</option>
             <option value="price-asc">Price: Low to High</option>
@@ -335,13 +335,13 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
         <div className="fixed inset-0 z-50 md:hidden">
           {/* Backdrop */}
           <div 
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute inset-0 bg-text/40"
             onClick={() => setShowMobileFilters(false)}
           ></div>
           
           {/* Drawer */}
-          <div className="absolute inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl flex flex-col">
-            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+          <div className="absolute inset-y-0 right-0 max-w-xs w-full bg-surface shadow-xl flex flex-col">
+            <div className="p-4 border-b border-line flex justify-between items-center">
               <h2 className="text-lg font-medium">Filters</h2>
               <button onClick={() => setShowMobileFilters(false)}>
                 <X size={20} />
@@ -352,7 +352,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               <div className="space-y-6">
                 {/* Categories Section */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Categories</h3>
+                  <h3 className="text-sm font-medium text-text mb-2">Categories</h3>
                   <div className="space-y-2">
                     {categories.map(category => (
                       <div key={category.id} className="flex items-center">
@@ -362,11 +362,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                           type="radio"
                           checked={filterOptions.category === category.name}
                           onChange={() => handleCategoryChange(category.id, category.name)}
-                          className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                         />
                         <label
                           htmlFor={`mobile-category-${category.id}`}
-                          className="ml-3 text-sm text-gray-600"
+                          className="ml-3 text-sm text-muted"
                         >
                           {category.name}
                         </label>
@@ -377,7 +377,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                 
                 {/* Brands Section */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Brands</h3>
+                  <h3 className="text-sm font-medium text-text mb-2">Brands</h3>
                   <div className="space-y-2">
                     {brands.map(brand => (
                       <div key={brand.id} className="flex items-center">
@@ -387,11 +387,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                           type="radio"
                           checked={filterOptions.brand === brand.name}
                           onChange={() => handleBrandChange(brand.id, brand.name)}
-                          className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                         />
                         <label
                           htmlFor={`mobile-brand-${brand.id}`}
-                          className="ml-3 text-sm text-gray-600"
+                          className="ml-3 text-sm text-muted"
                         >
                           {brand.name}
                         </label>
@@ -402,7 +402,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                 
                 {/* Price Range Section */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Price Range</h3>
+                  <h3 className="text-sm font-medium text-text mb-2">Price Range</h3>
                   <div className="space-y-2">
                     <div className="flex items-center">
                       <input
@@ -411,11 +411,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         type="radio"
                         checked={!filterOptions.minPrice && !filterOptions.maxPrice}
                         onChange={() => handlePriceChange(undefined, undefined)}
-                        className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-any"
-                        className="ml-3 text-sm text-gray-600"
+                        className="ml-3 text-sm text-muted"
                       >
                         Any Price
                       </label>
@@ -427,11 +427,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         type="radio"
                         checked={filterOptions.maxPrice === 50}
                         onChange={() => handlePriceChange(0, 50)}
-                        className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-under-50"
-                        className="ml-3 text-sm text-gray-600"
+                        className="ml-3 text-sm text-muted"
                       >
                         Under $50
                       </label>
@@ -443,11 +443,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         type="radio"
                         checked={filterOptions.minPrice === 50 && filterOptions.maxPrice === 100}
                         onChange={() => handlePriceChange(50, 100)}
-                        className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-50-100"
-                        className="ml-3 text-sm text-gray-600"
+                        className="ml-3 text-sm text-muted"
                       >
                         $50 - $100
                       </label>
@@ -459,11 +459,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         type="radio"
                         checked={filterOptions.minPrice === 100 && filterOptions.maxPrice === 200}
                         onChange={() => handlePriceChange(100, 200)}
-                        className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-100-200"
-                        className="ml-3 text-sm text-gray-600"
+                        className="ml-3 text-sm text-muted"
                       >
                         $100 - $200
                       </label>
@@ -475,11 +475,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         type="radio"
                         checked={filterOptions.minPrice === 200}
                         onChange={() => handlePriceChange(200, undefined)}
-                        className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-over-200"
-                        className="ml-3 text-sm text-gray-600"
+                        className="ml-3 text-sm text-muted"
                       >
                         $200 and Above
                       </label>
@@ -489,7 +489,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                 
                 {/* Rating Section */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Rating</h3>
+                  <h3 className="text-sm font-medium text-text mb-2">Rating</h3>
                   <div className="space-y-2">
                     {[4, 3, 2, 1].map(rating => (
                       <div key={rating} className="flex items-center">
@@ -499,11 +499,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                           type="radio"
                           checked={filterOptions.rating === rating}
                           onChange={() => handleRatingChange(rating)}
-                          className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                         />
                         <label
                           htmlFor={`mobile-rating-${rating}`}
-                          className="ml-3 text-sm text-gray-600 flex items-center"
+                          className="ml-3 text-sm text-muted flex items-center"
                         >
                           {rating}+ <span className="text-yellow-400 ml-1">★</span>
                         </label>
@@ -514,18 +514,18 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               </div>
             </div>
             
-            <div className="p-4 border-t border-gray-200 flex space-x-4">
+            <div className="p-4 border-t border-line flex space-x-4">
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="flex-1 py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="btn btn-secondary flex-1 px-4 py-2"
                 >
                   Clear All
                 </button>
               )}
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700"
+                className="btn btn-primary flex-1 px-4 py-2"
               >
                 Apply Filters
               </button>
@@ -538,3 +538,5 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
 };
 
 export default ProductFilter;
+
+

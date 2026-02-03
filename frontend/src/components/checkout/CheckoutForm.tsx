@@ -138,14 +138,14 @@
     return (
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="bg-pink-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="alert alert-error">
             {error}
           </div>
         )}
 
         {/* Shipping Address */}
         <div>
-    <h3 className="text-lg font-medium text-gray-900 mb-4">Shipping Address</h3>
+    <h3 className="h3 mb-4">Shipping Address</h3>
 
     {user?.addresses && user.addresses.length > 0 ? (
       <div>
@@ -154,7 +154,7 @@
           name="address"
           value={selectedAddress}
           onChange={handleAddressChange}
-          className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+          className="select"
         >
           <option value="">Select an address</option>
           {user.addresses.map(address => (
@@ -168,19 +168,19 @@
           <button
             type="button"
             onClick={() => navigate('/account/addresses/new?redirect=checkout')}
-            className="text-pink-600 hover:text-pink-800 text-sm font-medium"
+            className="text-brand hover:text-brand-strong text-sm font-medium"
           >
             + Add a new address
           </button>
         </div>
       </div>
     ) : (
-      <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-4">
+      <div className="alert border-yellow-200 bg-yellow-50 text-yellow-700 mb-4">
         <p>You don't have any saved addresses.</p>
         <button
           type="button"
           onClick={() => navigate('/account/addresses/new?redirect=checkout')}
-          className="mt-2 text-pink-600 hover:text-pink-800 font-medium"
+          className="mt-2 text-brand hover:text-brand-strong font-medium"
         >
           + Add a new address
         </button>
@@ -190,81 +190,81 @@
 
         {/* Payment Method */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
+          <h3 className="h3 mb-4">Payment Method</h3>
 
           <div className="space-y-4">
-            <label className="flex items-center p-4 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
               <input
                 type="radio"
                 name="payment-method"
                 value="card"
                 checked={paymentMethod === 'card'}
                 onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-pink-600 focus:ring-pink-500"
+                className="h-4 w-4 text-brand focus:ring-brand"
               />
               <div className="ml-3">
-                <span className="block text-sm font-medium text-gray-900">Credit/Debit Card</span>
-                <span className="block text-sm text-gray-500">Pay securely with your card</span>
+                <span className="block text-sm font-medium text-text">Credit/Debit Card</span>
+                <span className="block text-sm text-muted">Pay securely with your card</span>
               </div>
             </label>
 
-            <label className="flex items-center p-4 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
               <input
                 type="radio"
                 name="payment-method"
                 value="upi"
                 checked={paymentMethod === 'upi'}
                 onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-pink-600 focus:ring-pink-500"
+                className="h-4 w-4 text-brand focus:ring-brand"
               />
               <div className="ml-3">
-                <span className="block text-sm font-medium text-gray-900">UPI</span>
-                <span className="block text-sm text-gray-500">Pay using UPI ID or QR code</span>
+                <span className="block text-sm font-medium text-text">UPI</span>
+                <span className="block text-sm text-muted">Pay using UPI ID or QR code</span>
               </div>
             </label>
 
-            <label className="flex items-center p-4 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
               <input
                 type="radio"
                 name="payment-method"
                 value="wallet"
                 checked={paymentMethod === 'wallet'}
                 onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-pink-600 focus:ring-pink-500"
+                className="h-4 w-4 text-brand focus:ring-brand"
               />
               <div className="ml-3">
-                <span className="block text-sm font-medium text-gray-900">Mobile Wallet</span>
-                <span className="block text-sm text-gray-500">Pay using PhonePe, Paytm, etc.</span>
+                <span className="block text-sm font-medium text-text">Mobile Wallet</span>
+                <span className="block text-sm text-muted">Pay using PhonePe, Paytm, etc.</span>
               </div>
             </label>
 
-            <label className="flex items-center p-4 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
               <input
                 type="radio"
                 name="payment-method"
                 value="netbanking"
                 checked={paymentMethod === 'netbanking'}
                 onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-pink-600 focus:ring-pink-500"
+                className="h-4 w-4 text-brand focus:ring-brand"
               />
               <div className="ml-3">
-                <span className="block text-sm font-medium text-gray-900">Net Banking</span>
-                <span className="block text-sm text-gray-500">Pay through your bank account</span>
+                <span className="block text-sm font-medium text-text">Net Banking</span>
+                <span className="block text-sm text-muted">Pay through your bank account</span>
               </div>
             </label>
 
-            <label className="flex items-center p-4 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
               <input
                 type="radio"
                 name="payment-method"
                 value="cod"
                 checked={paymentMethod === 'cod'}
                 onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-pink-600 focus:ring-pink-500"
+                className="h-4 w-4 text-brand focus:ring-brand"
               />
               <div className="ml-3">
-                <span className="block text-sm font-medium text-gray-900">Cash on Delivery</span>
-                <span className="block text-sm text-gray-500">Pay when you receive your order</span>
+                <span className="block text-sm font-medium text-text">Cash on Delivery</span>
+                <span className="block text-sm text-muted">Pay when you receive your order</span>
               </div>
             </label>
           </div>
@@ -272,19 +272,19 @@
 
         {/* Order Summary */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
+          <h3 className="h3 mb-4">Order Summary</h3>
 
-          <div className="bg-gray-50 p-4 rounded-md">
+          <div className="bg-surface-muted p-4 rounded-2xl border border-line">
             <div className="space-y-2">
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-muted">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-muted">
                 <span>Tax</span>
                 <span>${tax.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-muted">
                 <span>Shipping</span>
                 <span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
               </div>
@@ -294,7 +294,7 @@
                   <span>-${discount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="border-t pt-2 mt-2 flex justify-between font-medium text-gray-900">
+              <div className="divider pt-2 mt-2 flex justify-between font-medium text-text">
                 <span>Total</span>
                 <span>${total.toFixed(2)}</span>
               </div>
@@ -307,7 +307,7 @@
           <button
             type="submit"
             disabled={loading || !selectedAddress || items.length === 0}
-            className="w-full bg-pink-600 text-white py-3 px-4 rounded-md hover:bg-pink-700 transition-colors font-medium disabled:bg-pink-300 disabled:cursor-not-allowed"
+            className="btn btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Processing...' : `Pay $${total.toFixed(2)}`}
           </button>
@@ -317,3 +317,4 @@
   };
 
   export default CheckoutForm;
+

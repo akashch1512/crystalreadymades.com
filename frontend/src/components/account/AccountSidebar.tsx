@@ -15,9 +15,9 @@ const AccountSidebar: React.FC = () => {
   if (!user) return null;
 
   return (
-    <div className="w-full md:w-64 bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="w-full md:w-64 card overflow-hidden">
       {/* User Info */}
-      <div className="p-6 bg-pink-600 text-white">
+      <div className="p-6 bg-brand text-white">
         <div className="flex items-center gap-3">
           {/* Profile Photo */}
           {user.avatar ? (
@@ -27,13 +27,13 @@ const AccountSidebar: React.FC = () => {
               className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-pink-500 flex items-center justify-center border-2 border-white/30">
+            <div className="w-12 h-12 rounded-full bg-brand-strong flex items-center justify-center border-2 border-white/30">
               <User size={24} className="text-white" />
             </div>
           )}
           <div>
             <h2 className="text-xl font-semibold">{user.name}</h2>
-            <p className="text-pink-100 mt-0.5 flex items-center text-sm">
+            <p className="text-white/80 mt-0.5 flex items-center text-sm">
               <Phone size={14} className="mr-1" />
               {user.phone || 'No phone added'}
             </p>
@@ -50,8 +50,8 @@ const AccountSidebar: React.FC = () => {
               end
               className={({ isActive }) =>
                 `flex items-center px-4 py-2 rounded-md ${isActive
-                  ? 'bg-pink-50 text-pink-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-brand/10 text-brand font-medium'
+                  : 'text-muted hover:bg-surface-muted'
                 }`
               }
             >
@@ -64,8 +64,8 @@ const AccountSidebar: React.FC = () => {
               to="/account/addresses"
               className={({ isActive }) =>
                 `flex items-center px-4 py-2 rounded-md ${isActive
-                  ? 'bg-pink-50 text-pink-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-brand/10 text-brand font-medium'
+                  : 'text-muted hover:bg-surface-muted'
                 }`
               }
             >
@@ -78,8 +78,8 @@ const AccountSidebar: React.FC = () => {
               to="/account/settings"
               className={({ isActive }) =>
                 `flex items-center px-4 py-2 rounded-md ${isActive
-                  ? 'bg-pink-50 text-pink-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-brand/10 text-brand font-medium'
+                  : 'text-muted hover:bg-surface-muted'
                 }`
               }
             >
@@ -95,8 +95,8 @@ const AccountSidebar: React.FC = () => {
                 to="/admin"
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2 rounded-md ${isActive
-                    ? 'bg-pink-50 text-pink-600 font-medium'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-brand/10 text-brand font-medium'
+                    : 'text-muted hover:bg-surface-muted'
                   }`
                 }
               >
@@ -107,10 +107,10 @@ const AccountSidebar: React.FC = () => {
           )}
 
           {/* Logout */}
-          <li className="pt-4 mt-4 border-t border-gray-200">
+          <li className="pt-4 mt-4 border-t border-line">
             <button
               onClick={handleLogout}
-              className="flex items-center w-full px-4 py-2 rounded-md text-gray-700 hover:bg-gray-50"
+              className="flex items-center w-full px-4 py-2 rounded-md text-muted hover:bg-surface-muted"
             >
               <LogOut size={20} className="mr-3" />
               Logout

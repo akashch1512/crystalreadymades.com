@@ -34,19 +34,21 @@ const WishlistPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">My Wishlist</h1>
+    <div className="page">
+      <div className="section">
+        <div className="container mx-auto">
+      <h1 className="h1 mb-6">My Wishlist</h1>
 
       {wishlistProducts.length > 0 ? (
         <>
           <div className="flex justify-between mb-6">
-            <p className="text-gray-600">
+            <p className="text-muted">
               {wishlistProducts.length}{" "}
               {wishlistProducts.length === 1 ? "item" : "items"}
             </p>
             <button
               onClick={handleClearWishlist}
-              className="text-red-600 hover:text-red-800"
+              className="text-red-600 hover:text-red-700"
             >
               Clear Wishlist
             </button>
@@ -56,7 +58,7 @@ const WishlistPage: React.FC = () => {
             {wishlistProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
+                className="card overflow-hidden"
               >
                 <div className="relative pt-[60%]">
                   <img
@@ -69,7 +71,7 @@ const WishlistPage: React.FC = () => {
                 <div className="p-4">
                   <Link
                     to={`/product/${product.slug}`}
-                    className="text-lg font-medium text-gray-900 hover:text-pink-600 mb-2 block"
+                    className="text-lg font-medium text-text hover:text-brand mb-2 block"
                   >
                     {product.name}
                   </Link>
@@ -78,27 +80,27 @@ const WishlistPage: React.FC = () => {
                     <div>
                       {product.salePrice != null ? (
                         <div className="flex items-center">
-                          <span className="text-lg font-semibold text-gray-900">
+                          <span className="text-lg font-semibold text-text">
                             ${product.salePrice.toFixed(2)}
                           </span>
                           {product.price != null && (
-                            <span className="ml-2 text-sm text-gray-500 line-through">
+                            <span className="ml-2 text-sm text-muted line-through">
                               ${product.price.toFixed(2)}
                             </span>
                           )}
                         </div>
                       ) : product.price != null ? (
-                        <span className="text-lg font-semibold text-gray-900">
+                        <span className="text-lg font-semibold text-text">
                           ${product.price.toFixed(2)}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-500">Price not available</span>
+                        <span className="text-sm text-muted">Price not available</span>
                       )}
                     </div>
 
                     <div className="flex items-center">
                       <span className="text-yellow-400 mr-1">★</span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted">
                         {product.ratings != null ? product.ratings.toFixed(1) : "N/A"}
                       </span>
                     </div>
@@ -108,10 +110,10 @@ const WishlistPage: React.FC = () => {
                     <button
                       onClick={() => handleAddToCart(product)}
                       disabled={!product.stock}
-                      className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md ${
+                      className={`flex-1 flex items-center justify-center px-4 py-2 rounded-full ${
                         product.stock
-                          ? "bg-pink-600 text-white hover:bg-pink-700"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          ? "bg-brand text-white hover:bg-brand-strong"
+                          : "bg-surface-muted text-muted cursor-not-allowed"
                       } transition-colors`}
                     >
                       <ShoppingBag size={16} className="mr-2" />
@@ -120,7 +122,7 @@ const WishlistPage: React.FC = () => {
 
                     <button
                       onClick={() => handleRemoveFromWishlist(product.id)}
-                      className="p-2 rounded-md border border-red-500 text-red-500 hover:bg-pink-50"
+                      className="p-2 rounded-full border border-red-500 text-red-500 hover:bg-red-50"
                       aria-label="Remove from wishlist"
                     >
                       <Heart size={16} className="fill-current" />
@@ -132,26 +134,29 @@ const WishlistPage: React.FC = () => {
           </div>
         </>
       ) : (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
+        <div className="text-center py-16 bg-surface-muted rounded-2xl border border-line">
           <div className="flex justify-center mb-4">
-            <Heart size={48} className="text-gray-400" />
+            <Heart size={48} className="text-muted" />
           </div>
-          <h2 className="text-xl font-medium text-gray-900 mb-2">
+          <h2 className="h3 mb-2">
             Your wishlist is empty
           </h2>
-          <p className="text-gray-500 mb-6">
+          <p className="text-muted mb-6">
             Items added to your wishlist will be saved here.
           </p>
           <Link
             to="/products"
-            className="inline-block bg-pink-600 text-white px-6 py-3 rounded-md hover:bg-pink-700 transition-colors"
+            className="btn btn-primary"
           >
             Start Shopping
           </Link>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };
 
 export default WishlistPage;
+

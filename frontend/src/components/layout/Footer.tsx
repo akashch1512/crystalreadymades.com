@@ -98,16 +98,19 @@ const Footer: React.FC = () => {
 
           {/* 2. Terms */}
           <div className="col-span-1">
-            <h4 className="text-lg font-semibold mb-4 text-text">Terms</h4>
+            <h4 className="text-lg font-semibold mb-4 text-text">Policies</h4>
             <ul className="space-y-2 text-sm text-muted">
               <li>
-                <Link to="/terms#privacy" className="hover:text-brand transition-colors">Privacy Policy</Link>
+                <Link to="/terms" className="hover:text-brand transition-colors">Terms of Service</Link>
               </li>
               <li>
-                <Link to="/terms#terms" className="hover:text-brand transition-colors">Terms of Service</Link>
+                <Link to="/privacy" className="hover:text-brand transition-colors">Privacy Policy</Link>
               </li>
               <li>
-                <Link to="/terms#refund" className="hover:text-brand transition-colors">Refund Policy</Link>
+                <Link to="/refund" className="hover:text-brand transition-colors">Refund Policy</Link>
+              </li>
+              <li>
+                <Link to="/shipping" className="hover:text-brand transition-colors">Shipping Policy</Link>
               </li>
             </ul>
           </div>

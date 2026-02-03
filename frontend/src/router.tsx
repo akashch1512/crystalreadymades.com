@@ -18,6 +18,9 @@ import { useAuth } from './contexts/AuthContext';
 import { AboutUs } from './pages/AboutUs';
 import { TermsAndPolicies } from './pages/Terms';
 import { FAQ } from './pages/Faq';
+import { RefundPolicy } from './pages/RefundPolicy';
+import { ShippingPolicy } from './pages/ShippingPolicy';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ 
@@ -59,6 +62,9 @@ const AppRouter: React.FC = () => {
         <Route path="register" element={<RegisterPage />} />
         <Route path="aboutus" element={<AboutUs />} />
         <Route path="terms" element={<TermsAndPolicies />} />
+        <Route path="refund" element={<RefundPolicy />} />
+        <Route path="shipping" element={<ShippingPolicy />} />
+        <Route path="privacy" element={<PrivacyPolicy />} />
         <Route path="faq" element={<FAQ />} />
         
         {/* Protected Routes */}

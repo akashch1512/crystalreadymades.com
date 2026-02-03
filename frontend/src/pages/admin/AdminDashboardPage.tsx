@@ -171,11 +171,11 @@ const ProductsManagement: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            ${product.salePrice || product.price}
+                            ₹{product.salePrice || product.price}
                           </div>
                           {product.salePrice && (
                             <div className="text-sm text-gray-500 line-through">
-                              ${product.price}
+                              ₹{product.price}
                             </div>
                           )}
                         </td>
@@ -345,7 +345,7 @@ const OrdersManagement: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ${order.total.toFixed(2)}
+                          ₹{order.total.toFixed(2)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <a

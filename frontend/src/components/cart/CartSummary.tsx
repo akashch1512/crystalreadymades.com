@@ -45,27 +45,27 @@ const CartSummary: React.FC = () => {
       <div className="space-y-3 mb-6">
         <div className="flex justify-between text-muted">
           <span>Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>₹{subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-muted">
           <span>Tax</span>
-          <span>${tax.toFixed(2)}</span>
+          <span>₹{tax.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-muted">
           <span>Shipping</span>
           <span>
-            {shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}
+            {shipping === 0 ? 'Free' : `₹${shipping.toFixed(2)}`}
           </span>
         </div>
         {discount > 0 && (
           <div className="flex justify-between text-green-600">
             <span>Discount</span>
-            <span>-${discount.toFixed(2)}</span>
+            <span>-₹{discount.toFixed(2)}</span>
           </div>
         )}
         <div className="divider pt-3 mt-3 flex justify-between font-medium text-text">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <span>₹{total.toFixed(2)}</span>
         </div>
       </div>
       

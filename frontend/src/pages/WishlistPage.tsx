@@ -81,17 +81,17 @@ const WishlistPage: React.FC = () => {
                       {product.salePrice != null ? (
                         <div className="flex items-center">
                           <span className="text-lg font-semibold text-text">
-                            ${product.salePrice.toFixed(2)}
+                            ₹{product.salePrice.toFixed(2)}
                           </span>
                           {product.price != null && (
                             <span className="ml-2 text-sm text-muted line-through">
-                              ${product.price.toFixed(2)}
+                              ₹{product.price.toFixed(2)}
                             </span>
                           )}
                         </div>
                       ) : product.price != null ? (
                         <span className="text-lg font-semibold text-text">
-                          ${product.price.toFixed(2)}
+                          ₹{product.price.toFixed(2)}
                         </span>
                       ) : (
                         <span className="text-sm text-muted">Price not available</span>

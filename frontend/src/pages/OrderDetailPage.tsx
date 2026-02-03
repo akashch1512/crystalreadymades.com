@@ -264,7 +264,7 @@ const OrderDetailPage: React.FC = () => {
                       <p className="text-sm text-muted">Quantity: {item.quantity}</p>
                     </div>
                     <div className="text-sm font-medium text-text">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ₹{(item.price * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}
@@ -278,27 +278,27 @@ const OrderDetailPage: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted">Subtotal</span>
-                  <span className="text-text">${order.subtotal.toFixed(2)}</span>
+                  <span className="text-text">₹{order.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted">Shipping</span>
                   <span className="text-text">
-                    {order.shipping === 0 ? 'Free' : `$${order.shipping.toFixed(2)}`}
+                    {order.shipping === 0 ? 'Free' : `₹${order.shipping.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted">Tax</span>
-                  <span className="text-text">${order.tax.toFixed(2)}</span>
+                  <span className="text-text">₹{order.tax.toFixed(2)}</span>
                 </div>
                 {order.discount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted">Discount</span>
-                    <span className="text-green-600">-${order.discount.toFixed(2)}</span>
+                    <span className="text-green-600">-₹{order.discount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-base font-medium pt-2 border-t border-line mt-2">
                   <span className="text-text">Total</span>
-                  <span className="text-text">${order.total.toFixed(2)}</span>
+                  <span className="text-text">₹{order.total.toFixed(2)}</span>
                 </div>
               </div>
             </div>

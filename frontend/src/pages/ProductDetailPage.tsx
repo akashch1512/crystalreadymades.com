@@ -226,14 +226,14 @@ const ProductDetailPage: React.FC = () => {
           <div className="mb-6">
             {product.salePrice ? (
               <div className="flex items-baseline">
-                <span className="text-2xl font-bold text-text">${product.salePrice.toFixed(2)}</span>
-                <span className="ml-2 text-lg text-muted line-through">${product.price.toFixed(2)}</span>
+                <span className="text-2xl font-bold text-text">₹{product.salePrice.toFixed(2)}</span>
+                <span className="ml-2 text-lg text-muted line-through">₹{product.price.toFixed(2)}</span>
                 <span className="ml-2 text-sm bg-brand/10 text-brand-strong px-2 py-0.5 rounded-full">
                   {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
                 </span>
               </div>
             ) : (
-              <span className="text-2xl font-bold text-text">${product.price.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-text">₹{product.price.toFixed(2)}</span>
             )}
           </div>
           

@@ -79,11 +79,11 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             
             <div className="flex items-center">
               <p className="text-lg font-medium text-text">
-                ${totalPrice.toFixed(2)}
+                ₹{totalPrice.toFixed(2)}
               </p>
               {item.salePrice && (
                 <p className="ml-2 text-sm text-muted line-through">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  ₹{(item.price * item.quantity).toFixed(2)}
                 </p>
               )}
             </div>

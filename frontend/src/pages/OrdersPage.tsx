@@ -100,7 +100,7 @@ const OrdersPage: React.FC = () => {
                 <div className="divider py-4 my-4">
                   <div className="flex items-center justify-between text-sm text-muted mb-2">
                     <span>{order.items.length} {order.items.length === 1 ? 'item' : 'items'}</span>
-                    <span>Total: ${order.total.toFixed(2)}</span>
+                    <span>Total: ₹{order.total.toFixed(2)}</span>
                   </div>
                   
                   <div className="flex overflow-x-auto py-2 space-x-4">

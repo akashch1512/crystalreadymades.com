@@ -34,63 +34,50 @@ const CartContext = createContext<CartContextValue>({
 
 export const useCart = () => useContext(CartContext);
 
+// Helper: read saved cart from localStorage synchronously
+function loadCartFromStorage() {
+  try {
+    const saved = localStorage.getItem('cart');
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return null;
+}
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [subtotal, setSubtotal] = useState(0);
-  const [tax, setTax] = useState(0);
-  const [shipping, setShipping] = useState(defaultCart.shipping);
-  const [discount, setDiscount] = useState(0);
-  const [total, setTotal] = useState(0);
+  // Lazy initializers read localStorage BEFORE the first render,
+  // so there is no race condition with the save effect.
+  const [items, setItems] = useState<CartItem[]>(() => {
+    const saved = loadCartFromStorage();
+    return saved?.items || [];
+  });
+  const [shipping, setShipping] = useState<number>(() => {
+    const saved = loadCartFromStorage();
+    return saved?.shipping ?? defaultCart.shipping;
+  });
+  const [discount, setDiscount] = useState<number>(() => {
+    const saved = loadCartFromStorage();
+    return saved?.discount || 0;
+  });
 
-  useEffect(() => {
-    // Load cart from localStorage on initial load
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      const parsedCart = JSON.parse(savedCart);
-      setItems(parsedCart.items || []);
-      setSubtotal(parsedCart.subtotal || 0);
-      setTax(parsedCart.tax || 0);
-      setShipping(parsedCart.shipping || defaultCart.shipping);
-      setDiscount(parsedCart.discount || 0);
-      setTotal(parsedCart.total || 0);
-    }
-  }, []);
+  // Derived values — computed fresh every render
+  const subtotal = items.reduce((sum, item) => {
+    return sum + ((item.salePrice || item.price) * item.quantity);
+  }, 0);
+  const tax = subtotal * 0.08;
+  const total = subtotal + tax + shipping - discount;
 
+  // Save to localStorage whenever cart changes (NO race — initial state is already correct)
   useEffect(() => {
-    // Calculate totals whenever cart items change
-    const newSubtotal = items.reduce((sum, item) => {
-      const itemPrice = item.salePrice || item.price;
-      return sum + (itemPrice * item.quantity);
-    }, 0);
-    
-    const newTax = newSubtotal * 0.08; // 8% tax rate
-    const newTotal = newSubtotal + newTax + shipping - discount;
-    
-    setSubtotal(newSubtotal);
-    setTax(newTax);
-    setTotal(newTotal);
-    
-    // Save to localStorage
-    const cartData = {
-      items,
-      subtotal: newSubtotal,
-      tax: newTax,
-      shipping,
-      discount,
-      total: newTotal
-    };
+    const cartData = { items, subtotal, tax, shipping, discount, total };
     localStorage.setItem('cart', JSON.stringify(cartData));
   }, [items, shipping, discount]);
 
   const addItem = (product: Product, quantity: number) => {
     setItems(prevItems => {
-      // Check if item already exists in cart
       const existingItemIndex = prevItems.findIndex(
         item => item.productId === product.id
       );
-  
       if (existingItemIndex >= 0) {
-        // Update quantity of existing item
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
@@ -98,7 +85,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         return updatedItems;
       } else {
-        // Add new item
         return [
           ...prevItems,
           {
@@ -114,19 +100,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
   };
-  
 
   const updateQuantity = (itemId: string, quantity: number) => {
     if (quantity <= 0) {
       removeItem(itemId);
       return;
     }
-    
-    setItems(prevItems => 
-      prevItems.map(item => 
-        item.id === itemId 
-          ? { ...item, quantity } 
-          : item
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId ? { ...item, quantity } : item
       )
     );
   };
@@ -141,13 +123,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const applyDiscount = (code: string): boolean => {
-    // Mock discount codes
     const validCodes = {
       'CRYSTAL10': 10,
       'CRYSTAL20': 20,
       'WELCOME15': 15
     };
-    
     const discountCode = code.toUpperCase();
     if (discountCode in validCodes) {
       const discountAmount = (subtotal * validCodes[discountCode as keyof typeof validCodes]) / 100;

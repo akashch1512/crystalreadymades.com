@@ -1,0 +1,20 @@
+frontend - vercel/netlify
+backend - Google Cloud
+database - Google Cloud SQL
+
+
+plan:
+ok so this is my plan cross check this !!
+
+so i have my domain ! no static ip needed ! 
+will use a subdoamin 
+lets use free tier e2-micro (in free only region)
+will use a ligthweigth db + djnago (all hosted on e2-micro) 
+will use enable Swap Space on your 30GB disk.
+frontend react - hosted on vercel/netlify with my domain ! 
+no load baalancer, no backups needed ! 
+will use 30 gb free peristent disk ! 
+backend will strictly only send texual things!! no images no videos !!! to save egress !
+Host your images on imgbb
+
+run a simple cron job that emails you a copy of the db.sqlite3 file once a week. It’s a "free" backup system.

@@ -129,7 +129,7 @@ export const RefundPolicy = () => {
             <div className="space-y-3">
               <div className="flex items-start gap-3 p-3 bg-surface rounded-lg">
                 <span className="text-brand font-bold mt-1">✗</span>
-                <span className="text-muted">Innerwear, lingerie, or swimwear (for hygiene reasons)</span>
+                <span className="text-muted">We dont offer any return on discounted and sale items</span>
               </div>
               <div className="flex items-start gap-3 p-3 bg-surface rounded-lg">
                 <span className="text-brand font-bold mt-1">✗</span>
@@ -142,6 +142,13 @@ export const RefundPolicy = () => {
           <div id="process" className="bg-surface border border-line p-8 rounded-2xl">
             <h2 className="h2 mb-6 text-text">4. Return Process</h2>
             <div className="space-y-4">
+            <div className="flex gap-4 items-start p-4 bg-surface-muted rounded-lg">
+                <div className="text-brand font-bold text-xl min-w-fit w-8 h-8 flex items-center justify-center rounded-full bg-brand/10">*</div>
+                <div>
+                  <p className="text-text font-semibold mb-1">Please Note That: For School Unifroms Exhnage an Return is in Shop Only</p>
+                </div>
+              </div>
+
               <div className="flex gap-4 items-start p-4 bg-surface-muted rounded-lg">
                 <div className="text-brand font-bold text-xl min-w-fit w-8 h-8 flex items-center justify-center rounded-full bg-brand/10">1</div>
                 <div>

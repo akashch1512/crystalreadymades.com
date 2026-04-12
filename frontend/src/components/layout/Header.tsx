@@ -12,7 +12,7 @@ const Header: React.FC = () => {
   const { itemCount: cartItemCount } = useCart();
   const { itemCount: wishlistItemCount } = useWishlist();
   const { unreadCount: notificationCount } = useNotifications();
-  const { searchProducts } = useProducts();
+  const { searchProducts, categories } = useProducts();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,10 +22,27 @@ const Header: React.FC = () => {
   const [mobileClothingsOpen, setMobileClothingsOpen] = useState(false);
   const [mobileUniformsOpen, setMobileUniformsOpen] = useState(false);
 
+  const uniformsCategory = categories.find(
+    (category) => category.slug === 'uniforms' || category.name.toLowerCase() === 'uniforms'
+  );
+  const uniformSchools = uniformsCategory
+    ? categories.filter((category) => category.parentId === uniformsCategory.id)
+    : [];
+
+  const clothingCategory = categories.find(
+    (category) =>
+      category.slug === 'clothing' || category.name.toLowerCase() === 'clothing'
+  );
+  const clothingChildren = clothingCategory
+    ? categories.filter((category) => category.parentId === clothingCategory.id)
+    : categories.filter(
+        (category) => !category.parentId && category.id !== uniformsCategory?.id
+      );
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
       setShowSearchResults(false);
       setSearchQuery('');
     }
@@ -103,7 +120,7 @@ const Header: React.FC = () => {
                       <div>
                         <div className="font-medium text-text">{product.name}</div>
                         <div className="text-sm text-muted">
-                          ${product.salePrice || product.price}
+                          ₹{product.salePrice || product.price}
                         </div>
                       </div>
                     </div>
@@ -115,67 +132,85 @@ const Header: React.FC = () => {
 
           {/* Navigation Links - Desktop */}
           <nav className="hidden md:flex items-center space-x-6 text-sm">
-            {/* Clothings Dropdown */}
-            <div className="relative group py-2">
-              <button className="flex items-center text-muted hover:text-brand transition-colors">
-                Clothings
-                <ChevronDown size={16} className="ml-1" />
-              </button>
-              <div className="absolute left-0 mt-0 w-56 bg-surface rounded-lg shadow-soft py-2 z-50 
-                              opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                              transition-all duration-200 border border-line shadow-soft bg-surface">
-                <Link to="/products?category=mens-wear" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand" onClick={() => { }}>
-                  Men's Wear
-                </Link>
-                <Link to="/products?category=womens-wear" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
-                  Women's Wear
-                </Link>
-                <Link to="/products?category=kids-wear" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
-                  Kids Wear
-                </Link>
-                <Link to="/products?category=ethnic-wear" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
-                  Ethnic Wear
-                </Link>
-                <hr className="my-1 border-line" />
-                <Link to="/products" className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted">
-                  View All Clothings
-                </Link>
-              </div>
-            </div>
-
             {/* Uniforms Dropdown */}
             <div className="relative group py-2">
               <button className="flex items-center text-muted hover:text-brand transition-colors">
                 Uniforms
                 <ChevronDown size={16} className="ml-1" />
               </button>
-              <div className="absolute left-0 mt-0 w-56 bg-surface rounded-lg shadow-soft py-2 z-50 
+              <div className="absolute left-0 mt-0 w-72 bg-surface rounded-lg shadow-soft py-2 z-50 
                               opacity-0 invisible group-hover:opacity-100 group-hover:visible 
                               transition-all duration-200 border border-line shadow-soft bg-surface">
-                <Link to="/categories/school-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
-                  School Uniforms
-                </Link>
-                <Link to="/categories/college-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
-                  College Uniforms
-                </Link>
-                <Link to="/categories/corporate-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
-                  Corporate Uniforms
-                </Link>
-                <Link to="/categories/hospital-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
-                  Hospital & Medical
-                </Link>
-                <Link to="/categories/hotel-uniforms" className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
-                  Hotel & Hospitality
-                </Link>
+                {uniformSchools.length > 0 ? (
+                  uniformSchools.map((school) => (
+                    <Link
+                      key={school.id}
+                      to={`/products?category=${encodeURIComponent(school.slug)}`}
+                      className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand"
+                    >
+                      {school.name}
+                    </Link>
+                  ))
+                ) : (
+                  <div className="px-4 py-2.5 text-sm text-muted">Loading school categories...</div>
+                )}
                 <hr className="my-1 border-line" />
-                <Link to="/categories" className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted">
+                <Link
+                  to={`/products?category=${encodeURIComponent(uniformsCategory?.slug || 'uniforms')}`}
+                  className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted"
+                >
                   View All Uniforms
                 </Link>
               </div>
             </div>
 
-            <Link to="/aboutus" className="text-muted hover:text-brand transition-colors">
-              About
+            {/* Clothing Dropdown */}
+            <div className="relative group py-2">
+              <button className="flex items-center text-muted hover:text-brand transition-colors">
+                Clothing
+                <ChevronDown size={16} className="ml-1" />
+              </button>
+              <div className="absolute left-0 mt-0 w-64 bg-surface rounded-lg shadow-soft py-2 z-50 
+                              opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                              transition-all duration-200 border border-line shadow-soft bg-surface">
+                {clothingChildren.length > 0 ? (
+                  clothingChildren.map((category) => (
+                    <Link
+                      key={category.id}
+                      to={`/products?category=${encodeURIComponent(category.slug)}`}
+                      className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand"
+                    >
+                      {category.name}
+                    </Link>
+                  ))
+                ) : (
+                  categories
+                    .filter((category) => !category.parentId && category.id !== uniformsCategory?.id)
+                    .map((category) => (
+                      <Link
+                        key={category.id}
+                        to={`/products?category=${encodeURIComponent(category.slug)}`}
+                        className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand"
+                      >
+                        {category.name}
+                      </Link>
+                    ))
+                )}
+                <hr className="my-1 border-line" />
+                <Link
+                  to={`/products?category=${encodeURIComponent(clothingCategory?.slug || 'clothing')}`}
+                  className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted"
+                >
+                  View All Clothing
+                </Link>
+              </div>
+            </div>
+
+            <Link to="/our-story" className="text-muted hover:text-brand transition-colors">
+              Our Story
+            </Link>
+            <Link to="/blog" className="text-muted hover:text-brand transition-colors">
+              Blog
             </Link>
           </nav>
 
@@ -298,7 +333,7 @@ const Header: React.FC = () => {
                     <div>
                       <div className="font-medium text-text">{product.name}</div>
                       <div className="text-sm text-muted">
-                        ${product.salePrice || product.price}
+                        ₹{product.salePrice || product.price}
                       </div>
                     </div>
                   </div>
@@ -313,26 +348,6 @@ const Header: React.FC = () => {
       {showMobileMenu && (
         <div className="md:hidden bg-surface border-t border-line shadow-soft">
           <nav className="flex flex-col px-4 py-2">
-            {/* Clothings Accordion */}
-            <div className="border-b border-line">
-              <button
-                onClick={() => setMobileClothingsOpen(!mobileClothingsOpen)}
-                className="flex items-center justify-between w-full py-3 text-muted"
-              >
-                Clothings
-                <ChevronDown size={16} className={`transition-transform ${mobileClothingsOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {mobileClothingsOpen && (
-                <div className="pl-4 pb-2 space-y-1">
-                  <Link to="/products?category=mens-wear" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Men's Wear</Link>
-                  <Link to="/products?category=womens-wear" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Women's Wear</Link>
-                  <Link to="/products?category=kids-wear" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Kids Wear</Link>
-                  <Link to="/products?category=ethnic-wear" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Ethnic Wear</Link>
-                  <Link to="/products" className="block py-2 text-sm font-medium text-brand" onClick={() => setShowMobileMenu(false)}>View All Clothings</Link>
-                </div>
-              )}
-            </div>
-
             {/* Uniforms Accordion */}
             <div className="border-b border-line">
               <button
@@ -344,21 +359,90 @@ const Header: React.FC = () => {
               </button>
               {mobileUniformsOpen && (
                 <div className="pl-4 pb-2 space-y-1">
-                  <Link to="/categories/school-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>School Uniforms</Link>
-                  <Link to="/categories/college-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>College Uniforms</Link>
-                  <Link to="/categories/corporate-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Corporate Uniforms</Link>
-                  <Link to="/categories/hospital-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Hospital & Medical</Link>
-                  <Link to="/categories/hotel-uniforms" className="block py-2 text-sm text-muted hover:text-brand" onClick={() => setShowMobileMenu(false)}>Hotel & Hospitality</Link>
-                  <Link to="/categories" className="block py-2 text-sm font-medium text-brand" onClick={() => setShowMobileMenu(false)}>View All Uniforms</Link>
+                  {uniformSchools.length > 0 ? (
+                    uniformSchools.map((school) => (
+                      <Link
+                        key={school.id}
+                        to={`/products?category=${encodeURIComponent(school.slug)}`}
+                        className="block py-2 text-sm text-muted hover:text-brand"
+                        onClick={() => setShowMobileMenu(false)}
+                      >
+                        {school.name}
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="py-2 text-sm text-muted">Loading school categories...</div>
+                  )}
+                  <Link
+                    to={`/products?category=${encodeURIComponent(uniformsCategory?.slug || 'uniforms')}`}
+                    className="block py-2 text-sm font-medium text-brand"
+                    onClick={() => setShowMobileMenu(false)}
+                  >
+                    View All Uniforms
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Clothing Accordion */}
+            <div className="border-b border-line">
+              <button
+                onClick={() => setMobileClothingsOpen(!mobileClothingsOpen)}
+                className="flex items-center justify-between w-full py-3 text-muted"
+              >
+                Clothing
+                <ChevronDown size={16} className={`transition-transform ${mobileClothingsOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileClothingsOpen && (
+                <div className="pl-4 pb-2 space-y-1">
+                  {clothingChildren.length > 0 ? (
+                    clothingChildren.map((category) => (
+                      <Link
+                        key={category.id}
+                        to={`/products?category=${encodeURIComponent(category.slug)}`}
+                        className="block py-2 text-sm text-muted hover:text-brand"
+                        onClick={() => setShowMobileMenu(false)}
+                      >
+                        {category.name}
+                      </Link>
+                    ))
+                  ) : (
+                    categories
+                      .filter((category) => !category.parentId && category.id !== uniformsCategory?.id)
+                      .map((category) => (
+                        <Link
+                          key={category.id}
+                          to={`/products?category=${encodeURIComponent(category.slug)}`}
+                          className="block py-2 text-sm text-muted hover:text-brand"
+                          onClick={() => setShowMobileMenu(false)}
+                        >
+                          {category.name}
+                        </Link>
+                      ))
+                  )}
+                  <Link
+                    to={`/products?category=${encodeURIComponent(clothingCategory?.slug || 'clothing')}`}
+                    className="block py-2 text-sm font-medium text-brand"
+                    onClick={() => setShowMobileMenu(false)}
+                  >
+                    View All Clothing
+                  </Link>
                 </div>
               )}
             </div>
             <Link
-              to="/aboutus"
+              to="/our-story"
               className="py-3 text-muted border-b border-line"
               onClick={() => setShowMobileMenu(false)}
             >
-              About
+              Our Story
+            </Link>
+            <Link
+              to="/blog"
+              className="py-3 text-muted border-b border-line"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Blog
             </Link>
 
             {isAuthenticated ? (

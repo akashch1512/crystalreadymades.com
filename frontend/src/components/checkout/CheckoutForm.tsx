@@ -1,320 +1,293 @@
-  import React, { useState, useEffect } from 'react';
-  import { useNavigate } from 'react-router-dom';
-  import { useAuth } from '../../contexts/AuthContext';
-  import { useCart } from '../../contexts/CartContext';
-  import { useOrders } from '../../contexts/OrderContext';
-  import { createRazorpayOrder } from '../../services/razorpay';
-  import { loadRazorpayScript } from '../../utils/loadRazorpay';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
+import { useOrders } from '../../contexts/OrderContext';
+import { createRazorpayOrder, verifyPayment } from '../../services/razorpay';
+import { loadRazorpayScript } from '../../utils/loadRazorpay';
 
-  interface CheckoutFormProps {
-    onSuccess: (orderId: string) => void;
-  }
+interface CheckoutFormProps {
+  onSuccess: (orderId: string) => void;
+}
 
-  const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
-    const { user } = useAuth();
-    const { items, subtotal, tax, shipping, discount, total, clearCart } = useCart();
-    const { createOrder } = useOrders();
-    const navigate = useNavigate();
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
+  const { user } = useAuth();
+  const { items, subtotal, tax, shipping, discount, total, clearCart } = useCart();
+  const { createOrder } = useOrders();
+  const navigate = useNavigate();
 
-    const [selectedAddress, setSelectedAddress] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('online');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-    
-    const [paymentMethod, setPaymentMethod] = useState('card');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    
-    // Update the selected address if new address is added
-    useEffect(() => {
-      if (user?.addresses?.length) {
-        const defaultAddress = user.addresses.find(addr => addr.isDefault);
-        const fallback = user.addresses[0];
-    
-        // Update selectedAddress if:
-        // - It's not set, OR
-        // - The selected address no longer exists in the updated user.addresses
-        if (!selectedAddress || !user.addresses.some(a => a.id === selectedAddress)) {
-          setSelectedAddress(defaultAddress?.id || fallback.id);
+  useEffect(() => {
+    if (!user?.addresses?.length) {
+      return;
+    }
+
+    const defaultAddress = user.addresses.find((addr) => addr.isDefault);
+    const fallbackAddress = user.addresses[0];
+
+    if (!selectedAddress || !user.addresses.some((address) => String(address.id) === String(selectedAddress))) {
+      setSelectedAddress(String(defaultAddress?.id || fallbackAddress.id));
+    }
+  }, [selectedAddress, user?.addresses]);
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAddress(e.target.value);
+  };
+
+  const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPaymentMethod(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedAddress) {
+      setError('Please select a shipping address');
+      return;
+    }
+
+    if (items.length === 0) {
+      setError('Your cart is empty');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      if (paymentMethod === 'cod') {
+        const { success, orderId } = await createOrder('cod', selectedAddress, {
+          paymentStatus: 'pending',
+        });
+
+        if (success && orderId) {
+          clearCart();
+          onSuccess(orderId);
+        } else {
+          setError('Failed to create order. Please try again.');
+        }
+
+        return;
+      }
+
+      const razorpayLoaded = await loadRazorpayScript();
+
+      if (!razorpayLoaded || !(window as any).Razorpay) {
+        setError('Failed to load Razorpay. Please try again later.');
+        return;
+      }
+
+      const razorpayValue = Math.round(total * 100);
+      const razorpayOrderId = await createRazorpayOrder(razorpayValue);
+
+      const prefill: any = {};
+      if (user?.name) prefill.name = user.name;
+      if (user?.email) prefill.email = user.email;
+      if (user?.phone) {
+        let contact = String(user.phone).replace(/\D/g, '');
+        if (contact.length > 10 && contact.endsWith(contact.slice(-10))) {
+          contact = contact.slice(-10);
+        }
+        if (contact.length === 10) {
+          prefill.contact = contact;
         }
       }
-    }, [user?.addresses]);  // this will re-run every time the address list updates
-    
-    
-    const handleAddressChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedAddress(e.target.value);
-      console.log('Selected address in handleAddressChange:', e.target.value);
-    };
-    
-    // Check if addresses exist before rendering
-    console.log('Rendering addresses:', user?.addresses); // Add this log
-    
-    const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPaymentMethod(e.target.value);
-    };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!selectedAddress) {
-        setError('Please select a shipping address');
-        return;
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!razorpayKey) {
+        throw new Error('Razorpay key is not configured.');
       }
 
-      if (items.length === 0) {
-        setError('Your cart is empty');
-        return;
-      }
+      const options = {
+        key: razorpayKey,
+        amount: razorpayValue,
+        currency: 'INR',
+        name: 'CrystalReadymade',
+        description: 'Payment for your order',
+        order_id: razorpayOrderId,
+        prefill,
+        notes: {
+          address_id: selectedAddress,
+        },
+        theme: {
+          color: '#ec4899',
+        },
+        handler: async (response: any) => {
+          const verified = await verifyPayment(
+            response.razorpay_payment_id,
+            response.razorpay_order_id,
+            response.razorpay_signature
+          );
 
-      try {
-        setLoading(true);
-        setError('');
-
-        if (paymentMethod !== 'cod') {
-          const razorpayLoaded = await loadRazorpayScript();
-
-          if (!razorpayLoaded || !(window as any).Razorpay) {
-            setError('Failed to load Razorpay. Please try again later.');
+          if (!verified) {
+            setError('Payment verification failed. Please contact support.');
             return;
           }
 
-          const razorpayOrderId = await createRazorpayOrder(total * 100);
+          const { success, orderId } = await createOrder('online', selectedAddress, {
+            paymentStatus: 'paid',
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          });
 
-          const options = {
-            key: 'rzp_live_bGTn7dpj6KD55L',
-            amount: total * 100,
-            currency: 'INR',
-            name: 'CrystalReadymade',
-            description: 'Payment for your order',
-            order_id: razorpayOrderId,
-            prefill: {
-              name: user?.name || '',
-              email: user?.email || '',
-              contact: user?.phone || '',
-            },
-            notes: {
-              address_id: selectedAddress,
-            },
-            theme: {
-              color: '#3B82F6',
-            },
-            handler: async function (response: any) {
-              const verified = await verifyPayment(
-                response.razorpay_payment_id,
-                response.razorpay_order_id,
-                response.razorpay_signature
-              );
+          if (success && orderId) {
+            clearCart();
+            onSuccess(orderId);
+          } else {
+            setError('Failed to create order. Please try again.');
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+          },
+        },
+      };
 
-              if (!verified) {
-                setError('Payment verification failed. Please contact support.');
-                return;
-              }
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setError('An error occurred during checkout. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-              const { success, orderId } = await createOrder(paymentMethod);
-              if (success && orderId) {
-                clearCart();
-                onSuccess(orderId);
-              } else {
-                setError('Failed to create order. Please try again.');
-              }
-            },
-            modal: {
-              ondismiss: function () {
-                setLoading(false);
-                console.log('Payment popup closed');
-              }
-            }
-          };
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && <div className="alert alert-error">{error}</div>}
 
-          const rzp = new (window as any).Razorpay(options);
-          rzp.open();
-        }
-      } catch (err) {
-        console.error('Checkout error:', err);
-        setError('An error occurred during checkout. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
+      <div>
+        <h3 className="h3 mb-4">Shipping Address</h3>
 
-    return (
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <div className="alert alert-error">
-            {error}
+        {user?.addresses && user.addresses.length > 0 ? (
+          <div>
+            <select
+              id="address"
+              name="address"
+              value={selectedAddress}
+              onChange={handleAddressChange}
+              className="select"
+            >
+              <option value="">Select an address</option>
+              {user.addresses.map((address: any) => (
+                <option key={address.id} value={String(address.id)}>
+                  {address.address_type || 'Address'} ({address.name}): {address.line1}, {address.city},{' '}
+                  {address.state} {address.postalCode}
+                </option>
+              ))}
+            </select>
+
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => navigate('/account/addresses/new?redirect=checkout')}
+                className="text-brand hover:text-brand-strong text-sm font-medium"
+              >
+                + Add a new address
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="alert border-yellow-200 bg-yellow-50 text-yellow-700 mb-4">
+            <p>You don't have any saved addresses.</p>
+            <button
+              type="button"
+              onClick={() => navigate('/account/addresses/new?redirect=checkout')}
+              className="mt-2 text-brand hover:text-brand-strong font-medium"
+            >
+              + Add a new address
+            </button>
           </div>
         )}
+      </div>
 
-        {/* Shipping Address */}
-        <div>
-    <h3 className="h3 mb-4">Shipping Address</h3>
-
-    {user?.addresses && user.addresses.length > 0 ? (
       <div>
-        <select
-          id="address"
-          name="address"
-          value={selectedAddress}
-          onChange={handleAddressChange}
-          className="select"
-        >
-          <option value="">Select an address</option>
-          {user.addresses.map(address => (
-            <option key={address.id} value={address.id}>
-              {address.name}: {address.line1}, {address.city}, {address.state} {address.postalCode}
-            </option>
-          ))}
-        </select>
+        <h3 className="h3 mb-4">Payment Method</h3>
 
-        <div className="mt-2">
-          <button
-            type="button"
-            onClick={() => navigate('/account/addresses/new?redirect=checkout')}
-            className="text-brand hover:text-brand-strong text-sm font-medium"
-          >
-            + Add a new address
-          </button>
+        <div className="space-y-4">
+          <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
+            <input
+              type="radio"
+              name="payment-method"
+              value="online"
+              checked={paymentMethod === 'online'}
+              onChange={handlePaymentMethodChange}
+              className="h-4 w-4 text-brand focus:ring-brand"
+            />
+            <div className="ml-3">
+              <span className="block text-sm font-medium text-text">Online Payment</span>
+              <span className="block text-sm text-muted">
+                Pay securely with Razorpay using card, UPI, wallet, or net banking
+              </span>
+            </div>
+          </label>
+
+          <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
+            <input
+              type="radio"
+              name="payment-method"
+              value="cod"
+              checked={paymentMethod === 'cod'}
+              onChange={handlePaymentMethodChange}
+              className="h-4 w-4 text-brand focus:ring-brand"
+            />
+            <div className="ml-3">
+              <span className="block text-sm font-medium text-text">Cash on Delivery</span>
+              <span className="block text-sm text-muted">Pay when you receive your order</span>
+            </div>
+          </label>
         </div>
       </div>
-    ) : (
-      <div className="alert border-yellow-200 bg-yellow-50 text-yellow-700 mb-4">
-        <p>You don't have any saved addresses.</p>
-        <button
-          type="button"
-          onClick={() => navigate('/account/addresses/new?redirect=checkout')}
-          className="mt-2 text-brand hover:text-brand-strong font-medium"
-        >
-          + Add a new address
-        </button>
-      </div>
-    )}
-  </div>
 
-        {/* Payment Method */}
-        <div>
-          <h3 className="h3 mb-4">Payment Method</h3>
+      <div>
+        <h3 className="h3 mb-4">Order Summary</h3>
 
-          <div className="space-y-4">
-            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
-              <input
-                type="radio"
-                name="payment-method"
-                value="card"
-                checked={paymentMethod === 'card'}
-                onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-brand focus:ring-brand"
-              />
-              <div className="ml-3">
-                <span className="block text-sm font-medium text-text">Credit/Debit Card</span>
-                <span className="block text-sm text-muted">Pay securely with your card</span>
+        <div className="bg-surface-muted p-4 rounded-2xl border border-line">
+          <div className="space-y-2">
+            <div className="flex justify-between text-muted">
+              <span>Subtotal</span>
+              <span>Rs. {subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-muted">
+              <span>Tax</span>
+              <span>Rs. {tax.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-muted">
+              <span>Shipping</span>
+              <span>{shipping === 0 ? 'Free' : `Rs. ${shipping.toFixed(2)}`}</span>
+            </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Discount</span>
+                <span>-Rs. {discount.toFixed(2)}</span>
               </div>
-            </label>
-
-            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
-              <input
-                type="radio"
-                name="payment-method"
-                value="upi"
-                checked={paymentMethod === 'upi'}
-                onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-brand focus:ring-brand"
-              />
-              <div className="ml-3">
-                <span className="block text-sm font-medium text-text">UPI</span>
-                <span className="block text-sm text-muted">Pay using UPI ID or QR code</span>
-              </div>
-            </label>
-
-            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
-              <input
-                type="radio"
-                name="payment-method"
-                value="wallet"
-                checked={paymentMethod === 'wallet'}
-                onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-brand focus:ring-brand"
-              />
-              <div className="ml-3">
-                <span className="block text-sm font-medium text-text">Mobile Wallet</span>
-                <span className="block text-sm text-muted">Pay using PhonePe, Paytm, etc.</span>
-              </div>
-            </label>
-
-            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
-              <input
-                type="radio"
-                name="payment-method"
-                value="netbanking"
-                checked={paymentMethod === 'netbanking'}
-                onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-brand focus:ring-brand"
-              />
-              <div className="ml-3">
-                <span className="block text-sm font-medium text-text">Net Banking</span>
-                <span className="block text-sm text-muted">Pay through your bank account</span>
-              </div>
-            </label>
-
-            <label className="flex items-center p-4 border border-line rounded-2xl cursor-pointer hover:bg-surface-muted">
-              <input
-                type="radio"
-                name="payment-method"
-                value="cod"
-                checked={paymentMethod === 'cod'}
-                onChange={handlePaymentMethodChange}
-                className="h-4 w-4 text-brand focus:ring-brand"
-              />
-              <div className="ml-3">
-                <span className="block text-sm font-medium text-text">Cash on Delivery</span>
-                <span className="block text-sm text-muted">Pay when you receive your order</span>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        {/* Order Summary */}
-        <div>
-          <h3 className="h3 mb-4">Order Summary</h3>
-
-          <div className="bg-surface-muted p-4 rounded-2xl border border-line">
-            <div className="space-y-2">
-              <div className="flex justify-between text-muted">
-                <span>Subtotal</span>
-                <span>₹{subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-muted">
-                <span>Tax</span>
-                <span>₹{tax.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-muted">
-                <span>Shipping</span>
-                <span>{shipping === 0 ? 'Free' : `₹${shipping.toFixed(2)}`}</span>
-              </div>
-              {discount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Discount</span>
-                  <span>-₹{discount.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="divider pt-2 mt-2 flex justify-between font-medium text-text">
-                <span>Total</span>
-                <span>₹{total.toFixed(2)}</span>
-              </div>
+            )}
+            <div className="divider pt-2 mt-2 flex justify-between font-medium text-text">
+              <span>Total</span>
+              <span>Rs. {total.toFixed(2)}</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Submit Button */}
-        <div>
-          <button
-            type="submit"
-            disabled={loading || !selectedAddress || items.length === 0}
-            className="btn btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Processing...' : `Pay $${total.toFixed(2)}`}
-          </button>
-        </div>
-      </form>
-    );
-  };
+      <div>
+        <button
+          type="submit"
+          disabled={loading || !selectedAddress || items.length === 0}
+          className="btn btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Processing...' : paymentMethod === 'cod' ? 'Place Order' : `Pay Rs. ${total.toFixed(2)}`}
+        </button>
+      </div>
+    </form>
+  );
+};
 
-  export default CheckoutForm;
-
+export default CheckoutForm;

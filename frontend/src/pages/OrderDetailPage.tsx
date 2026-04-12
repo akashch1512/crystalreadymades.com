@@ -22,7 +22,7 @@ const OrderDetailPage: React.FC = () => {
         
         if (foundOrder) {
           setOrder(foundOrder);
-          document.title = `Order #${foundOrder.id.slice(-8)} | CrystalReadymade`;
+          document.title = `Order #${String(foundOrder.id).slice(-8)} | CrystalReadymade`;
         } else {
           navigate('/orders', { replace: true });
         }
@@ -108,6 +108,18 @@ const OrderDetailPage: React.FC = () => {
   
   const orderStep = getOrderStatusStep(order.status);
   const canCancel = ['pending', 'processing'].includes(order.status);
+  const shippingCost = order.shipping ?? (order as any).shipping_cost ?? 0;
+  const orderShippingAddress = order.shippingAddress ?? (order as any).shipping_address_snapshot ?? {
+    name: '',
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+  };
+  const paymentMethod = order.paymentMethod ?? (order as any).payment_method ?? 'cod';
+  const paymentStatus = order.paymentStatus ?? (order as any).payment_status ?? 'pending';
 
   return (
     <div className="page">
@@ -126,7 +138,7 @@ const OrderDetailPage: React.FC = () => {
           <div className="card overflow-hidden">
             <div className="p-6 border-b border-line">
               <h1 className="h1 mb-2">
-                Order #{order.id.slice(-8)}
+                Order #{String(order.id).slice(-8)}
               </h1>
               <p className="text-muted">
                 Placed on {formatDate(order.createdAt)}
@@ -283,22 +295,22 @@ const OrderDetailPage: React.FC = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted">Shipping</span>
                   <span className="text-text">
-                    {order.shipping === 0 ? 'Free' : `₹${order.shipping.toFixed(2)}`}
+                    {shippingCost === 0 ? 'Free' : `₹${shippingCost.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted">Tax</span>
-                  <span className="text-text">₹{order.tax.toFixed(2)}</span>
+                  <span className="text-text">₹{(order.tax ?? 0).toFixed(2)}</span>
                 </div>
                 {order.discount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted">Discount</span>
-                    <span className="text-green-600">-₹{order.discount.toFixed(2)}</span>
+                    <span className="text-green-600">-₹{(order.discount ?? 0).toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-base font-medium pt-2 border-t border-line mt-2">
                   <span className="text-text">Total</span>
-                  <span className="text-text">₹{order.total.toFixed(2)}</span>
+                  <span className="text-text">₹{(order.total ?? 0).toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -308,13 +320,13 @@ const OrderDetailPage: React.FC = () => {
               <div>
                 <h2 className="h3 mb-4">Shipping Information</h2>
                 <address className="not-italic text-muted">
-                  <p className="font-medium text-text">{order.shippingAddress.name}</p>
-                  <p>{order.shippingAddress.line1}</p>
-                  {order.shippingAddress.line2 && <p>{order.shippingAddress.line2}</p>}
+                  <p className="font-medium text-text">{orderShippingAddress.name}</p>
+                  <p>{orderShippingAddress.line1}</p>
+                  {orderShippingAddress.line2 && <p>{orderShippingAddress.line2}</p>}
                   <p>
-                    {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}
+                    {orderShippingAddress.city}, {orderShippingAddress.state} {orderShippingAddress.postalCode}
                   </p>
-                  <p>{order.shippingAddress.country}</p>
+                  <p>{orderShippingAddress.country}</p>
                 </address>
               </div>
               
@@ -323,26 +335,28 @@ const OrderDetailPage: React.FC = () => {
                 <div className="text-muted">
                   <p className="mb-2">
                     <span className="font-medium text-text">Payment Method:</span>{' '}
-                    {order.paymentMethod === 'card'
+                    {paymentMethod === 'online'
+                      ? 'Online Payment'
+                      : paymentMethod === 'card'
                       ? 'Credit/Debit Card'
-                      : order.paymentMethod === 'upi'
+                      : paymentMethod === 'upi'
                       ? 'UPI'
-                      : order.paymentMethod === 'wallet'
+                      : paymentMethod === 'wallet'
                       ? 'Mobile Wallet'
-                      : order.paymentMethod === 'netbanking'
+                      : paymentMethod === 'netbanking'
                       ? 'Net Banking'
                       : 'Cash on Delivery'}
                   </p>
                   <p className="mb-2">
                     <span className="font-medium text-text">Payment Status:</span>{' '}
                     <span className={`${
-                      order.paymentStatus === 'paid'
+                      paymentStatus === 'paid'
                         ? 'text-green-600'
-                        : order.paymentStatus === 'pending'
+                        : paymentStatus === 'pending'
                         ? 'text-yellow-600'
                         : 'text-red-600'
                     }`}>
-                      {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                      {paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)}
                     </span>
                   </p>
                 </div>

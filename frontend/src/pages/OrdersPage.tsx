@@ -84,7 +84,7 @@ const OrdersPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
                   <div>
                     <h2 className="text-lg font-semibold text-text">
-                      Order #{order.id.slice(-8)}
+                      Order #{String(order.id).slice(-8)}
                     </h2>
                     <p className="text-muted text-sm">
                       Placed on {formatDate(order.createdAt)}

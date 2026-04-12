@@ -39,11 +39,11 @@ export const AboutUs = () => {
                 Explore Our Story <ArrowRight size={20} />
               </button>
             </div>
-            
+
             <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=500" 
-                alt="Quality garments" 
+              <img
+                src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=500"
+                alt="Quality garments"
                 className="rounded-2xl shadow-soft"
               />
             </div>
@@ -56,13 +56,13 @@ export const AboutUs = () => {
         <div className="container mx-auto max-w-7xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <img 
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=500" 
-                alt="Our team" 
+              <img
+                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=500"
+                alt="Our team"
                 className="rounded-2xl shadow-soft"
               />
             </div>
-            
+
             <div>
               <h2 className="h2 mb-6">Crafting Excellence Since 2008</h2>
               <div className="space-y-4 text-muted text-lg">
@@ -76,7 +76,7 @@ export const AboutUs = () => {
                   Every piece is designed to last, crafted with attention to detail that reflects our dedication to customer satisfaction.
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-8 mt-10">
                 <div className="card p-6 text-center">
                   <p className="text-3xl font-bold text-brand">15+</p>
@@ -101,7 +101,7 @@ export const AboutUs = () => {
               Every decision we make is guided by our commitment to quality, integrity, and customer satisfaction.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
@@ -139,7 +139,7 @@ export const AboutUs = () => {
               Visit us in person at our Chhatrapati Sambhajinagar outlet or reach out to our online support team for e-commerce help.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             {/* Showroom Half */}
             <div className="card p-8 md:p-10">
@@ -148,20 +148,21 @@ export const AboutUs = () => {
               </div>
               <h3 className="h3 mb-4 tracking-tight">Visit Showroom</h3>
               <p className="text-muted mb-6">Experience our collections in person at our flagship garment district location.</p>
-              
+
               <div className="space-y-4 mb-8 text-muted">
                 <p className="flex gap-3">
-                  <span className="font-bold shrink-0">Address:</span> 
+                  <span className="font-bold shrink-0">Address:</span>
                   Aurangapura Rd, Gulmandi, Chhatrapati Sambhajinagar
                 </p>
                 <p className="flex gap-3">
-                  <span className="font-bold shrink-0">Hours:</span> 
-                  10:00 AM - 9:00 PM, Daily
+                  <span className="font-bold shrink-0">Hours:</span>
+                  11:00 AM to 09:00 PM, Daily
                 </p>
               </div>
-              
-              <a 
-                href="https://maps.google.com" 
+
+              {/* fix this thing  */}
+              <a
+                href="https://maps.app.goo.gl/Ah2a5u4x49SEpT5v6"
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-secondary w-full border-2 border-brand"
@@ -178,7 +179,7 @@ export const AboutUs = () => {
               </div>
               <h3 className="h3 mb-4 tracking-tight">Online Support</h3>
               <p className="text-white/80 mb-8">Having trouble with an online order or payment? Our support team is here to help you 24/7.</p>
-              
+
               <div className="space-y-6 mb-10">
                 <div className="flex items-center gap-4">
                   <div className="p-2 bg-surface/10 rounded-lg"><Mail size={20} /></div>
@@ -195,7 +196,7 @@ export const AboutUs = () => {
                   </div>
                 </div>
               </div>
-              
+
               <button className="btn btn-secondary w-full bg-surface text-brand uppercase tracking-widest text-xs hover:bg-surface-muted">
                 Contact Support
               </button>
@@ -208,7 +209,7 @@ export const AboutUs = () => {
       <section className="section section-muted border-t border-line">
         <div className="container mx-auto max-w-7xl">
           <h2 className="h2 mb-12 text-center">Why Choose CrystalReadymade?</h2>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             {[
               "Handpicked premium quality fabrics from trusted suppliers",

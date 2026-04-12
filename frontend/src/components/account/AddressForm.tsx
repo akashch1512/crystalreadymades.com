@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { MapPin, Navigation } from 'lucide-react';
 
 interface AddressFormProps {
   address?: {
     id: string;
     name: string;
+    email?: string;
+    contact_no?: string;
+    alt_contact_no?: string;
     line1: string;
     line2?: string;
+    locality?: string;
     city: string;
     state: string;
     postalCode: string;
     country: string;
+    address_type?: string;
     isDefault: boolean;
   };
   onSubmit: (updatedUser: any) => void;
@@ -19,15 +25,20 @@ interface AddressFormProps {
 
 const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
   const navigate = useNavigate();
-  const { setUser, refreshUser } = useAuth();
+  const { user, setUser, refreshUser } = useAuth();
   const [formData, setFormData] = useState({
     name: address?.name || '',
+    email: address?.email || '',
+    contact_no: address?.contact_no || '',
+    alt_contact_no: address?.alt_contact_no || '',
     line1: address?.line1 || '',
     line2: address?.line2 || '',
+    locality: address?.locality || '',
     city: address?.city || '',
     state: address?.state || '',
-    postalCode: address?.postalCode || '',
-    country: address?.country || 'United States',
+    postalCode: address?.postalCode || (address as any)?.postal_code || '',
+    country: address?.country || 'India',
+    address_type: address?.address_type || 'Home',
     isDefault: address?.isDefault || false,
   });
 
@@ -36,11 +47,13 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target;
-    const { name, value, type } = target;
-  
+    // @ts-ignore
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+    
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? (target as HTMLInputElement).checked : value
+      [name]: value
     }));
   
     if (errors[name]) {
@@ -54,11 +67,10 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = 'Address name is required';
-    if (!formData.line1.trim()) newErrors.line1 = 'Address line 1 is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
+    if (!formData.postalCode.trim()) newErrors.postalCode = 'Pincode is required';
+    if (!formData.line1.trim()) newErrors.line1 = 'House no. is required';
+    if (!formData.city.trim()) newErrors.city = 'City/District is required';
     if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (!formData.postalCode.trim()) newErrors.postalCode = 'Postal code is required';
     return newErrors;
   };
 
@@ -74,9 +86,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      console.log('Token from localStorage:', token ? 'exists' : 'missing');
-      console.log('Full token:', token);
-      
       if (!token) {
         throw new Error('You must be logged in to save addresses. Please login and try again.');
       }
@@ -84,8 +93,22 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
       const apiUrl = import.meta.env.VITE_API_URL;
 
       const endpoint = address ? `/api/addresses/${address.id}` : '/api/addresses';
-      console.log('Sending request to:', `${apiUrl}${endpoint}`);
-      console.log('Auth header:', `Bearer ${token}`);
+      
+      const payload = {
+        name: user?.name || formData.name,
+        email: user?.email || formData.email,
+        contact_no: user?.phone || formData.contact_no,
+        alt_contact_no: formData.alt_contact_no,
+        line1: formData.line1,
+        line2: formData.line2,
+        locality: formData.locality,
+        city: formData.city,
+        state: formData.state,
+        postal_code: formData.postalCode,
+        country: formData.country,
+        address_type: formData.address_type,
+        is_default: formData.isDefault
+      };
       
       const response = await fetch(`${apiUrl}${endpoint}`, {
         method: address ? 'PUT' : 'POST',
@@ -93,7 +116,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -119,24 +142,74 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name */}
-      <div>
-        <label htmlFor="name" className="label mb-1">Address Name</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className={`input ${errors.name ? 'border-red-500' : ''}`}
-          placeholder="Home, Work, etc."
-        />
-        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+      
+      {/* Personal Info Section */}
+      <h3 className="h3 mb-2 pb-2 border-b border-line text-lg">Personal Details</h3>
+      
+      <div className="p-4 bg-surface rounded-xl border border-line mb-4">
+        <p className="text-sm text-muted mb-3">
+          Using details from your profile
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-1">Name</label>
+            <p className="font-medium text-text">{user?.name || formData.name}</p>
+          </div>
+          <div>
+            <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-1">Email ID</label>
+            <p className="font-medium text-text">{user?.email || formData.email || '—'}</p>
+          </div>
+          <div>
+            <label className="text-xs text-muted uppercase tracking-wider font-semibold block mb-1">Contact No.</label>
+            <p className="font-medium text-text">{user?.phone || formData.contact_no}</p>
+          </div>
+        </div>
       </div>
 
-      {/* Line 1 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="alt_contact_no" className="label mb-1">Alt. contact no.</label>
+          <input
+            type="text"
+            id="alt_contact_no"
+            name="alt_contact_no"
+            value={formData.alt_contact_no}
+            onChange={handleChange}
+            className="input"
+            placeholder="Optional secondary number"
+          />
+        </div>
+      </div>
+
+      {/* Address Section */}
+      <h3 className="h3 mt-8 mb-2 pb-2 border-b border-line text-lg">Address</h3>
+      
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <button type="button" className="btn bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 flex items-center justify-center gap-2 py-2">
+          <Navigation size={18} /> Use my current location
+        </button>
+        <button type="button" className="btn bg-surface-muted text-text hover:bg-line border border-line flex items-center justify-center gap-2 py-2">
+          <MapPin size={18} /> Search on map
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="postalCode" className="label mb-1">Pincode</label>
+          <input
+            type="text"
+            id="postalCode"
+            name="postalCode"
+            value={formData.postalCode}
+            onChange={handleChange}
+            className={`input ${errors.postalCode ? 'border-red-500' : ''}`}
+          />
+          {errors.postalCode && <p className="mt-1 text-sm text-red-600">{errors.postalCode}</p>}
+        </div>
+      </div>
+
       <div>
-        <label htmlFor="line1" className="label mb-1">Address Line 1</label>
+        <label htmlFor="line1" className="label mb-1">House no. <span className="text-muted font-normal text-xs">(to allow doorstep delivery)</span></label>
         <input
           type="text"
           id="line1"
@@ -144,14 +217,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
           value={formData.line1}
           onChange={handleChange}
           className={`input ${errors.line1 ? 'border-red-500' : ''}`}
-          placeholder="Street address, P.O. box, etc."
         />
         {errors.line1 && <p className="mt-1 text-sm text-red-600">{errors.line1}</p>}
       </div>
 
-      {/* Line 2 */}
       <div>
-        <label htmlFor="line2" className="label mb-1">Address Line 2</label>
+        <label htmlFor="line2" className="label mb-1">Address <span className="text-muted font-normal text-xs">(Building, locality, street details)</span></label>
         <input
           type="text"
           id="line2"
@@ -159,14 +230,24 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
           value={formData.line2}
           onChange={handleChange}
           className="input"
-          placeholder="Apartment, suite, unit, building, floor, etc."
         />
       </div>
 
-      {/* City & State */}
+      <div>
+        <label htmlFor="locality" className="label mb-1">Locality/Town</label>
+        <input
+          type="text"
+          id="locality"
+          name="locality"
+          value={formData.locality}
+          onChange={handleChange}
+          className="input"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="city" className="label mb-1">City</label>
+          <label htmlFor="city" className="label mb-1">City/District</label>
           <input
             type="text"
             id="city"
@@ -179,7 +260,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
         </div>
 
         <div>
-          <label htmlFor="state" className="label mb-1">State / Province</label>
+          <label htmlFor="state" className="label mb-1">State</label>
           <input
             type="text"
             id="state"
@@ -192,43 +273,36 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
         </div>
       </div>
 
-      {/* Postal & Country */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="postalCode" className="label mb-1">Postal Code</label>
-          <input
-            type="text"
-            id="postalCode"
-            name="postalCode"
-            value={formData.postalCode}
-            onChange={handleChange}
-            className={`input ${errors.postalCode ? 'border-red-500' : ''}`}
-          />
-          {errors.postalCode && <p className="mt-1 text-sm text-red-600">{errors.postalCode}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="country" className="label mb-1">Country</label>
-          <select
-            id="country"
-            name="country"
-            value={formData.country}
-            onChange={handleChange}
-            className="select"
-          >
-            <option value="">Select a country</option>
-            <option value="United States">United States</option>
-            <option value="Canada">Canada</option>
-            <option value="United Kingdom">United Kingdom</option>
-            <option value="Australia">Australia</option>
-            <option value="India">India</option>
-            {/* Add more countries as needed */}
-          </select>
+      <div>
+        <label className="label mb-2">Address type</label>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2 cursor-pointer border border-line rounded p-3 flex-1 hover:bg-surface-muted transition-colors">
+            <input 
+              type="radio" 
+              name="address_type" 
+              value="Home" 
+              checked={formData.address_type === 'Home'}
+              onChange={handleChange}
+              className="text-brand focus:ring-brand" 
+            />
+            <span className="font-medium text-sm">Home</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer border border-line rounded p-3 flex-1 hover:bg-surface-muted transition-colors">
+            <input 
+              type="radio" 
+              name="address_type" 
+              value="Office" 
+              checked={formData.address_type === 'Office'}
+              onChange={handleChange}
+              className="text-brand focus:ring-brand" 
+            />
+            <span className="font-medium text-sm">Office</span>
+          </label>
         </div>
       </div>
 
       {/* Default checkbox */}
-      <div className="flex items-center">
+      <div className="flex items-center py-2">
         <input
           type="checkbox"
           id="isDefault"
@@ -237,16 +311,16 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
           onChange={handleChange}
           className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
         />
-        <label htmlFor="isDefault" className="ml-2 block text-sm text-muted">
-          Make this my default address
+        <label htmlFor="isDefault" className="ml-2 block text-sm font-medium text-text">
+          Mark this as default address
         </label>
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-end space-x-4">
+      <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4 border-t border-line">
         <button
           type="button"
-          onClick={() => navigate('/account/addresses')}
+          onClick={() => navigate(new URLSearchParams(window.location.search).get('redirect') === 'checkout' ? '/checkout' : '/account/addresses')}
           className="btn btn-secondary"
         >
           Cancel
@@ -256,7 +330,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
           disabled={loading}
           className="btn btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {loading ? 'Saving...' : address ? 'Update Address' : 'Add Address'}
+          {loading ? 'Saving...' : address ? 'Update Address' : 'Save Address for Order'}
         </button>
       </div>
     </form>

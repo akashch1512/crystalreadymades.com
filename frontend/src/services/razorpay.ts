@@ -1,5 +1,12 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 interface RazorpayOrderResponse {
   order: {
     id: string;
@@ -27,11 +34,45 @@ interface RazorpayOptions {
 
 export const createRazorpayOrder = async (amount: number): Promise<string> => {
   try {
-    const response = await axios.post<RazorpayOrderResponse>(`${import.meta.env.VITE_API_URL}/api/payment/create-order`, { amount });
-    return response.data.order.id;
+    const response = await axios.post<RazorpayOrderResponse>(
+      `${API_BASE_URL}/api/payment/create-order`,
+      { amount: Math.round(amount) },
+      { headers: getAuthHeaders() }
+    );
+
+    const razorpayOrderId = response.data?.order?.id;
+    if (!razorpayOrderId) {
+      console.error('Invalid Razorpay order response:', response.data);
+      throw new Error('Invalid Razorpay order response');
+    }
+
+    return String(razorpayOrderId);
   } catch (error) {
     console.error('Failed to create Razorpay order:', error);
     throw new Error('Could not create Razorpay order');
+  }
+};
+
+export const verifyPayment = async (
+  razorpay_payment_id: string,
+  razorpay_order_id: string,
+  razorpay_signature: string
+): Promise<boolean> => {
+  try {
+    const response = await axios.post<{ success: boolean }>(
+      `${API_BASE_URL}/api/payment/verify-payment`,
+      {
+        razorpay_payment_id,
+        razorpay_order_id,
+        razorpay_signature,
+      },
+      { headers: getAuthHeaders() }
+    );
+
+    return response.data.success;
+  } catch (error) {
+    console.error('Failed to verify Razorpay payment:', error);
+    return false;
   }
 };
 

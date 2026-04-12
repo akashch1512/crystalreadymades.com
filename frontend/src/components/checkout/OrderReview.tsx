@@ -25,7 +25,7 @@ const OrderReview: React.FC = () => {
                 <div className="flex justify-between text-base font-medium text-text">
                   <h4>{item.name}</h4>
                   <p className="ml-4">
-                    ${((item.salePrice || item.price) * item.quantity).toFixed(2)}
+                    ₹{((item.salePrice || item.price) * item.quantity).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -34,7 +34,7 @@ const OrderReview: React.FC = () => {
                 <div className="flex">
                   {item.salePrice && (
                     <p className="text-muted line-through">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ₹{(item.price * item.quantity).toFixed(2)}
                     </p>
                   )}
                 </div>

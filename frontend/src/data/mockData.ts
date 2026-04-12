@@ -48,7 +48,25 @@ export const getUsers = async (): Promise<User[]> => {
 
 // 5. Orders
 export const getOrders = async (): Promise<Order[]> => {
-  return await fetchJson<Order>('/api/orders');
+  const token = localStorage.getItem('token');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders`, { headers });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch /api/orders: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return [];
+  }
 };
 
 // 6. Notifications (Specific to a user, example user 1)

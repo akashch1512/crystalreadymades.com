@@ -80,8 +80,19 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
           brandRes.json()
         ]);
 
-        setProducts(productData.map((p: any) => ({ ...p, id: p.id || p._id })));
-        setCategories(categoryData.map((c: any) => ({ ...c, id: String(c.id) })));
+        setProducts(productData.map((p: any) => ({
+          ...p,
+          id: p.id || p._id,
+          category: p.category || p.category_name || p.category?.name || '',
+          categorySlug: p.category_slug || p.category?.slug || '',
+          brand: p.brand || p.brand_name || p.brand?.name || '',
+          brandSlug: p.brand_slug || p.brand?.slug || '',
+        })));
+        setCategories(categoryData.map((c: any) => ({
+          ...c,
+          id: String(c.id),
+          parentId: c.parent_id !== null && c.parent_id !== undefined ? String(c.parent_id) : undefined,
+        })));
         setBrands(brandData.map((b: any) => ({ ...b, id: String(b.id) })));
       } catch (error) {
         console.error("Failed to fetch product data:", error);
@@ -91,15 +102,48 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchData();
   }, []);
 
+  const getCategoryAndDescendantSlugs = (categorySlug: string) => {
+    const parentCategory = categories.find(
+      (category) => category.slug === categorySlug || category.name.toLowerCase() === categorySlug.toLowerCase()
+    );
+
+    if (!parentCategory) {
+      return [categorySlug];
+    }
+
+    const slugs = new Set<string>([parentCategory.slug]);
+
+    const collectChildren = (parentId: string) => {
+      categories
+        .filter((category) => category.parentId === parentId)
+        .forEach((child) => {
+          if (!slugs.has(child.slug)) {
+            slugs.add(child.slug);
+            collectChildren(child.id);
+          }
+        });
+    };
+
+    collectChildren(parentCategory.id);
+    return Array.from(slugs);
+  };
+
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
     if (filterOptions.category) {
-      result = result.filter(p => p.category === filterOptions.category);
+      const categorySlugs = getCategoryAndDescendantSlugs(filterOptions.category);
+      result = result.filter((p) =>
+        categorySlugs.includes(p.categorySlug || p.category)
+      );
     }
 
     if (filterOptions.brand) {
-      result = result.filter(p => p.brand === filterOptions.brand);
+      result = result.filter(p =>
+        p.brandSlug
+          ? p.brandSlug === filterOptions.brand
+          : p.brand === filterOptions.brand
+      );
     }
 
     if (filterOptions.minPrice !== undefined) {
@@ -124,6 +168,20 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
       result = result.filter(p =>
         filterOptions.tags!.some(tag => p.tags.includes(tag))
       );
+    }
+
+    if (filterOptions.search?.trim()) {
+      const terms = filterOptions.search.toLowerCase().split(' ').filter(Boolean);
+      result = result.filter(p => {
+        const text = `
+          ${p.name}
+          ${p.description}
+          ${p.category}
+          ${p.brand}
+          ${p.tags.join(' ')}
+        `.toLowerCase();
+        return terms.every(term => text.includes(term));
+      });
     }
 
     if (filterOptions.sortBy) {

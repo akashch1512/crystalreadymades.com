@@ -15,7 +15,7 @@ import AccountPage from './pages/AccountPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import { useAuth } from './contexts/AuthContext';
-import { AboutUs } from './pages/AboutUs';
+import { OurStory } from './pages/OurStory';
 import { TermsAndPolicies } from './pages/Terms';
 import { FAQ } from './pages/Faq';
 import { RefundPolicy } from './pages/RefundPolicy';
@@ -60,7 +60,7 @@ const AppRouter: React.FC = () => {
         <Route path="cart" element={<CartPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
-        <Route path="aboutus" element={<AboutUs />} />
+        <Route path="our-story" element={<OurStory />} />
         <Route path="terms" element={<TermsAndPolicies />} />
         <Route path="refund" element={<RefundPolicy />} />
         <Route path="shipping" element={<ShippingPolicy />} />

@@ -119,7 +119,7 @@ const Footer: React.FC = () => {
           <div className="col-span-1">
             <h4 className="text-lg font-semibold mb-4 text-text">Support</h4>
             <ul className="space-y-2 text-sm text-muted">
-              <li><Link to="/aboutus#contact" className="hover:text-brand transition-colors">Contact Us</Link></li>
+              <li><Link to="/our-story#contact" className="hover:text-brand transition-colors">Contact Us</Link></li>
               <li><Link to="/faq" className="hover:text-brand transition-colors">FAQ</Link></li>
             </ul>
           </div>
@@ -156,11 +156,11 @@ const Footer: React.FC = () => {
 
               <div className="flex items-center justify-center sm:justify-start hover:text-text transition-colors">
                 <Phone size={14} className="mr-2" />
-                <span>+1 (555) 123-4567</span>
+                <span>+91 91300 94080</span>
               </div>
 
               <a
-                href="https://maps.app.goo.gl/wUsoxoV9gkfz56gC9"
+                href="https://maps.app.goo.gl/Ah2a5u4x49SEpT5v6"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center sm:justify-start hover:text-text transition-colors mx-auto sm:mx-0"

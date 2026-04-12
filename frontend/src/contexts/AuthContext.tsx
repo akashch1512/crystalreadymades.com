@@ -44,7 +44,8 @@
           if (parts.length === 3) {
             setUser(JSON.parse(storedUser));
             // Attach the token to axios default headers
-            axios.defaults.headers.Authorization = `Bearer ${storedToken}`;
+            axios.defaults.headers.common = axios.defaults.headers.common || {};
+            axios.defaults.headers.common.Authorization = `Bearer ${storedToken}`;
           } else {
             // Invalid token format, clear it
             localStorage.removeItem('user');
@@ -74,7 +75,8 @@
         localStorage.setItem('token', token);
 
         // Set the token in the Axios default headers for future requests
-        axios.defaults.headers.Authorization = `Bearer ${token}`;
+        axios.defaults.headers.common = axios.defaults.headers.common || {};
+        axios.defaults.headers.common.Authorization = `Bearer ${token}`;
 
         return true;
       } catch (error: any) {
@@ -101,7 +103,8 @@
         localStorage.setItem('token', token);
 
         // Set the token in the Axios default headers for future requests
-        axios.defaults.headers.Authorization = `Bearer ${token}`;
+        axios.defaults.headers.common = axios.defaults.headers.common || {};
+        axios.defaults.headers.common.Authorization = `Bearer ${token}`;
 
         return true;
       } catch (error: any) {
@@ -119,14 +122,16 @@
       setUser(null);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      delete axios.defaults.headers.Authorization; // Remove token from headers
+      if (axios.defaults.headers.common) {
+        delete axios.defaults.headers.common.Authorization;
+      }
     };
 
     const refreshUser = async (): Promise<void> => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
         const res = await axios.get(`${apiUrl}/api/user/me`);
-        const updatedUser: User = res.data.user;
+        const updatedUser: User = res.data.user || res.data;
     
         // Sanity check: Ensure addresses is always an array
         updatedUser.addresses = updatedUser.addresses || [];

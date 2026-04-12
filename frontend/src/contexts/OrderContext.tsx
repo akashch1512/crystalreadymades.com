@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 import { Order, OrderStatus } from '../types';
 import { getOrders } from '../data/mockData';
 import { useAuth } from './AuthContext';
@@ -7,7 +8,16 @@ import { useNotifications } from './NotificationContext';
 
 interface OrderContextValue {
   orders: Order[];
-  createOrder: (paymentMethod: string) => Promise<{ success: boolean; orderId?: string }>;
+  createOrder: (
+    paymentMethod: string,
+    addressId: string,
+    paymentDetails?: {
+      paymentStatus?: string;
+      razorpayOrderId?: string;
+      razorpayPaymentId?: string;
+      razorpaySignature?: string;
+    }
+  ) => Promise<{ success: boolean; orderId?: string }>;
   cancelOrder: (orderId: string) => Promise<boolean>;
   getOrderById: (orderId: string) => Order | undefined;
   getOrdersByUser: () => Order[];
@@ -21,6 +31,24 @@ const OrderContext = createContext<OrderContextValue>({
   getOrderById: () => undefined,
   getOrdersByUser: () => [],
   updateOrderStatus: async () => false,
+});
+
+const normalizeOrder = (order: any): Order => ({
+  id: String(order.id),
+  userId: String(order.user_id ?? order.userId ?? ''),
+  items: order.items ?? [],
+  status: order.status ?? 'pending',
+  shippingAddress: order.shipping_address_snapshot ?? order.shippingAddress ?? null,
+  paymentMethod: order.payment_method ?? order.paymentMethod ?? 'cod',
+  paymentStatus: order.payment_status ?? order.paymentStatus ?? 'pending',
+  subtotal: Number(order.subtotal ?? 0),
+  tax: Number(order.tax ?? 0),
+  shipping: Number(order.shipping_cost ?? order.shipping ?? 0),
+  discount: Number(order.discount ?? 0),
+  total: Number(order.total ?? 0),
+  trackingNumber: order.tracking_number ?? order.trackingNumber,
+  createdAt: order.created_at ?? order.createdAt ?? new Date().toISOString(),
+  updatedAt: order.updated_at ?? order.updatedAt ?? new Date().toISOString(),
 });
 
 export const useOrders = () => useContext(OrderContext);
@@ -37,7 +65,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const loadOrders = async () => {
       try {
         const fetchedOrders = await getOrders();
-        setAllOrders(fetchedOrders);
+        setAllOrders(fetchedOrders.map(normalizeOrder));
       } catch (error) {
         console.error('Failed to load orders:', error);
         setAllOrders([]);
@@ -48,61 +76,60 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     loadOrders();
   }, []);
 
-  // Simulates creating a new order
-  const createOrder = async (paymentMethod: string): Promise<{ success: boolean; orderId?: string }> => {
+  const createOrder = async (
+    paymentMethod: string,
+    addressId: string,
+    paymentDetails?: {
+      paymentStatus?: string;
+      razorpayOrderId?: string;
+      razorpayPaymentId?: string;
+      razorpaySignature?: string;
+    }
+  ): Promise<{ success: boolean; orderId?: string }> => {
     if (!user || items.length === 0) {
       return { success: false };
     }
 
     try {
-      // This would be an API call in a real app
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${apiUrl}/api/orders`,
+        {
+          payment_method: paymentMethod,
+          address_id: addressId,
+          items: items.map(item => ({
+            productId: item.productId,
+            name: item.name,
+            price: item.salePrice || item.price,
+            quantity: item.quantity,
+            image: item.image,
+          })),
+          subtotal,
+          tax,
+          shipping_cost: shipping,
+          discount,
+          total,
+          payment_status: paymentDetails?.paymentStatus || (paymentMethod === 'cod' ? 'pending' : 'paid'),
+          razorpay_order_id: paymentDetails?.razorpayOrderId,
+          razorpay_payment_id: paymentDetails?.razorpayPaymentId,
+          razorpay_signature: paymentDetails?.razorpaySignature,
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
 
-      // Get the user's default address (in a real app, this would be selected during checkout)
-      const shippingAddress = user.addresses.find(addr => addr.isDefault) || user.addresses[0];
-      
-      if (!shippingAddress) {
-        return { success: false };
-      }
-
-      const newOrder: Order = {
-        id: `order-${Date.now()}`,
-        userId: user.id,
-        items: items.map(item => ({
-          id: `order-item-${Date.now()}-${item.productId}`,
-          productId: item.productId,
-          name: item.name,
-          price: item.salePrice || item.price,
-          quantity: item.quantity,
-          image: item.image
-        })),
-        status: 'pending',
-        shippingAddress,
-        paymentMethod: paymentMethod as any,
-        paymentStatus: 'paid', // Mock - assuming payment is successful
-        subtotal,
-        tax,
-        shipping,
-        discount,
-        total,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      setAllOrders(prev => [newOrder, ...prev]);
-      
-      // Clear the cart after successful order
-      clearCart();
-      
-      // Add a notification
+      const createdOrder: Order = normalizeOrder(response.data);
+      setAllOrders(prev => [createdOrder, ...prev]);
       addNotification({
         title: 'Order Placed',
-        message: `Your order #${newOrder.id} has been placed and is being processed.`,
+        message: `Your order #${createdOrder.id} has been placed and is being processed.`,
         type: 'order',
         read: false,
       });
 
-      return { success: true, orderId: newOrder.id };
+      return { success: true, orderId: createdOrder.id };
     } catch (error) {
       console.error('Error creating order:', error);
       return { success: false };
@@ -127,7 +154,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       // Check if user is authorized to cancel (user's own order or admin)
-      if (orderToCancel.userId !== user?.id && !isAdmin) {
+      if (String(orderToCancel.userId) !== String(user?.id) && !isAdmin) {
         return false;
       }
 
@@ -159,23 +186,27 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const getOrderById = (orderId: string): Order | undefined => {
+    const normalizedOrderId = String(orderId);
+
     // For admin, return any order. For users, only return their own orders
     if (isAdmin) {
-      return allOrders.find(order => order.id === orderId);
+      return allOrders.find(order => String(order.id) === normalizedOrderId);
     }
-    
-    return allOrders.find(order => order.id === orderId && order.userId === user?.id);
+
+    return allOrders.find(
+      order => String(order.id) === normalizedOrderId && String(order.userId) === String(user?.id)
+    );
   };
 
   const getOrdersByUser = (): Order[] => {
     if (!user) return [];
-    
+
     // For admin, return all orders. For users, only return their own orders
     if (isAdmin) {
       return allOrders;
     }
-    
-    return allOrders.filter(order => order.userId === user.id);
+
+    return allOrders.filter(order => String(order.userId) === String(user.id));
   };
 
   // Admin function to update order status

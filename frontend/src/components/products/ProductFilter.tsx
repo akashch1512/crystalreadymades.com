@@ -32,17 +32,17 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
     }));
   };
   
-  const handleCategoryChange = (categoryId: string, categoryName: string) => {
+  const handleCategoryChange = (categorySlug: string) => {
     setFilterOptions({
       ...filterOptions,
-      category: filterOptions.category === categoryName ? undefined : categoryName
+      category: filterOptions.category === categorySlug ? undefined : categorySlug
     });
   };
   
-  const handleBrandChange = (brandId: string, brandName: string) => {
+  const handleBrandChange = (brandSlug: string) => {
     setFilterOptions({
       ...filterOptions,
-      brand: filterOptions.brand === brandName ? undefined : brandName
+      brand: filterOptions.brand === brandSlug ? undefined : brandSlug
     });
   };
   
@@ -62,10 +62,10 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
   };
   
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as FilterOptions['sortBy'];
+    const value = e.target.value;
     setFilterOptions({
       ...filterOptions,
-      sortBy: value === "" ? undefined : value
+      sortBy: value === "" ? undefined : (value as FilterOptions['sortBy'])
     });
   };
   
@@ -89,6 +89,22 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
         </div>
         
         <div className="space-y-6">
+          <div>
+            <label htmlFor="sidebar-search" className="block text-sm font-medium text-text mb-2">
+              Search uniforms & wear
+            </label>
+            <input
+              id="sidebar-search"
+              type="text"
+              value={filterOptions.search || ''}
+              onChange={(e) => setFilterOptions({
+                ...filterOptions,
+                search: e.target.value || undefined,
+              })}
+              placeholder="Search by school, style, fabric..."
+              className="input w-full rounded-2xl border-line"
+            />
+          </div>
           {/* Categories Section */}
           <div>
             <div 
@@ -100,25 +116,57 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
             </div>
             
             {expandedSections.categories && (
-              <div className="mt-2 space-y-1">
-                {categories.map(category => (
-                  <div key={category.id} className="flex items-center">
-                    <input
-                      id={`category-${category.id}`}
-                      name="category"
-                      type="radio"
-                      checked={filterOptions.category === category.name}
-                      onChange={() => handleCategoryChange(category.id, category.name)}
-                      className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
-                    />
-                    <label
-                      htmlFor={`category-${category.id}`}
-                      className="ml-3 text-sm text-muted"
-                    >
-                      {category.name}
-                    </label>
-                  </div>
-                ))}
+              <div className="mt-2 space-y-4">
+                {categories
+                  .filter(category => !category.parentId)
+                  .map(parent => {
+                    const children = categories.filter(
+                      category => category.parentId === parent.id
+                    );
+
+                    return (
+                      <div key={parent.id}>
+                        <div className="flex items-center">
+                          <input
+                            id={`category-parent-${parent.id}`}
+                            name="category"
+                            type="radio"
+                            checked={filterOptions.category === parent.slug}
+                            onChange={() => handleCategoryChange(parent.slug)}
+                            className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
+                          />
+                          <label
+                            htmlFor={`category-parent-${parent.id}`}
+                            className="ml-3 text-sm font-medium text-text"
+                          >
+                            {parent.name}
+                          </label>
+                        </div>
+                        {children.length > 0 && (
+                          <div className="mt-2 space-y-1 pl-6">
+                            {children.map(category => (
+                              <div key={category.id} className="flex items-center">
+                                <input
+                                  id={`category-${category.id}`}
+                                  name="category"
+                                  type="radio"
+                                  checked={filterOptions.category === category.slug}
+                                  onChange={() => handleCategoryChange(category.slug)}
+                                  className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
+                                />
+                                <label
+                                  htmlFor={`category-${category.id}`}
+                                  className="ml-3 text-sm text-muted"
+                                >
+                                  {category.name}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>
@@ -141,8 +189,8 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                       id={`brand-${brand.id}`}
                       name="brand"
                       type="radio"
-                      checked={filterOptions.brand === brand.name}
-                      onChange={() => handleBrandChange(brand.id, brand.name)}
+                      checked={filterOptions.brand === brand.slug}
+                      onChange={() => handleBrandChange(brand.slug)}
                       className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                     />
                     <label
@@ -190,15 +238,15 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     id="price-under-50"
                     name="price"
                     type="radio"
-                    checked={filterOptions.maxPrice === 50}
-                    onChange={() => handlePriceChange(0, 50)}
+                    checked={filterOptions.maxPrice === 500}
+                    onChange={() => handlePriceChange(0, 500)}
                     className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-under-50"
-                    className="ml-3 text-sm text-muted"
+                    className="ml-3 text-sm text-muted break-words"
                   >
-                    Under $50
+                    Under ₹500
                   </label>
                 </div>
                 <div className="flex items-center">
@@ -206,15 +254,15 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     id="price-50-100"
                     name="price"
                     type="radio"
-                    checked={filterOptions.minPrice === 50 && filterOptions.maxPrice === 100}
-                    onChange={() => handlePriceChange(50, 100)}
+                    checked={filterOptions.minPrice === 500 && filterOptions.maxPrice === 1000}
+                    onChange={() => handlePriceChange(500, 1000)}
                     className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-50-100"
-                    className="ml-3 text-sm text-muted"
+                    className="ml-3 text-sm text-muted break-words"
                   >
-                    $50 - $100
+                    ₹500 - ₹1000
                   </label>
                 </div>
                 <div className="flex items-center">
@@ -222,15 +270,15 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     id="price-100-200"
                     name="price"
                     type="radio"
-                    checked={filterOptions.minPrice === 100 && filterOptions.maxPrice === 200}
-                    onChange={() => handlePriceChange(100, 200)}
+                    checked={filterOptions.minPrice === 1000 && filterOptions.maxPrice === 2000}
+                    onChange={() => handlePriceChange(1000, 2000)}
                     className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-100-200"
-                    className="ml-3 text-sm text-muted"
+                    className="ml-3 text-sm text-muted break-words"
                   >
-                    $100 - $200
+                    ₹1000 - ₹2000
                   </label>
                 </div>
                 <div className="flex items-center">
@@ -238,15 +286,15 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                     id="price-over-200"
                     name="price"
                     type="radio"
-                    checked={filterOptions.minPrice === 200}
-                    onChange={() => handlePriceChange(200, undefined)}
+                    checked={filterOptions.minPrice === 2000}
+                    onChange={() => handlePriceChange(2000, undefined)}
                     className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                   />
                   <label
                     htmlFor="price-over-200"
-                    className="ml-3 text-sm text-muted"
+                    className="ml-3 text-sm text-muted break-words"
                   >
-                    $200 and Above
+                    ₹2000 and Above
                   </label>
                 </div>
               </div>
@@ -354,24 +402,56 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                 <div>
                   <h3 className="text-sm font-medium text-text mb-2">Categories</h3>
                   <div className="space-y-2">
-                    {categories.map(category => (
-                      <div key={category.id} className="flex items-center">
-                        <input
-                          id={`mobile-category-${category.id}`}
-                          name="mobile-category"
-                          type="radio"
-                          checked={filterOptions.category === category.name}
-                          onChange={() => handleCategoryChange(category.id, category.name)}
-                          className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
-                        />
-                        <label
-                          htmlFor={`mobile-category-${category.id}`}
-                          className="ml-3 text-sm text-muted"
-                        >
-                          {category.name}
-                        </label>
-                      </div>
-                    ))}
+                    {categories
+                      .filter(category => !category.parentId)
+                      .map((parent) => {
+                        const children = categories.filter(
+                          category => category.parentId === parent.id
+                        );
+
+                        return (
+                          <div key={parent.id} className="space-y-2">
+                            <div className="flex items-center">
+                              <input
+                                id={`mobile-category-parent-${parent.id}`}
+                                name="mobile-category"
+                                type="radio"
+                                checked={filterOptions.category === parent.slug}
+                                onChange={() => handleCategoryChange(parent.slug)}
+                                className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
+                              />
+                              <label
+                                htmlFor={`mobile-category-parent-${parent.id}`}
+                                className="ml-3 text-sm font-medium text-text"
+                              >
+                                {parent.name}
+                              </label>
+                            </div>
+                            {children.length > 0 && (
+                              <div className="mt-2 space-y-1 pl-6">
+                                {children.map(category => (
+                                  <div key={category.id} className="flex items-center">
+                                    <input
+                                      id={`mobile-category-${category.id}`}
+                                      name="mobile-category"
+                                      type="radio"
+                                      checked={filterOptions.category === category.slug}
+                                      onChange={() => handleCategoryChange(category.slug)}
+                                      className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
+                                    />
+                                    <label
+                                      htmlFor={`mobile-category-${category.id}`}
+                                      className="ml-3 text-sm text-muted"
+                                    >
+                                      {category.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
                 
@@ -385,8 +465,8 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                           id={`mobile-brand-${brand.id}`}
                           name="mobile-brand"
                           type="radio"
-                          checked={filterOptions.brand === brand.name}
-                          onChange={() => handleBrandChange(brand.id, brand.name)}
+                          checked={filterOptions.brand === brand.slug}
+                          onChange={() => handleBrandChange(brand.slug)}
                           className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                         />
                         <label
@@ -425,15 +505,15 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         id="mobile-price-under-50"
                         name="mobile-price"
                         type="radio"
-                        checked={filterOptions.maxPrice === 50}
-                        onChange={() => handlePriceChange(0, 50)}
+                        checked={filterOptions.maxPrice === 500}
+                        onChange={() => handlePriceChange(0, 500)}
                         className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-under-50"
                         className="ml-3 text-sm text-muted"
                       >
-                        Under $50
+                        Under ₹500
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -441,15 +521,15 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         id="mobile-price-50-100"
                         name="mobile-price"
                         type="radio"
-                        checked={filterOptions.minPrice === 50 && filterOptions.maxPrice === 100}
-                        onChange={() => handlePriceChange(50, 100)}
+                        checked={filterOptions.minPrice === 500 && filterOptions.maxPrice === 1000}
+                        onChange={() => handlePriceChange(500, 1000)}
                         className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-50-100"
                         className="ml-3 text-sm text-muted"
                       >
-                        $50 - $100
+                        ₹500 - ₹1000
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -457,15 +537,15 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         id="mobile-price-100-200"
                         name="mobile-price"
                         type="radio"
-                        checked={filterOptions.minPrice === 100 && filterOptions.maxPrice === 200}
-                        onChange={() => handlePriceChange(100, 200)}
+                        checked={filterOptions.minPrice === 1000 && filterOptions.maxPrice === 2000}
+                        onChange={() => handlePriceChange(1000, 2000)}
                         className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-100-200"
                         className="ml-3 text-sm text-muted"
                       >
-                        $100 - $200
+                        ₹1000 - ₹2000
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -473,15 +553,15 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                         id="mobile-price-over-200"
                         name="mobile-price"
                         type="radio"
-                        checked={filterOptions.minPrice === 200}
-                        onChange={() => handlePriceChange(200, undefined)}
+                        checked={filterOptions.minPrice === 2000}
+                        onChange={() => handlePriceChange(2000, undefined)}
                         className="h-4 w-4 text-brand focus:ring-brand border-line rounded"
                       />
                       <label
                         htmlFor="mobile-price-over-200"
                         className="ml-3 text-sm text-muted"
                       >
-                        $200 and Above
+                        ₹2000 and Above
                       </label>
                     </div>
                   </div>

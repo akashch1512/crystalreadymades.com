@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AccountSidebar from '../components/account/AccountSidebar';
 import ProfileForm from '../components/account/ProfileForm';
@@ -8,6 +8,11 @@ import {  toast } from 'react-toastify'
 
 const AddressList: React.FC = () => {
   const { user, refreshUser } = useAuth();
+
+  // Fetch fresh user data (with addresses) from server on mount
+  useEffect(() => {
+    refreshUser();
+  }, []);
   
   const addresses = user?.addresses || [];
   
@@ -15,9 +20,13 @@ const AddressList: React.FC = () => {
   const handleSetDefault = async (addressId: string) => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      await fetch(`${apiUrl}/api/addresses/${addressId}/set-default`, { method: 'PATCH' });
+      const token = localStorage.getItem('token');
+      await fetch(`${apiUrl}/api/addresses/${addressId}/set-default`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
       await refreshUser();
-      toast.success('Default address updated'); // if using a toast library
+      toast.success('Default address updated');
     } catch (error) {
       console.error('Failed to set default address:', error);
     }
@@ -27,7 +36,11 @@ const AddressList: React.FC = () => {
   const handleDelete = async (addressId: string) => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      await fetch(`${apiUrl}/api/addresses/${addressId}`, { method: 'DELETE' });
+      const token = localStorage.getItem('token');
+      await fetch(`${apiUrl}/api/addresses/${addressId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
       await refreshUser();
     } catch (error) {
       console.error('Failed to delete address:', error);

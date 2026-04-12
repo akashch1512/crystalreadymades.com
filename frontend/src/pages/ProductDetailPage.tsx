@@ -246,7 +246,7 @@ const ProductDetailPage: React.FC = () => {
             <div className="flex">
               <span className="text-muted w-24">Category:</span>
               <a 
-                href={`/products?category=${encodeURIComponent(product.category)}`}
+                href={`/products?category=${encodeURIComponent(product.categorySlug || product.category)}`}
                 className="text-brand hover:underline"
               >
                 {product.category}
@@ -255,7 +255,7 @@ const ProductDetailPage: React.FC = () => {
             <div className="flex">
               <span className="text-muted w-24">Brand:</span>
               <a 
-                href={`/products?brand=${encodeURIComponent(product.brand)}`}
+                href={`/products?brand=${encodeURIComponent(product.brandSlug || product.brand)}`}
                 className="text-brand hover:underline"
               >
                 {product.brand}

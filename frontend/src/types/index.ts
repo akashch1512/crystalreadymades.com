@@ -31,7 +31,9 @@ export interface Product {
   salePrice?: number;
   images: string[];
   category: string;
+  categorySlug?: string;
   brand: string;
+  brandSlug?: string;
   tags: string[];
   stock: number;
   quantity: number;
@@ -102,6 +104,7 @@ export type OrderStatus =
   | 'cancelled';
 
 export type PaymentMethod =
+  | 'online'
   | 'card'
   | 'upi'
   | 'wallet'
@@ -148,5 +151,6 @@ export interface FilterOptions {
   maxPrice?: number;
   rating?: number;
   tags?: string[];
+  search?: string;
   sortBy?: 'price-asc' | 'price-desc' | 'newest' | 'popular';
 }

@@ -27,6 +27,7 @@ const ProductsPage: React.FC = () => {
     const minPriceParam = params.get('minPrice');
     const maxPriceParam = params.get('maxPrice');
     const ratingParam = params.get('rating');
+    const searchParam = params.get('search');
     const sortByParam = params.get('sortBy');
     
     // Apply filters from URL
@@ -37,6 +38,7 @@ const ProductsPage: React.FC = () => {
     if (minPriceParam) newFilters.minPrice = parseFloat(minPriceParam);
     if (maxPriceParam) newFilters.maxPrice = parseFloat(maxPriceParam);
     if (ratingParam) newFilters.rating = parseFloat(ratingParam);
+    if (searchParam) newFilters.search = searchParam;
     if (sortByParam) newFilters.sortBy = sortByParam;
     
     setFilterOptions(newFilters);
@@ -53,9 +55,9 @@ const ProductsPage: React.FC = () => {
     <div className="page">
       <div className="section">
         <div className="container mx-auto">
-          <h1 className="h1 mb-2">Shop Our Products</h1>
+          <h1 className="h1 mb-2">Uniforms & Clothing</h1>
           <p className="text-muted mb-8">
-            Browse our collection of crystal-enhanced products
+            Explore school uniforms by school, with dedicated clothing categories for women's wear, boys' wear, and girls' wear.
           </p>
           
           <div className="flex flex-col md:flex-row">

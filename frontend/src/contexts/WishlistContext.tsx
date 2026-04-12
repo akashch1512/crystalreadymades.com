@@ -21,36 +21,32 @@ const WishlistContext = createContext<WishlistContextValue>({
 
 export const useWishlist = () => useContext(WishlistContext);
 
-export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<WishlistItem[]>([]);
-
-  useEffect(() => {
-    const savedWishlist = localStorage.getItem('wishlist');
-    if (savedWishlist) {
-      try {
-        const parsedWishlist = JSON.parse(savedWishlist);
-        if (Array.isArray(parsedWishlist)) {
-          setItems(parsedWishlist);
-        } else {
-          console.warn('Invalid wishlist data in localStorage. Resetting.');
-          setItems([]);
-        }
-      } catch (error) {
-        console.error('Failed to parse wishlist from localStorage:', error);
-        setItems([]);
-      }
+// Helper: read saved wishlist from localStorage synchronously
+function loadWishlistFromStorage(): WishlistItem[] {
+  try {
+    const saved = localStorage.getItem('wishlist');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
     }
-  }, []);
+  } catch {}
+  return [];
+}
 
+export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Lazy initializer reads localStorage BEFORE first render — no race condition
+  const [items, setItems] = useState<WishlistItem[]>(() => loadWishlistFromStorage());
+
+  // Save whenever items change (safe — initial state is already loaded)
   useEffect(() => {
     localStorage.setItem('wishlist', JSON.stringify(items));
   }, [items]);
 
   const addItem = (productId: string) => {
     if (!isInWishlist(productId)) {
-      setItems(prev => [...prev, { 
-        id: `wishlist-item-${Date.now()}`, 
-        productId 
+      setItems(prev => [...prev, {
+        id: `wishlist-item-${Date.now()}`,
+        productId
       }]);
     }
   };

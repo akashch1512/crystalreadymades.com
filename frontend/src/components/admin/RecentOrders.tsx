@@ -91,7 +91,7 @@ const RecentOrders: React.FC = () => {
             {recentOrders.map(order => (
               <tr key={order.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  #{order.id.slice(-8)}
+                  #{String(order.id).slice(-8)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {order.userId}
@@ -105,7 +105,7 @@ const RecentOrders: React.FC = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${order.total.toFixed(2)}
+                  ₹{order.total.toFixed(2)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <Link 

@@ -30,8 +30,12 @@ urlpatterns = [
     path('api/users/<int:id>', views.UserDetailView.as_view()),
 
     # Orders
-    path('api/orders', views.OrderListView.as_view()),
+    path('api/orders', views.OrderListCreateView.as_view()),
     path('api/orders/user/<int:user_id>', views.UserOrderListView.as_view()),
+
+    # Payment
+    path('api/payment/create-order', views.PaymentCreateOrderView.as_view()),
+    path('api/payment/verify-payment', views.PaymentVerifyView.as_view()),
 
     # Notifications
     path('api/notifications/<int:user_id>', views.NotificationListView.as_view()),
@@ -39,6 +43,7 @@ urlpatterns = [
     # Addresses
     path('api/addresses', views.AddressListCreateView.as_view()),
     path('api/addresses/<int:address_id>', views.AddressDetailView.as_view()),
+    path('api/addresses/<int:address_id>/set-default', views.AddressSetDefaultView.as_view()),
     
     # Hero Slides
     path('api/hero-slides', views.HeroSlideListView.as_view()),

@@ -4,7 +4,7 @@ from .models import *
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['id', 'name', 'line1', 'line2', 'city', 'state', 'postal_code', 'country', 'is_default']
+        fields = ['id', 'name', 'email', 'contact_no', 'alt_contact_no', 'line1', 'line2', 'locality', 'city', 'state', 'postal_code', 'country', 'address_type', 'is_default']
 
 class UserSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True, read_only=True)
@@ -14,9 +14,11 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'phone', 'email', 'role', 'addresses']
 
 class CategorySerializer(serializers.ModelSerializer):
+    parent_id = serializers.IntegerField(source='parent.id', read_only=True)
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'image', 'description']
+        fields = ['id', 'name', 'slug', 'image', 'description', 'parent_id']
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,12 +32,16 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
+    category = serializers.CharField(source='category.name', read_only=True)
+    category_slug = serializers.CharField(source='category.slug', read_only=True)
+    brand = serializers.CharField(source='brand.name', read_only=True)
+    brand_slug = serializers.CharField(source='brand.slug', read_only=True)
     
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'slug', 'description', 'price', 'sale_price', 
-            'images', 'category_id', 'brand_id', 'tags', 'in_stock', 
+            'images', 'category_id', 'brand_id', 'category', 'category_slug', 'brand', 'brand_slug', 'tags', 'in_stock', 
             'quantity', 'rating_average', 'specifications', 'created_at', 
             'updated_at', 'reviews'
         ]

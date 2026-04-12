@@ -1,7 +1,15 @@
+import base64
+import hashlib
+import hmac
+import json
+import urllib.error
+import urllib.request
+
 from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import JSONParser
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import check_password
 from datetime import datetime, timedelta
@@ -14,7 +22,7 @@ from .serializers import *
 # --- Auth Views (Matching Schema) ---
 
 def create_access_token(user_id):
-    expire = datetime.utcnow() + timedelta(minutes=30)
+    expire = datetime.utcnow() + timedelta(days=30)
     payload = {"sub": str(user_id), "exp": expire}
     return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
 
@@ -91,7 +99,7 @@ class UserUpdateView(APIView):
 # --- Product Catalog Views ---
 
 class CategoryListView(generics.ListAPIView):
-    queryset = Category.objects.all()
+    queryset = Category.objects.order_by('parent_id', 'name')
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
     pagination_class = None  # <--- ADD THIS (FastAPI returned .all())
@@ -125,12 +133,143 @@ class ProductDetailView(generics.RetrieveAPIView):
 
 # ... User views ...
 
-class OrderListView(generics.ListAPIView):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-    pagination_class = None  # <--- ADD THIS
+class OrderListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser]
+
+    def get(self, request):
+        orders = Order.objects.all()
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        address = get_object_or_404(Address, id=request.data.get('address_id'), user=request.user)
+        items = request.data.get('items', [])
+        if not isinstance(items, list) or len(items) == 0:
+            return Response({"detail": "Order items are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order = Order.objects.create(
+            user=request.user,
+            payment_method=request.data.get('payment_method', 'online'),
+            payment_status=request.data.get('payment_status', 'pending'),
+            subtotal=request.data.get('subtotal', 0.0),
+            tax=request.data.get('tax', 0.0),
+            shipping_cost=request.data.get('shipping_cost', 0.0),
+            discount=request.data.get('discount', 0.0),
+            total=request.data.get('total', 0.0),
+            shipping_address_snapshot={
+                'name': address.name,
+                'email': address.email,
+                'contact_no': address.contact_no,
+                'alt_contact_no': address.alt_contact_no,
+                'line1': address.line1,
+                'line2': address.line2,
+                'locality': address.locality,
+                'city': address.city,
+                'state': address.state,
+                'postal_code': address.postal_code,
+                'country': address.country,
+                'address_type': address.address_type,
+                'is_default': address.is_default,
+            }
+        )
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+
+            product_id = item.get('productId') or item.get('product_id')
+            product = Product.objects.filter(id=product_id).first() if product_id else None
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                name=item.get('name', ''),
+                price=item.get('price', 0.0),
+                quantity=item.get('quantity', 1),
+                image=item.get('image', ''),
+            )
+
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class PaymentCreateOrderView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser]
+
+    def post(self, request):
+        amount = request.data.get('amount')
+        if amount is None:
+            return Response({"detail": "Amount is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            amount = int(amount)
+        except (TypeError, ValueError):
+            return Response({"detail": "Amount must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
+            return Response({"detail": "Razorpay keys are not configured"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        payload = json.dumps({
+            'amount': amount,
+            'currency': 'INR',
+            'payment_capture': 1,
+            'receipt': f'receipt_{int(datetime.utcnow().timestamp() * 1000)}',
+            'notes': {
+                'source': 'checkout',
+            },
+        }).encode('utf-8')
+
+        auth_value = base64.b64encode(f"{settings.RAZORPAY_KEY_ID}:{settings.RAZORPAY_KEY_SECRET}".encode('utf-8')).decode('utf-8')
+        req = urllib.request.Request(
+            'https://api.razorpay.com/v1/orders',
+            data=payload,
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Basic {auth_value}',
+            }
+        )
+
+        try:
+            with urllib.request.urlopen(req) as response:
+                response_data = json.loads(response.read().decode('utf-8'))
+            return Response({'order': response_data}, status=status.HTTP_201_CREATED)
+        except urllib.error.HTTPError as err:
+            error_body = err.read().decode('utf-8')
+            try:
+                error_data = json.loads(error_body)
+            except Exception:
+                error_data = {'detail': error_body}
+            return Response(error_data, status=err.code)
+        except Exception as err:
+            return Response({'detail': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class PaymentVerifyView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser]
+
+    def post(self, request):
+        payment_id = request.data.get('razorpay_payment_id')
+        order_id = request.data.get('razorpay_order_id')
+        signature = request.data.get('razorpay_signature')
+
+        if not payment_id or not order_id or not signature:
+            return Response({"detail": "Missing payment verification fields"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not settings.RAZORPAY_KEY_SECRET:
+            return Response({"detail": "Razorpay key secret is not configured"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        expected_signature = hmac.new(
+            settings.RAZORPAY_KEY_SECRET.encode('utf-8'),
+            f"{order_id}|{payment_id}".encode('utf-8'),
+            hashlib.sha256
+        ).hexdigest()
+
+        return Response({'success': expected_signature == signature})
 
 class UserOrderListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
     pagination_class = None  # <--- ADD THIS
     
@@ -160,17 +299,23 @@ class UserDetailView(generics.RetrieveAPIView):
 
 class AddressListCreateView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser]
+
+    def get(self, request):
+        # Return the full user object which includes addresses[] nested
+        return Response(UserSerializer(request.user).data)
 
     def post(self, request):
         serializer = AddressSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
-            # Return Updated User object as per FastAPI code
+            # Return Updated User object so frontend can update state
             return Response(UserSerializer(request.user).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AddressDetailView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser]
 
     def put(self, request, address_id):
         address = get_object_or_404(Address, id=address_id, user=request.user)
@@ -183,6 +328,16 @@ class AddressDetailView(APIView):
     def delete(self, request, address_id):
         address = get_object_or_404(Address, id=address_id, user=request.user)
         address.delete()
+        return Response(UserSerializer(request.user).data)
+
+class AddressSetDefaultView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, address_id):
+        address = get_object_or_404(Address, id=address_id, user=request.user)
+        # The model's save() method will automatically unset other defaults
+        address.is_default = True
+        address.save()
         return Response(UserSerializer(request.user).data)
 
 class HeroSlideListView(APIView):

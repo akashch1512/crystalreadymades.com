@@ -28,6 +28,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')  == "True"
 
+RAZORPAY_KEY_ID = os.environ.get('key_id')
+RAZORPAY_KEY_SECRET = os.environ.get('key_secret')
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 
@@ -93,18 +96,29 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+import os
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv("ENGINE"),
-        "NAME": os.getenv("NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("PASSWORD"),
-        "HOST": os.getenv("HOST"),
-        "PORT": os.getenv("PORT"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": os.getenv("ENGINE"),
+#         "NAME": os.getenv("NAME"),
+#         "USER": os.getenv("DB_USER"),
+#         "PASSWORD": os.getenv("PASSWORD"),
+#         "HOST": os.getenv("HOST"),
+#         "PORT": os.getenv("PORT"),
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -158,6 +172,10 @@ REST_FRAMEWORK = {
     ),
     # Pagination to match skip/limit
     'DEFAULT_PAGINATION_CLASS': 'store.pagination.SkipLimitPagination',
+}
+
+JSON_CAMEL_CASE = {
+    'no_underscore_before_number': True,
 }
 
 # Convert string → bool

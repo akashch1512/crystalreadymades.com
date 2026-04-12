@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField
+# from django.contrib.postgres.fields import ArrayField
 
 class User(AbstractUser):
     # We set phone as the unique identifier
@@ -26,19 +26,37 @@ class User(AbstractUser):
 class Address(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
     name = models.CharField(max_length=100)
+    email = models.EmailField(null=True, blank=True)
+    contact_no = models.CharField(max_length=50, null=True, blank=True)
+    alt_contact_no = models.CharField(max_length=50, null=True, blank=True)
     line1 = models.CharField(max_length=255)
     line2 = models.CharField(max_length=255, null=True, blank=True)
+    locality = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=20)
     country = models.CharField(max_length=100)
+    address_type = models.CharField(max_length=50, default='Home')
     is_default = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            # Unset other default addresses for this user
+            Address.objects.filter(user=self.user, is_default=True).exclude(pk=self.pk).update(is_default=False)
+        super().save(*args, **kwargs)
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     image = models.CharField(max_length=500, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='children'
+    )
 
 class Brand(models.Model):
     name = models.CharField(max_length=255)
@@ -56,8 +74,8 @@ class Product(models.Model):
     sale_price = models.FloatField(null=True, blank=True)
     
     # Postgres specific fields
-    images = ArrayField(models.CharField(max_length=500), default=list, blank=True)
-    tags = ArrayField(models.CharField(max_length=100), default=list, blank=True)
+    images = models.JSONField(default=list, blank=True)
+    tags = models.JSONField(default=list, blank=True)
     specifications = models.JSONField(null=True, blank=True)
     
     in_stock = models.BooleanField(default=True)

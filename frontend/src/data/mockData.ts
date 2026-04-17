@@ -8,7 +8,7 @@ import {
 } from '../types';
 
 // Detect environment to select the correct URL
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 // --- API Helper ---
 const fetchJson = async <T>(endpoint: string): Promise<T[]> => {

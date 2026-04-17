@@ -1,1 +1,16 @@
 .env
+staticfiles
+db.sqlite3
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+media/
+*.swp
+.DS_Store
+.idea/
+.vscode/
+*.bak
+*.tmp
+*.orig

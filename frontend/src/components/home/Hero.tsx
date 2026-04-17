@@ -21,7 +21,8 @@ const Hero: React.FC = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await fetch('/api/hero-slides');
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/hero-slides`);
         const data = await response.json();
         setSlides(data);
       } catch (error) {

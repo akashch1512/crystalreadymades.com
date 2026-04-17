@@ -31,8 +31,8 @@ DEBUG = os.environ.get('DEBUG')  == "True"
 RAZORPAY_KEY_ID = os.environ.get('key_id')
 RAZORPAY_KEY_SECRET = os.environ.get('key_secret')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
-
+# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 

@@ -23,21 +23,19 @@ const Header: React.FC = () => {
   const [mobileUniformsOpen, setMobileUniformsOpen] = useState(false);
 
   const uniformsCategory = categories.find(
-    (category) => category.slug === 'uniforms' || category.name.toLowerCase() === 'uniforms'
+    (c) => c.slug === 'uniforms' || c.name.toLowerCase() === 'uniforms'
   );
   const uniformSchools = uniformsCategory
-    ? categories.filter((category) => category.parentId === uniformsCategory.id)
+    ? categories.filter((c) => c.parentId === uniformsCategory.id)
     : [];
 
   const clothingCategory = categories.find(
-    (category) =>
-      category.slug === 'clothing' || category.name.toLowerCase() === 'clothing'
+    (c) => c.slug === 'clothing' || c.name.toLowerCase() === 'clothing'
   );
+  // Only show children of the clothing category — never fall back to showing all roots
   const clothingChildren = clothingCategory
-    ? categories.filter((category) => category.parentId === clothingCategory.id)
-    : categories.filter(
-        (category) => !category.parentId && category.id !== uniformsCategory?.id
-      );
+    ? categories.filter((c) => c.parentId === clothingCategory.id)
+    : [];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,16 +129,16 @@ const Header: React.FC = () => {
           </div>
 
           {/* Navigation Links - Desktop */}
-          <nav className="hidden md:flex items-center space-x-6 text-sm">
+          <nav className="hidden md:flex items-center text-sm">
             {/* Uniforms Dropdown */}
-            <div className="relative group py-2">
+            <div className="relative group py-2 px-3">
               <button className="flex items-center text-muted hover:text-brand transition-colors">
                 Uniforms
                 <ChevronDown size={16} className="ml-1" />
               </button>
-              <div className="absolute left-0 mt-0 w-72 bg-surface rounded-lg shadow-soft py-2 z-50 
-                              opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                              transition-all duration-200 border border-line shadow-soft bg-surface">
+              <div className="absolute left-0 mt-0 w-72 bg-surface rounded-lg shadow-soft py-2 z-50
+                              opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                              transition-all duration-200 border border-line">
                 {uniformSchools.length > 0 ? (
                   uniformSchools.map((school) => (
                     <Link
@@ -152,7 +150,7 @@ const Header: React.FC = () => {
                     </Link>
                   ))
                 ) : (
-                  <div className="px-4 py-2.5 text-sm text-muted">Loading school categories...</div>
+                  <div className="px-4 py-2.5 text-sm text-muted italic">No sub-categories yet</div>
                 )}
                 <hr className="my-1 border-line" />
                 <Link
@@ -165,14 +163,14 @@ const Header: React.FC = () => {
             </div>
 
             {/* Clothing Dropdown */}
-            <div className="relative group py-2">
+            <div className="relative group py-2 px-3">
               <button className="flex items-center text-muted hover:text-brand transition-colors">
                 Clothing
                 <ChevronDown size={16} className="ml-1" />
               </button>
-              <div className="absolute left-0 mt-0 w-64 bg-surface rounded-lg shadow-soft py-2 z-50 
-                              opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                              transition-all duration-200 border border-line shadow-soft bg-surface">
+              <div className="absolute left-0 mt-0 w-64 bg-surface rounded-lg shadow-soft py-2 z-50
+                              opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                              transition-all duration-200 border border-line">
                 {clothingChildren.length > 0 ? (
                   clothingChildren.map((category) => (
                     <Link
@@ -184,17 +182,7 @@ const Header: React.FC = () => {
                     </Link>
                   ))
                 ) : (
-                  categories
-                    .filter((category) => !category.parentId && category.id !== uniformsCategory?.id)
-                    .map((category) => (
-                      <Link
-                        key={category.id}
-                        to={`/products?category=${encodeURIComponent(category.slug)}`}
-                        className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand"
-                      >
-                        {category.name}
-                      </Link>
-                    ))
+                  <div className="px-4 py-2.5 text-sm text-muted italic">No sub-categories yet</div>
                 )}
                 <hr className="my-1 border-line" />
                 <Link
@@ -206,10 +194,13 @@ const Header: React.FC = () => {
               </div>
             </div>
 
-            <Link to="/our-story" className="text-muted hover:text-brand transition-colors">
+            {/* Divider */}
+            <div className="w-px h-4 bg-line mx-2" />
+
+            <Link to="/our-story" className="px-3 py-2 text-muted hover:text-brand transition-colors">
               Our Story
             </Link>
-            <Link to="/blog" className="text-muted hover:text-brand transition-colors">
+            <Link to="/blog" className="px-3 py-2 text-muted hover:text-brand transition-colors">
               Blog
             </Link>
           </nav>
@@ -447,67 +438,67 @@ const Header: React.FC = () => {
 
             {isAuthenticated ? (
               <>
-              <Link
-                to="/account"
-                className="py-3 text-muted border-b border-line"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                My Account
-              </Link>
-              <Link
-                to="/orders"
-                className="py-3 text-muted border-b border-line"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                My Orders
-              </Link>
-              <Link
-                to="/wishlist"
-                className="py-3 text-muted border-b border-line"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Wishlist
-              </Link>
-              <Link
-                to="/notifications"
-                className="py-3 text-muted border-b border-line"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Notifications
-                {notificationCount > 0 && (
+                <Link
+                  to="/account"
+                  className="py-3 text-muted border-b border-line"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  My Account
+                </Link>
+                <Link
+                  to="/orders"
+                  className="py-3 text-muted border-b border-line"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  My Orders
+                </Link>
+                <Link
+                  to="/wishlist"
+                  className="py-3 text-muted border-b border-line"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  Wishlist
+                </Link>
+                <Link
+                  to="/notifications"
+                  className="py-3 text-muted border-b border-line"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  Notifications
+                  {notificationCount > 0 && (
                     <span className="ml-2 bg-brand text-white text-xs rounded-full px-2 py-1">
                       {notificationCount}
                     </span>
                   )}
-              </Link>
-              {user?.role === 'admin' && (
-                <Link
-                  to="/admin"
-                  className="py-3 text-muted border-b border-line"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  Admin Dashboard
                 </Link>
-              )}
-              <button
-                onClick={() => {
-                  logout();
-                  setShowMobileMenu(false);
-                }}
-                className="flex items-center py-3 text-muted"
+                {user?.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    className="py-3 text-muted border-b border-line"
+                    onClick={() => setShowMobileMenu(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    logout();
+                    setShowMobileMenu(false);
+                  }}
+                  className="flex items-center py-3 text-muted"
+                >
+                  <LogOut size={18} className="mr-2" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="py-3 text-muted flex items-center"
+                onClick={() => setShowMobileMenu(false)}
               >
-                <LogOut size={18} className="mr-2" />
-                Logout
-              </button>
-            </>
-          ) : (
-            <Link
-              to="/login"
-              className="py-3 text-muted flex items-center"
-              onClick={() => setShowMobileMenu(false)}
-            >
-              <User size={18} className="mr-2" />
-              Login / Register
+                <User size={18} className="mr-2" />
+                Login / Register
               </Link>
             )}
           </nav>

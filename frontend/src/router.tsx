@@ -21,6 +21,7 @@ import { FAQ } from './pages/Faq';
 import { RefundPolicy } from './pages/RefundPolicy';
 import { ShippingPolicy } from './pages/ShippingPolicy';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { BlogPage } from './pages/BlogPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ 
@@ -61,6 +62,7 @@ const AppRouter: React.FC = () => {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="our-story" element={<OurStory />} />
+        <Route path="blog" element={<BlogPage />} />
         <Route path="terms" element={<TermsAndPolicies />} />
         <Route path="refund" element={<RefundPolicy />} />
         <Route path="shipping" element={<ShippingPolicy />} />

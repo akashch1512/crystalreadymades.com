@@ -46,12 +46,13 @@ const Footer: React.FC = () => {
           <div className="col-span-2 lg:col-span-1 flex flex-col space-y-6 items-center text-center lg:items-start lg:text-left">
 
             {/* Logo */}
-            <div>
-              <h3 className="text-2xl font-semibold tracking-tight">
-                <span className="text-brand">Logo</span>
-                <span className="text-text">Here</span>
-              </h3>
-            </div>
+            <Link to="/" className="flex items-center">
+              <img
+                src="/Logo/Hero_Logo.gif"
+                alt="Crystal Readymade Logo"
+                className="h-12 w-auto"
+              />
+            </Link>
 
             {/* Social Icons */}
             <div className="flex space-x-4">

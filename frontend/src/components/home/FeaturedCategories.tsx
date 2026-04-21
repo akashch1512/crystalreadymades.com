@@ -28,29 +28,30 @@ const FeaturedCategories: React.FC = () => {
 
   return (
     <section className="section section-muted">
-      <div className="container mx-auto">
+      <div className="w-full px-4 md:px-12 mx-auto">
         <h2 className="h2 text-center mb-2">Shop by Category</h2>
         <p className="text-muted text-center mb-8">Explore our range of crystal-enhanced products</p>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-center gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {categories
             .filter((category) => !category.parentId)
             .map((category) => (
               <Link
                 key={category.id}
                 to={`/products?category=${encodeURIComponent(category.slug)}`}
-                className="group relative block h-70 rounded-2xl overflow-hidden card card-hover flex-grow basis-full sm:basis-[calc(50%-1.5rem)] lg:basis-[calc(25%-1.5rem)] min-w-[280px]"
+                className="group relative block h-[250px] sm:h-[300px] lg:h-[350px] rounded-2xl overflow-hidden card card-hover w-full"
               >
-              <div className="absolute inset-0 bg-gradient-to-t from-text/70 via-text/30 to-transparent z-10 transition-all duration-300 group-hover:from-text/80"></div>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 transition-all duration-300 group-hover:from-black/90"></div>
               <img 
                 src={category.image} 
                 alt={category.name}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
               <div className="absolute inset-0 flex flex-col justify-end p-6 z-20">
-                <h3 className="text-white text-xl font-semibold mb-2">{category.name}</h3>
-                <p className="text-white/80 text-sm mb-3 line-clamp-2">{category.description}</p>
-                <span className="btn btn-primary w-fit text-xs md:text-sm px-4 py-2 md:px-6 md:py-3">
+                <h3 className="text-white text-xl md:text-2xl font-bold mb-2 drop-shadow-md">{category.name}</h3>
+                <p className="text-white/90 text-sm md:text-base font-medium mb-4 line-clamp-2 drop-shadow">{category.description}</p>
+                <span className="btn btn-primary text-white font-medium w-fit text-xs md:text-sm px-4 py-2 md:px-6 md:py-3 shadow-lg">
                   Shop Now
                 </span>
                 

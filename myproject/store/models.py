@@ -39,6 +39,9 @@ class Address(models.Model):
     address_type = models.CharField(max_length=50, default='Home')
     is_default = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.name} - {self.city}"
+
     def save(self, *args, **kwargs):
         if self.is_default:
             # Unset other default addresses for this user
@@ -58,11 +61,17 @@ class Category(models.Model):
         related_name='children'
     )
 
+    def __str__(self):
+        return self.name
+
 class Brand(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     logo = models.CharField(max_length=500, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
@@ -84,6 +93,9 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
@@ -91,6 +103,9 @@ class Review(models.Model):
     rating = models.FloatField()
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user_name} on {self.product.name}"
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
@@ -107,6 +122,9 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Order #{self.id} - {self.user.phone}"
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='order_items')
@@ -115,6 +133,9 @@ class OrderItem(models.Model):
     quantity = models.IntegerField(default=1)
     image = models.CharField(max_length=500, null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.quantity} x {self.name}"
+
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     title = models.CharField(max_length=255)
@@ -122,6 +143,9 @@ class Notification(models.Model):
     type = models.CharField(max_length=50)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
 
 class HeroSlide(models.Model):
     id = models.IntegerField(primary_key=True)

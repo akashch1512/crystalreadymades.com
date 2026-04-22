@@ -140,6 +140,63 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
     }
   };
 
+  const [locationLoading, setLocationLoading] = useState(false);
+
+  const handleCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          // Reverse geocoding using Nominatim (OpenStreetMap) - free, no API key needed
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+          );
+          if (!response.ok) throw new Error("Network response was not ok");
+          const data = await response.json();
+          
+          if (data && data.address) {
+            setFormData(prev => ({
+              ...prev,
+              postalCode: data.address.postcode || prev.postalCode,
+              city: data.address.city || data.address.town || data.address.state_district || prev.city,
+              state: data.address.state || prev.state,
+              locality: data.address.suburb || data.address.neighborhood || data.address.county || prev.locality,
+              line2: data.address.road || data.display_name || prev.line2
+            }));
+            
+            // Clear any validation errors for fields we just auto-filled
+            setErrors(prev => ({
+              ...prev,
+              ...(data.address.postcode && { postalCode: undefined }),
+              ...((data.address.city || data.address.town || data.address.state_district) && { city: undefined }),
+              ...(data.address.state && { state: undefined }),
+            }) as Record<string, string>);
+          } else {
+             alert("Could not find address details for your location.");
+          }
+        } catch (error) {
+          console.error("Error fetching location data", error);
+          alert("Failed to fetch address details. Please enter manually.");
+        } finally {
+          setLocationLoading(false);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        alert("Unable to retrieve your location. Check your browser location permissions.");
+        setLocationLoading(false);
+      },
+      { timeout: 10000 }
+    );
+  };
+
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       
@@ -184,12 +241,15 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
       {/* Address Section */}
       <h3 className="h3 mt-8 mb-2 pb-2 border-b border-line text-lg">Address</h3>
       
-      <div className="flex flex-col sm:flex-row gap-4 mb-4">
-        <button type="button" className="btn bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 flex items-center justify-center gap-2 py-2">
-          <Navigation size={18} /> Use my current location
-        </button>
-        <button type="button" className="btn bg-surface-muted text-text hover:bg-line border border-line flex items-center justify-center gap-2 py-2">
-          <MapPin size={18} /> Search on map
+      <div className="mb-4">
+        <button 
+          type="button" 
+          onClick={handleCurrentLocation}
+          disabled={locationLoading}
+          className="btn bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 flex items-center justify-center gap-2 py-2 transition-all disabled:opacity-70 disabled:cursor-wait w-full sm:w-auto px-6"
+        >
+          <Navigation size={18} className={locationLoading ? "animate-pulse" : ""} /> 
+          {locationLoading ? "Locating..." : "Use my current location"}
         </button>
       </div>
 

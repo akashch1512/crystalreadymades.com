@@ -56,46 +56,47 @@ def _html_wrap(title: str, body_html: str) -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{title}</title>
 </head>
-<body style="margin:0;padding:0;background:#f9f6f2;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f6f2;padding:32px 0;">
+<body style="margin:0;padding:0;background-color:#f9f6f2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9f6f2;padding:40px 0;">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0"
-               style="background:#ffffff;border-radius:16px;overflow:hidden;
-                      border:1px solid #e7e1da;max-width:600px;">
+               style="background-color:#ffffff;border-radius:16px;overflow:hidden;
+                      border:1px solid #e7e1da;max-width:600px;
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
 
           <!-- Header -->
           <tr>
-            <td style="background:#e05b7a;padding:28px 40px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;
-                         letter-spacing:-0.3px;">Crystal Readymade</h1>
-              <p style="margin:4px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
-                crystalreadymades.com
-              </p>
+            <td style="padding:48px 40px 24px;text-align:center;">
+              <img src="https://i.ibb.co/GfHmzjLy/Hero-Logo.gif" alt="Crystal Readymade" style="display:block;margin:0 auto;height:64px;width:auto;" />
             </td>
           </tr>
 
           <!-- Body -->
           <tr>
-            <td style="padding:36px 40px;">
+            <td style="padding:16px 40px 48px;">
               {body_html}
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background:#f9f6f2;padding:20px 40px;text-align:center;
-                       border-top:1px solid #e7e1da;">
-              <p style="margin:0;color:#6f6764;font-size:12px;line-height:1.6;">
-                Crystal Readymade · Aurangpura Rd, Gulmandi, Chhatrapati Sambhajinagar<br/>
-                <a href="mailto:support@crystalreadymades.com"
-                   style="color:#e05b7a;text-decoration:none;">support@crystalreadymades.com</a>
-                &nbsp;·&nbsp; +91 91300 94080
+            <td style="background-color:#f3efe9;padding:24px 40px;text-align:center;border-top:1px solid #e7e1da;">
+              <p style="margin:0;color:#6f6764;font-size:12px;line-height:1.6;font-weight:500;">
+                Crystal Readymade · Aurangpura Rd, Gulmandi, Chhatrapati Sambhajinagar
+              </p>
+              <p style="margin:8px 0 0;color:#6f6764;font-size:12px;">
+                <a href="https://crystalreadymades.com" style="color:#e05b7a;text-decoration:none;font-weight:600;">Visit our store</a>
+                &nbsp;|&nbsp;
+                <a href="mailto:support@crystalreadymades.com" style="color:#e05b7a;text-decoration:none;">support@crystalreadymades.com</a>
               </p>
             </td>
           </tr>
 
         </table>
+        
+        <!-- Bottom padding for mobile clients -->
+        <div style="height:40px;"></div>
       </td>
     </tr>
   </table>
@@ -117,26 +118,26 @@ def send_verification_otp(user_name: str, to_email: str, otp: str):
         f"— Crystal Readymade Team"
     )
     html = _html_wrap(subject, f"""
-      <h2 style="margin:0 0 8px;color:#1f1b1c;font-size:22px;">Verify your email</h2>
-      <p style="color:#6f6764;font-size:15px;margin:0 0 28px;">
-        Hi <strong>{user_name}</strong>, enter the code below to verify your account.
-      </p>
+      <div style="text-align:center;">
+        <h2 style="margin:0 0 12px;color:#1f1b1c;font-size:24px;font-weight:700;">Verify your email</h2>
+        <p style="color:#6f6764;font-size:15px;margin:0 0 32px;line-height:1.6;">
+          Hi <strong style="color:#1f1b1c;">{user_name}</strong>, use the code below to complete your registration.
+        </p>
 
-      <div style="text-align:center;margin:0 0 28px;">
-        <div style="display:inline-block;background:#f9f6f2;border:2px dashed #e05b7a;
-                    border-radius:12px;padding:20px 40px;">
-          <span style="font-size:40px;font-weight:700;letter-spacing:10px;color:#e05b7a;">
+        <div style="display:inline-block;background-color:#f9f6f2;border:1px solid #e7e1da;
+                    border-radius:12px;padding:24px 40px;margin-bottom:32px;">
+          <span style="font-size:42px;font-weight:800;letter-spacing:12px;color:#e05b7a;margin-right:-12px;">
             {otp}
           </span>
         </div>
-        <p style="margin:12px 0 0;color:#6f6764;font-size:13px;">
-          ⏱ Expires in <strong>10 minutes</strong>
+
+        <p style="margin:0 0 8px;color:#6f6764;font-size:13px;font-weight:500;">
+          This code expires in 10 minutes.
+        </p>
+        <p style="color:#a8a2a0;font-size:13px;margin:0;">
+          If you didn't create an account, you can safely ignore this email.
         </p>
       </div>
-
-      <p style="color:#6f6764;font-size:14px;margin:0;">
-        If you didn't create an account, you can safely ignore this email.
-      </p>
     """)
     _send(to_email, subject, text, html)
 
@@ -146,7 +147,7 @@ def send_verification_otp(user_name: str, to_email: str, otp: str):
 # ─────────────────────────────────────────────
 
 def send_welcome_email(user_name: str, to_email: str):
-    subject = f"Welcome to Crystal Readymade, {user_name}! 🎉"
+    subject = f"Welcome to Crystal Readymade, {user_name}!"
     text = (
         f"Hi {user_name},\n\n"
         f"Welcome to Crystal Readymade! Your account is now active.\n\n"
@@ -155,7 +156,7 @@ def send_welcome_email(user_name: str, to_email: str):
     )
     html = _html_wrap(subject, f"""
       <h2 style="margin:0 0 8px;color:#1f1b1c;font-size:24px;">
-        Welcome, {user_name}! 🎉
+        Welcome, {user_name}!
       </h2>
       <p style="color:#6f6764;font-size:15px;margin:0 0 20px;">
         Your email is verified and your account is ready. Explore premium
@@ -214,7 +215,7 @@ def send_order_placed(user_name: str, to_email: str, order):
         f"— Crystal Readymade Team"
     )
     html = _html_wrap(subject, f"""
-      <h2 style="margin:0 0 6px;color:#1f1b1c;font-size:22px;">Order Confirmed! 🛍️</h2>
+      <h2 style="margin:0 0 6px;color:#1f1b1c;font-size:22px;">Order Confirmed!</h2>
       <p style="color:#6f6764;font-size:15px;margin:0 0 24px;">
         Hi <strong>{user_name}</strong>, we've received your order and it's being processed.
       </p>
@@ -250,7 +251,7 @@ def send_order_placed(user_name: str, to_email: str, order):
       </table>
 
       <p style="color:#6f6764;font-size:14px;margin:0;">
-        We'll send you another email when your order ships. 🚚
+        We'll send you another email when your order ships.
       </p>
     """)
     _send(to_email, subject, text, html)
@@ -305,7 +306,7 @@ def send_order_status_update(user_name: str, to_email: str, order):
         </div>
         """
 
-    subject = f"Order #{order.id} — {cfg['label']} {cfg['emoji']} | Crystal Readymade"
+    subject = f"Order #{order.id} — {cfg['label']} | Crystal Readymade"
     text = (
         f"Hi {user_name},\n\n"
         f"Your order #{order.id} is now {cfg['label']}.\n"
@@ -314,7 +315,7 @@ def send_order_status_update(user_name: str, to_email: str, order):
     )
     html = _html_wrap(subject, f"""
       <h2 style="margin:0 0 6px;color:#1f1b1c;font-size:22px;">
-        {cfg['emoji']} Order {cfg['label']}
+        Order {cfg['label']}
       </h2>
       <p style="color:#6f6764;font-size:15px;margin:0 0 20px;">
         Hi <strong>{user_name}</strong>, here's an update on your order.
@@ -371,7 +372,7 @@ def send_password_reset_otp(user_name: str, to_email: str, otp: str):
           </span>
         </div>
         <p style="margin:12px 0 0;color:#6f6764;font-size:13px;">
-          ⏱ Expires in <strong>10 minutes</strong>
+          Expires in <strong>10 minutes</strong>
         </p>
       </div>
 

@@ -38,6 +38,7 @@ export interface Product {
   stock: number;
   quantity: number;
   ratings: number;
+  reviewCount?: number;
   reviews: Review[];
   specifications?: Record<string, string>;
   createdAt: string;

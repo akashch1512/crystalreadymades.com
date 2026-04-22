@@ -7,6 +7,7 @@ import { WishlistProvider } from './contexts/WishlistContext';
 import { ProductProvider } from './contexts/ProductContext';
 import { OrderProvider } from './contexts/OrderContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { ToastProvider } from './contexts/ToastContext';
 import ScrollToTop from './components/layout/ScrollToTop';
 
 function App() {
@@ -19,7 +20,9 @@ function App() {
             <WishlistProvider>
               <OrderProvider>
                 <NotificationProvider>
-                  <AppRouter />
+                  <ToastProvider>
+                    <AppRouter />
+                  </ToastProvider>
                 </NotificationProvider>
               </OrderProvider>
             </WishlistProvider>
@@ -30,4 +33,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;

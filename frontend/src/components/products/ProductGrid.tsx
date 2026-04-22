@@ -1,6 +1,7 @@
 import React from 'react';
 import ProductCard from './ProductCard';
 import { Product } from '../../types';
+import { PackageSearch } from 'lucide-react';
 
 interface ProductGridProps {
   products: Product[];
@@ -8,21 +9,28 @@ interface ProductGridProps {
   emptyMessage?: string;
 }
 
-const ProductGrid: React.FC<ProductGridProps> = ({ 
-  products, 
-  loading = false, 
-  emptyMessage = "No products found" 
+const ProductGrid: React.FC<ProductGridProps> = ({
+  products,
+  loading = false,
+  emptyMessage = 'No products found',
 }) => {
+  // Loading skeleton — horizontal card shape
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {[...Array(8)].map((_, index) => (
-          <div key={index} className="card overflow-hidden animate-pulse">
-            <div className="w-full h-64 bg-surface-muted"></div>
-            <div className="p-4">
-              <div className="h-4 bg-surface-muted rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-surface-muted rounded w-1/2 mb-4"></div>
-              <div className="h-6 bg-surface-muted rounded w-1/4"></div>
+      <div className="flex flex-col gap-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex bg-surface border border-line rounded-2xl overflow-hidden animate-pulse">
+            {/* Image skeleton */}
+            <div className="flex-shrink-0 w-[160px] sm:w-[200px] md:w-[220px] bg-surface-muted" style={{ minHeight: 200 }} />
+            {/* Text skeleton */}
+            <div className="flex-1 p-5 space-y-3">
+              <div className="h-3 bg-surface-muted rounded w-1/4" />
+              <div className="h-5 bg-surface-muted rounded w-3/4" />
+              <div className="h-3 bg-surface-muted rounded w-1/2" />
+              <div className="h-3 bg-surface-muted rounded w-2/3" />
+              <div className="mt-auto pt-4 flex gap-3">
+                <div className="h-8 bg-surface-muted rounded-full w-28" />
+              </div>
             </div>
           </div>
         ))}
@@ -32,36 +40,21 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
   if (products.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12 bg-surface-muted rounded-2xl border border-line">
-        <div className="text-center">
-          <svg 
-            className="mx-auto h-12 w-12 text-muted" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor" 
-            aria-hidden="true"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="2" 
-              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-            />
-          </svg>
-          <h3 className="mt-2 text-lg font-medium text-text">No products found</h3>
-          <p className="mt-1 text-muted">{emptyMessage}</p>
-        </div>
+      <div className="flex flex-col items-center justify-center py-16 bg-surface-muted rounded-2xl border border-line text-center">
+        <PackageSearch size={48} className="text-muted mb-4" />
+        <h3 className="text-lg font-semibold text-text mb-1">No products found</h3>
+        <p className="text-muted text-sm max-w-sm">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {products.map(product => (
-        <ProductCard key={product.id} product={product} />
+    <div className="flex flex-col gap-4">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} layout="list" />
       ))}
     </div>
-  );  
+  );
 };
 
 export default ProductGrid;

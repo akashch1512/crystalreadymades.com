@@ -53,28 +53,35 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        if User.objects.filter(phone=request.data.get('phone')).exists():
+        user_email = request.data.get('email', '').strip()
+        user_phone = request.data.get('phone', '').strip()
+
+        if not user_email:
+            return Response({"detail": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(email=user_email).exists():
+            return Response({"detail": "Email is already registered"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(phone=user_phone).exists():
             return Response({"detail": "Phone number already registered"}, status=status.HTTP_400_BAD_REQUEST)
         
         user = User.objects.create_user(
-            username=request.data.get('phone'), # Django needs username, using phone
+            username=user_phone, # Django needs username, using phone
             phone=request.data.get('phone'),
             password=request.data.get('password'),
             name=request.data.get('name'),
-            email=request.data.get('email', ''),
+            email=user_email,
             role="user"
         )
         
-        # Send email verification OTP if email provided
-        user_email = request.data.get('email', '').strip()
-        if user_email:
-            otp_code = email_service.generate_otp()
-            EmailVerificationOTP.objects.create(user=user, otp=otp_code)
-            email_service.send_verification_otp(
-                user_name=user.name,
-                to_email=user_email,
-                otp=otp_code,
-            )
+        # Send email verification OTP
+        otp_code = email_service.generate_otp()
+        EmailVerificationOTP.objects.create(user=user, otp=otp_code)
+        email_service.send_verification_otp(
+            user_name=user.name,
+            to_email=user_email,
+            otp=otp_code,
+        )
         
         token = create_access_token(user.id)
         return Response({
@@ -99,7 +106,10 @@ class UserUpdateView(APIView):
         if 'name' in request.data:
             user.name = request.data['name']
         if 'email' in request.data:
-            user.email = request.data['email']
+            new_email = request.data['email'].strip()
+            if new_email != user.email and User.objects.filter(email=new_email).exists():
+                return Response({"detail": "Email address already in use"}, status=status.HTTP_400_BAD_REQUEST)
+            user.email = new_email
         if 'phone' in request.data:
             # Check if new phone is already in use by another user
             if request.data['phone'] != user.phone and User.objects.filter(phone=request.data['phone']).exists():

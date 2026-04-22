@@ -14,7 +14,7 @@ const CartPage: React.FC = () => {
 
   return (
     <div className="page">
-      <div className="section">
+      <div className="section px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
       <h1 className="h1 mb-6">Shopping Cart</h1>
       

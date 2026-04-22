@@ -8,7 +8,8 @@
     isAuthenticated: boolean;
     isAdmin: boolean;
     login: (phone: string, password: string) => Promise<boolean>;
-    register: (name: string, phone: string, password: string) => Promise<boolean>;
+    register: (name: string, phone: string, password: string, email?: string) => Promise<boolean>;
+    verifyOtp: (email: string, otp: string) => Promise<boolean>;
     logout: () => void;
     refreshUser: () => Promise<void>;
     loading: boolean;
@@ -22,6 +23,7 @@
     isAdmin: false,
     login: async () => false,
     register: async () => false,
+    verifyOtp: async () => false,
     logout: () => {},
     refreshUser: async () => {},
     loading: true,
@@ -94,25 +96,41 @@
       try {
         setLoading(true);
         const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await axios.post(`${apiUrl}/api/auth/register`, { name, phone, password, email });
+        await axios.post(`${apiUrl}/api/auth/register`, { name, phone, password, email });
+        
+        // Backend now only sends OTP. Login happens after verification!
+        return true;
+      } catch (error: any) {
+        console.error('Registration failed:', error);
+        if (error.response?.data?.detail) {
+          alert(error.response.data.detail);
+        } else if (error.response?.data?.message) {
+          alert(error.response.data.message);
+        }
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const verifyOtp = async (email: string, otp: string): Promise<boolean> => {
+      try {
+        setLoading(true);
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await axios.post(`${apiUrl}/api/auth/verify-email`, { email, otp });
         const { user: newUser, token } = response.data;
 
-        // Save user and token to localStorage
         setUser(newUser);
         localStorage.setItem('user', JSON.stringify(newUser));
         localStorage.setItem('token', token);
 
-        // Set the token in the Axios default headers for future requests
         axios.defaults.headers.common = axios.defaults.headers.common || {};
         axios.defaults.headers.common.Authorization = `Bearer ${token}`;
 
         return true;
       } catch (error: any) {
-        console.error('Registration failed:', error);
-        if (error.response?.data?.message) {
-          alert(error.response.data.message);
-        }
-        return false;
+        console.error('OTP Verification failed:', error);
+        throw error;
       } finally {
         setLoading(false);
       }
@@ -156,6 +174,7 @@
           isAdmin,
           login,
           register,
+          verifyOtp,
           logout,
           refreshUser,
           loading,

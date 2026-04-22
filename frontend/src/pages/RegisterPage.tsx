@@ -5,7 +5,7 @@ import { useToast } from '../contexts/ToastContext';
 import axios from 'axios';
 
 const RegisterPage: React.FC = () => {
-  const { register, isAuthenticated, refreshUser } = useAuth();
+  const { register, isAuthenticated, verifyOtp } = useAuth();
   const { success, error: toastError, info } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -137,10 +137,7 @@ const RegisterPage: React.FC = () => {
     setOtpLoading(true);
     setOtpError('');
     try {
-      const apiUrl = import.meta.env.VITE_API_URL;
-      await axios.post(`${apiUrl}/api/auth/verify-email`, { otp });
-      // Reload user data to get updated is_email_verified flag
-      await refreshUser();
+      await verifyOtp(formData.email, otp);
       success('Email verified! Welcome to CrystalReadymade');
       navigate(redirectTo === 'checkout' ? '/checkout' : redirectTo);
     } catch (error: any) {

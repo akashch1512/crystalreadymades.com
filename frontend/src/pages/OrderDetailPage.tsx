@@ -148,72 +148,84 @@ const OrderDetailPage: React.FC = () => {
               {order.status !== 'cancelled' ? (
                 <div className="mt-8">
                   <h2 className="h3 mb-4">Order Status</h2>
-                  <div className="relative">
-                    <div className="absolute top-4 left-5 w-[calc(100%-2.5rem)] h-0.5 bg-line"></div>
+                  <div className="relative pl-2 sm:pl-0">
+                    {/* Desktop Horizontal Line */}
+                    <div className="hidden sm:block absolute top-5 left-5 w-[calc(100%-2.5rem)] h-[2px] bg-line"></div>
                     <div 
-                      className="absolute top-4 left-5 h-0.5 bg-brand transition-all duration-500"
-                      style={{ width: `calc(${(orderStep - 1) * 33.3}%)` }}
+                      className="hidden sm:block absolute top-5 left-5 h-[2px] bg-brand transition-all duration-500"
+                      style={{ width: `calc(${(orderStep - 1) * 33.33}%)` }}
+                    ></div>
+
+                    {/* Mobile Vertical Line */}
+                    <div className="sm:hidden absolute top-5 left-[1.125rem] w-[2px] h-[calc(100%-2.5rem)] bg-line"></div>
+                    <div 
+                      className="sm:hidden absolute top-5 left-[1.125rem] w-[2px] bg-brand transition-all duration-500"
+                      style={{ height: `calc(${(orderStep - 1) * 33.33}%)` }}
                     ></div>
                     
-                    <div className="flex justify-between relative z-10">
-                      <div className="flex flex-col items-center">
+                    <div className="flex flex-col sm:flex-row justify-between relative z-10 space-y-8 sm:space-y-0">
+                      {/* Step 1 */}
+                      <div className="flex sm:flex-col items-center sm:items-center">
                         <div 
-                          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${
+                          className={`w-10 h-10 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
                             orderStep >= 1 
-                              ? 'border-brand bg-brand text-white' 
+                              ? 'border-brand bg-brand text-white shadow-sm' 
                               : 'border-line bg-surface text-muted'
                           }`}
                         >
                           <ShoppingBag size={18} />
                         </div>
-                        <p className={`mt-2 text-sm ${orderStep >= 1 ? 'text-brand font-medium' : 'text-muted'}`}>
+                        <p className={`ml-4 sm:ml-0 sm:mt-3 text-base sm:text-sm ${orderStep >= 1 ? 'text-brand font-medium' : 'text-muted'}`}>
                           Order Placed
                         </p>
                       </div>
                       
-                      <div className="flex flex-col items-center">
+                      {/* Step 2 */}
+                      <div className="flex sm:flex-col items-center sm:items-center">
                         <div 
-                          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${
+                          className={`w-10 h-10 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
                             orderStep >= 2 
-                              ? 'border-brand bg-brand text-white' 
-                              : 'border-line bg-surface text-muted'
+                              ? 'border-brand bg-brand text-white shadow-sm' 
+                              : 'border-line bg-surface text-muted bg-white'
                           }`}
                         >
                           <span className="text-sm font-medium">
                             {orderStep >= 2 ? '✓' : '2'}
                           </span>
                         </div>
-                        <p className={`mt-2 text-sm ${orderStep >= 2 ? 'text-brand font-medium' : 'text-muted'}`}>
+                        <p className={`ml-4 sm:ml-0 sm:mt-3 text-base sm:text-sm ${orderStep >= 2 ? 'text-brand font-medium' : 'text-muted'}`}>
                           Processing
                         </p>
                       </div>
                       
-                      <div className="flex flex-col items-center">
+                      {/* Step 3 */}
+                      <div className="flex sm:flex-col items-center sm:items-center">
                         <div 
-                          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${
+                          className={`w-10 h-10 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
                             orderStep >= 3 
-                              ? 'border-brand bg-brand text-white' 
-                              : 'border-line bg-surface text-muted'
+                              ? 'border-brand bg-brand text-white shadow-sm' 
+                              : 'border-line bg-surface text-muted bg-white'
                           }`}
                         >
                           <Truck size={18} />
                         </div>
-                        <p className={`mt-2 text-sm ${orderStep >= 3 ? 'text-brand font-medium' : 'text-muted'}`}>
+                        <p className={`ml-4 sm:ml-0 sm:mt-3 text-base sm:text-sm ${orderStep >= 3 ? 'text-brand font-medium' : 'text-muted'}`}>
                           Shipped
                         </p>
                       </div>
                       
-                      <div className="flex flex-col items-center">
+                      {/* Step 4 */}
+                      <div className="flex sm:flex-col items-center sm:items-center">
                         <div 
-                          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${
+                          className={`w-10 h-10 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
                             orderStep >= 4 
-                              ? 'border-brand bg-brand text-white' 
-                              : 'border-line bg-surface text-muted'
+                              ? 'border-brand bg-brand text-white shadow-sm' 
+                              : 'border-line bg-surface text-muted bg-white'
                           }`}
                         >
                           <Check size={18} />
                         </div>
-                        <p className={`mt-2 text-sm ${orderStep >= 4 ? 'text-brand font-medium' : 'text-muted'}`}>
+                        <p className={`ml-4 sm:ml-0 sm:mt-3 text-base sm:text-sm ${orderStep >= 4 ? 'text-brand font-medium' : 'text-muted'}`}>
                           Delivered
                         </p>
                       </div>

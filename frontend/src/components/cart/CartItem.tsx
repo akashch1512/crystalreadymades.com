@@ -27,10 +27,10 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const productSlug = item.name.toLowerCase().replace(/\s+/g, '-');
 
   return (
-    <div className="flex flex-col sm:flex-row py-6 border-b border-line">
+    <div className="flex flex-col sm:flex-row py-5 sm:py-6 border-b border-line gap-4 sm:gap-0">
       {/* Image and Product Info */}
-      <div className="flex flex-grow sm:w-3/4">
-        <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-xl border border-line">
+      <div className="flex w-full sm:flex-grow sm:w-3/4">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-xl border border-line">
           <img
             src={item.image}
             alt={item.name}
@@ -38,51 +38,50 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           />
         </div>
         
-        <div className="ml-4 flex flex-1 flex-col">
+        <div className="ml-3 sm:ml-4 flex flex-1 flex-col justify-between">
           <div>
-            <div className="flex justify-between">
-              <Link to={`/product/${productSlug}`} className="text-lg font-medium text-text hover:text-brand">
+            <div className="flex justify-between items-start">
+              <Link to={`/product/${productSlug}`} className="text-base sm:text-lg font-medium text-text hover:text-brand line-clamp-2 pr-2">
                 {item.name}
               </Link>
               <button
                 onClick={handleRemove}
                 type="button"
-                className="text-muted hover:text-text sm:hidden"
+                className="text-muted hover:text-red-500 sm:hidden flex-shrink-0 mt-1"
+                aria-label="Remove item"
               >
                 <X size={18} />
               </button>
             </div>
-            <div className="mt-1 flex text-sm">
-              <p className="text-muted">Quantity: {item.quantity}</p>
-            </div>
+            {/* Using hidden on mobile for price row inside details instead we show it at bottom */}
           </div>
           
-          <div className="flex flex-1 items-end justify-between">
-            <div className="flex items-center mt-2">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mt-2 sm:mt-0 gap-2 sm:gap-0">
+            <div className="flex items-center">
               <button
                 onClick={() => handleQuantityChange(item.quantity - 1)}
-                className="text-muted hover:text-text border border-line rounded-l-xl p-1"
+                className="text-muted hover:text-text border border-line rounded-l-lg sm:rounded-l-xl p-1 sm:p-1.5"
                 disabled={item.quantity <= 1}
               >
-                <Minus size={16} />
+                <Minus size={14} className="sm:w-4 sm:h-4" />
               </button>
-              <span className="w-10 text-center border-y border-line py-1">
+              <span className="w-8 sm:w-10 text-center border-y border-line py-1.5 text-sm sm:text-base">
                 {item.quantity}
               </span>
               <button
                 onClick={() => handleQuantityChange(item.quantity + 1)}
-                className="text-muted hover:text-text border border-line rounded-r-xl p-1"
+                className="text-muted hover:text-text border border-line rounded-r-lg sm:rounded-r-xl p-1 sm:p-1.5"
               >
-                <Plus size={16} />
+                <Plus size={14} className="sm:w-4 sm:h-4" />
               </button>
             </div>
             
-            <div className="flex items-center">
-              <p className="text-lg font-medium text-text">
+            <div className="flex items-baseline">
+              <p className="text-base sm:text-lg font-medium text-text">
                 ₹{totalPrice.toFixed(2)}
               </p>
               {item.salePrice && (
-                <p className="ml-2 text-sm text-muted line-through">
+                <p className="ml-1.5 sm:ml-2 text-xs sm:text-sm text-muted line-through">
                   ₹{(item.price * item.quantity).toFixed(2)}
                 </p>
               )}

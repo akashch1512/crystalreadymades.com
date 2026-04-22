@@ -42,6 +42,9 @@ class LoginView(APIView):
         if not user.check_password(password):
             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             
+        if not user.is_email_verified:
+            return Response({"detail": "Please verify your email before logging in"}, status=status.HTTP_403_FORBIDDEN)
+            
         token = create_access_token(user.id)
         # Manually constructing response to match: {user: {}, token: ""}
         return Response({
@@ -60,10 +63,18 @@ class RegisterView(APIView):
             return Response({"detail": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(email=user_email).exists():
-            return Response({"detail": "Email is already registered"}, status=status.HTTP_400_BAD_REQUEST)
+            existing = User.objects.get(email=user_email)
+            if existing.is_email_verified:
+                return Response({"detail": "Email is already registered"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                existing.delete()
 
         if User.objects.filter(phone=user_phone).exists():
-            return Response({"detail": "Phone number already registered"}, status=status.HTTP_400_BAD_REQUEST)
+            existing = User.objects.get(phone=user_phone)
+            if existing.is_email_verified:
+                return Response({"detail": "Phone number already registered"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                existing.delete()
         
         user = User.objects.create_user(
             username=user_phone, # Django needs username, using phone
@@ -83,11 +94,9 @@ class RegisterView(APIView):
             otp=otp_code,
         )
         
-        token = create_access_token(user.id)
         return Response({
-            "user": UserSerializer(user).data,
-            "token": token,
-            "email_verification_required": bool(user_email),
+            "message": "OTP sent successfully",
+            "email_verification_required": True,
         })
 
 class UserMeView(APIView):
@@ -122,14 +131,19 @@ class UserUpdateView(APIView):
 
 class VerifyEmailView(APIView):
     """POST /api/auth/verify-email  — Validate the OTP sent during registration."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
+        email_addr = str(request.data.get('email', '')).strip()
         otp_input = str(request.data.get('otp', '')).strip()
-        if not otp_input:
-            return Response({"detail": "OTP is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not email_addr or not otp_input:
+            return Response({"detail": "Email and OTP are required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = request.user
+        try:
+            user = User.objects.get(email=email_addr)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
         if user.is_email_verified:
             return Response({"detail": "Email is already verified"})
@@ -166,15 +180,23 @@ class VerifyEmailView(APIView):
             to_email=user.email or '',
         )
 
-        return Response({"detail": "Email verified successfully!", "user": UserSerializer(user).data})
+        token = create_access_token(user.id)
+        return Response({"detail": "Email verified successfully!", "user": UserSerializer(user).data, "token": token})
 
 
 class ResendOTPView(APIView):
     """POST /api/auth/resend-otp  — Resend a new OTP to the authenticated user."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
-        user = request.user
+        email_addr = str(request.data.get('email', '')).strip()
+        if not email_addr:
+            return Response({"detail": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email_addr)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         if user.is_email_verified:
             return Response({"detail": "Email is already verified"})
         if not user.email:

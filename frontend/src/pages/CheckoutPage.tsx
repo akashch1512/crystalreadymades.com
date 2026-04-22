@@ -37,36 +37,36 @@ const CheckoutPage: React.FC = () => {
   if (orderCompleted && orderId) {
     return (
       <div className="page">
-        <div className="section">
+        <div className="section px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-3xl">
-        <div className="text-center py-12 bg-green-50 rounded-2xl border border-green-200">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h1 className="h2 mb-2">Order Placed Successfully!</h1>
-          <p className="text-muted mb-6">
-            Thank you for your purchase. Your order has been confirmed.
-          </p>
-          <p className="text-muted mb-8">
-            Order ID: <span className="font-semibold">{orderId}</span>
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              to={`/orders/${orderId}`}
-              className="btn btn-primary"
-            >
-              View Order Details
-            </Link>
-            <Link
-              to="/"
-              className="btn btn-secondary"
-            >
-              Continue Shopping
-            </Link>
-          </div>
-        </div>
+            <div className="text-center py-10 px-6 sm:py-12 sm:px-12 bg-green-50 rounded-2xl border border-green-200 shadow-sm mx-auto">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm">
+                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h1 className="h2 mb-3">Order Placed Successfully!</h1>
+              <p className="text-muted mb-4 sm:mb-6 text-sm sm:text-base">
+                Thank you for your purchase. Your order has been confirmed.
+              </p>
+              <p className="text-muted mb-8 text-sm sm:text-base">
+                Order ID: <span className="font-semibold text-text">{orderId}</span>
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <Link
+                  to={`/orders/${orderId}`}
+                  className="btn btn-primary w-full sm:w-auto"
+                >
+                  View Order Details
+                </Link>
+                <Link
+                  to="/"
+                  className="btn btn-secondary w-full sm:w-auto"
+                >
+                  Continue Shopping
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

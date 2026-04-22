@@ -14,10 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'phone', 'email', 'role', 'addresses']
 
 class CategorySerializer(serializers.ModelSerializer):
-    # Use the raw FK column (parent_id) instead of traversing parent.id
-    # This avoids silent null returns when select_related is not applied
-    parent_id = serializers.IntegerField(source='parent_id', read_only=True, allow_null=True)
-
+    # parent_id is a real DB column Django auto-creates for ForeignKey(parent).
+    # ModelSerializer discovers it automatically — no explicit field needed.
     class Meta:
         model = Category
         fields = ['id', 'name', 'slug', 'image', 'description', 'parent_id']

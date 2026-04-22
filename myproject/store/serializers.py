@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'phone', 'email', 'role', 'addresses']
 
 class CategorySerializer(serializers.ModelSerializer):
-    parent_id = serializers.IntegerField(source='parent.id', read_only=True)
+    parent_id = serializers.IntegerField(source='parent.id', read_only=True, allow_null=True)
 
     class Meta:
         model = Category

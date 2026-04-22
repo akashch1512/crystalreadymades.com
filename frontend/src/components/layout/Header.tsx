@@ -19,23 +19,20 @@ const Header: React.FC = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [mobileClothingsOpen, setMobileClothingsOpen] = useState(false);
-  const [mobileUniformsOpen, setMobileUniformsOpen] = useState(false);
+  // Track which mobile accordion is open by parent category id
+  const [mobileOpenId, setMobileOpenId] = useState<string | null>(null);
 
-  const uniformsCategory = categories.find(
-    (c) => c.slug === 'uniforms' || c.name.toLowerCase() === 'uniforms'
-  );
-  const uniformSchools = uniformsCategory
-    ? categories.filter((c) => c.parentId === uniformsCategory.id)
-    : [];
+  // All root-level categories (no parent) become dropdown headers
+  const parentCategories = categories.filter((c) => !c.parentId);
 
-  const clothingCategory = categories.find(
-    (c) => c.slug === 'clothing' || c.name.toLowerCase() === 'clothing'
-  );
-  // Only show children of the clothing category — never fall back to showing all roots
-  const clothingChildren = clothingCategory
-    ? categories.filter((c) => c.parentId === clothingCategory.id)
-    : [];
+  // Map from parent id → its children
+  const childrenByParent: Record<string, typeof categories> = {};
+  categories.forEach((c) => {
+    if (c.parentId) {
+      if (!childrenByParent[c.parentId]) childrenByParent[c.parentId] = [];
+      childrenByParent[c.parentId].push(c);
+    }
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,69 +127,42 @@ const Header: React.FC = () => {
 
           {/* Navigation Links - Desktop */}
           <nav className="hidden md:flex items-center text-sm">
-            {/* Uniforms Dropdown */}
-            <div className="relative group py-2 px-3">
-              <button className="flex items-center text-muted hover:text-brand transition-colors">
-                Uniforms
-                <ChevronDown size={16} className="ml-1" />
-              </button>
-              <div className="absolute left-0 mt-0 w-72 bg-surface rounded-lg shadow-soft py-2 z-50
-                              opacity-0 invisible group-hover:opacity-100 group-hover:visible
-                              transition-all duration-200 border border-line">
-                {uniformSchools.length > 0 ? (
-                  uniformSchools.map((school) => (
+            {/* Dynamic Category Dropdowns */}
+            {parentCategories.map((parent) => {
+              const children = childrenByParent[parent.id] || [];
+              return (
+                <div key={parent.id} className="relative group py-2 px-3">
+                  <button className="flex items-center text-muted hover:text-brand transition-colors">
+                    {parent.name}
+                    <ChevronDown size={16} className="ml-1" />
+                  </button>
+                  <div className="absolute left-0 mt-0 w-64 bg-surface rounded-lg shadow-soft py-2 z-50
+                                  opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                                  transition-all duration-200 border border-line">
+                    {children.length > 0 ? (
+                      children.map((child) => (
+                        <Link
+                          key={child.id}
+                          to={`/products?category=${encodeURIComponent(child.slug)}`}
+                          className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand"
+                        >
+                          {child.name}
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2.5 text-sm text-muted italic">No sub-categories yet</div>
+                    )}
+                    <hr className="my-1 border-line" />
                     <Link
-                      key={school.id}
-                      to={`/products?category=${encodeURIComponent(school.slug)}`}
-                      className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand"
+                      to={`/products?category=${encodeURIComponent(parent.slug)}`}
+                      className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted"
                     >
-                      {school.name}
+                      View All {parent.name}
                     </Link>
-                  ))
-                ) : (
-                  <div className="px-4 py-2.5 text-sm text-muted italic">No sub-categories yet</div>
-                )}
-                <hr className="my-1 border-line" />
-                <Link
-                  to={`/products?category=${encodeURIComponent(uniformsCategory?.slug || 'uniforms')}`}
-                  className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted"
-                >
-                  View All Uniforms
-                </Link>
-              </div>
-            </div>
-
-            {/* Clothing Dropdown */}
-            <div className="relative group py-2 px-3">
-              <button className="flex items-center text-muted hover:text-brand transition-colors">
-                Clothing
-                <ChevronDown size={16} className="ml-1" />
-              </button>
-              <div className="absolute left-0 mt-0 w-64 bg-surface rounded-lg shadow-soft py-2 z-50
-                              opacity-0 invisible group-hover:opacity-100 group-hover:visible
-                              transition-all duration-200 border border-line">
-                {clothingChildren.length > 0 ? (
-                  clothingChildren.map((category) => (
-                    <Link
-                      key={category.id}
-                      to={`/products?category=${encodeURIComponent(category.slug)}`}
-                      className="block px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand"
-                    >
-                      {category.name}
-                    </Link>
-                  ))
-                ) : (
-                  <div className="px-4 py-2.5 text-sm text-muted italic">No sub-categories yet</div>
-                )}
-                <hr className="my-1 border-line" />
-                <Link
-                  to={`/products?category=${encodeURIComponent(clothingCategory?.slug || 'clothing')}`}
-                  className="block px-4 py-2.5 text-sm font-medium text-brand hover:bg-surface-muted"
-                >
-                  View All Clothing
-                </Link>
-              </div>
-            </div>
+                  </div>
+                </div>
+              );
+            })}
 
             {/* Divider */}
             <div className="w-px h-4 bg-line mx-2" />
@@ -339,88 +309,47 @@ const Header: React.FC = () => {
       {showMobileMenu && (
         <div className="md:hidden bg-surface border-t border-line shadow-soft">
           <nav className="flex flex-col px-4 py-2">
-            {/* Uniforms Accordion */}
-            <div className="border-b border-line">
-              <button
-                onClick={() => setMobileUniformsOpen(!mobileUniformsOpen)}
-                className="flex items-center justify-between w-full py-3 text-muted"
-              >
-                Uniforms
-                <ChevronDown size={16} className={`transition-transform ${mobileUniformsOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {mobileUniformsOpen && (
-                <div className="pl-4 pb-2 space-y-1">
-                  {uniformSchools.length > 0 ? (
-                    uniformSchools.map((school) => (
+            {/* Dynamic Category Accordions */}
+            {parentCategories.map((parent) => {
+              const children = childrenByParent[parent.id] || [];
+              const isOpen = mobileOpenId === parent.id;
+              return (
+                <div key={parent.id} className="border-b border-line">
+                  <button
+                    onClick={() => setMobileOpenId(isOpen ? null : parent.id)}
+                    className="flex items-center justify-between w-full py-3 text-muted"
+                  >
+                    {parent.name}
+                    <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isOpen && (
+                    <div className="pl-4 pb-2 space-y-1">
+                      {children.length > 0 ? (
+                        children.map((child) => (
+                          <Link
+                            key={child.id}
+                            to={`/products?category=${encodeURIComponent(child.slug)}`}
+                            className="block py-2 text-sm text-muted hover:text-brand"
+                            onClick={() => setShowMobileMenu(false)}
+                          >
+                            {child.name}
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="py-2 text-sm text-muted italic">No sub-categories yet</div>
+                      )}
                       <Link
-                        key={school.id}
-                        to={`/products?category=${encodeURIComponent(school.slug)}`}
-                        className="block py-2 text-sm text-muted hover:text-brand"
+                        to={`/products?category=${encodeURIComponent(parent.slug)}`}
+                        className="block py-2 text-sm font-medium text-brand"
                         onClick={() => setShowMobileMenu(false)}
                       >
-                        {school.name}
+                        View All {parent.name}
                       </Link>
-                    ))
-                  ) : (
-                    <div className="py-2 text-sm text-muted">Loading school categories...</div>
+                    </div>
                   )}
-                  <Link
-                    to={`/products?category=${encodeURIComponent(uniformsCategory?.slug || 'uniforms')}`}
-                    className="block py-2 text-sm font-medium text-brand"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    View All Uniforms
-                  </Link>
                 </div>
-              )}
-            </div>
-
-            {/* Clothing Accordion */}
-            <div className="border-b border-line">
-              <button
-                onClick={() => setMobileClothingsOpen(!mobileClothingsOpen)}
-                className="flex items-center justify-between w-full py-3 text-muted"
-              >
-                Clothing
-                <ChevronDown size={16} className={`transition-transform ${mobileClothingsOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {mobileClothingsOpen && (
-                <div className="pl-4 pb-2 space-y-1">
-                  {clothingChildren.length > 0 ? (
-                    clothingChildren.map((category) => (
-                      <Link
-                        key={category.id}
-                        to={`/products?category=${encodeURIComponent(category.slug)}`}
-                        className="block py-2 text-sm text-muted hover:text-brand"
-                        onClick={() => setShowMobileMenu(false)}
-                      >
-                        {category.name}
-                      </Link>
-                    ))
-                  ) : (
-                    categories
-                      .filter((category) => !category.parentId && category.id !== uniformsCategory?.id)
-                      .map((category) => (
-                        <Link
-                          key={category.id}
-                          to={`/products?category=${encodeURIComponent(category.slug)}`}
-                          className="block py-2 text-sm text-muted hover:text-brand"
-                          onClick={() => setShowMobileMenu(false)}
-                        >
-                          {category.name}
-                        </Link>
-                      ))
-                  )}
-                  <Link
-                    to={`/products?category=${encodeURIComponent(clothingCategory?.slug || 'clothing')}`}
-                    className="block py-2 text-sm font-medium text-brand"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    View All Clothing
-                  </Link>
-                </div>
-              )}
-            </div>
+              );
+            })}
             <Link
               to="/our-story"
               className="py-3 text-muted border-b border-line"

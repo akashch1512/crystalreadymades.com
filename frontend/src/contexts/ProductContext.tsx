@@ -88,11 +88,15 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
           brand: p.brand || p.brand_name || p.brand?.name || '',
           brandSlug: p.brand_slug || p.brand?.slug || '',
         })));
-        setCategories(categoryData.map((c: any) => ({
-          ...c,
-          id: String(c.id),
-          parentId: c.parent_id !== null && c.parent_id !== undefined ? String(c.parent_id) : undefined,
-        })));
+        setCategories(categoryData.map((c: any) => {
+          // API may return 'parentId' (camelCase) or 'parent_id' (snake_case)
+          const rawParentId = c.parentId ?? c.parent_id ?? null;
+          return {
+            ...c,
+            id: String(c.id),
+            parentId: rawParentId !== null && rawParentId !== undefined ? String(rawParentId) : undefined,
+          };
+        }));
         setBrands(brandData.map((b: any) => ({ ...b, id: String(b.id) })));
       } catch (error) {
         console.error("Failed to fetch product data:", error);

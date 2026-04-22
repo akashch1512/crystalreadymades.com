@@ -53,6 +53,7 @@ class Category(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     image = models.CharField(max_length=500, null=True, blank=True)
+    mobile_image = models.CharField(max_length=500, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     parent = models.ForeignKey(
         'self',
@@ -156,6 +157,7 @@ class HeroSlide(models.Model):
     buttonText = models.CharField(max_length=255)
     buttonLink = models.CharField(max_length=500)
     image = models.CharField(max_length=1000)
+    mobile_image = models.CharField(max_length=1000, null=True, blank=True)
     
     class Meta:
         ordering = ['id']

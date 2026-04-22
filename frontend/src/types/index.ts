@@ -123,6 +123,7 @@ export interface Category {
   name: string;
   slug: string;
   image?: string;
+  mobileImage?: string;
   description?: string;
   parentId?: string;
 }

@@ -94,4 +94,4 @@ class TermsAdmin(admin.ModelAdmin):
 @admin.register(HeroSlide)
 class HeroSlideAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'subtitle')
-    fields = ('id', 'title', 'subtitle', 'description', 'buttonText', 'buttonLink', 'image')
+    fields = ('id', 'title', 'subtitle', 'description', 'buttonText', 'buttonLink', 'image', 'mobile_image')

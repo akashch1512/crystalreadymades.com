@@ -10,6 +10,7 @@ interface Slide {
   buttonText: string;
   buttonLink: string;
   image: string;
+  mobileImage?: string;
 }
 
 const Hero: React.FC = () => {
@@ -64,31 +65,42 @@ const Hero: React.FC = () => {
             index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
           }`}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/60 to-transparent z-10"></div>
+          {/* Mobile Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/60 to-transparent z-10 md:hidden"></div>
+          {/* Desktop Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/60 to-transparent z-10 hidden md:block"></div>
+
+          {/* Mobile Image */}
+          <img
+            src={slide.mobileImage || slide.image}
+            alt={slide.title}
+            className="w-full h-full object-cover md:hidden object-center"
+          />
+          {/* Desktop Image */}
           <img
             src={slide.image}
             alt={slide.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover hidden md:block object-center"
           />
           
-          <div className="absolute inset-0 z-20 flex items-center">
-            <div className="container mx-auto px-4 md:px-10">
-              <div className="max-w-lg">
-                <p className="caption text-brand mb-2 transform translate-y-4 opacity-0 animate-fade-in"
+          <div className="absolute inset-0 z-20 flex items-end pb-[70px] sm:pb-24 md:items-center md:pb-0">
+            <div className="container mx-auto px-6 md:px-10">
+              <div className="max-w-xl mx-auto text-center md:text-left md:mx-0">
+                <p className="caption text-brand mb-2 md:mb-3 transform translate-y-4 opacity-0 animate-fade-in text-xs sm:text-sm font-semibold tracking-wider"
                    style={{ animationDelay: '0.2s' }}>
                   {slide.subtitle}
                 </p>
-                <h1 className="h1 text-text mb-4 transform translate-y-4 opacity-0 animate-fade-in"
+                <h1 className="h1 text-text mb-3 md:mb-5 transform translate-y-4 opacity-0 animate-fade-in text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
                    style={{ animationDelay: '0.4s' }}>
                   {slide.title}
                 </h1>
-                <p className="text-muted mb-6 transform translate-y-4 opacity-0 animate-fade-in"
+                <p className="text-muted mb-6 md:mb-8 transform translate-y-4 opacity-0 animate-fade-in text-sm sm:text-base md:text-lg max-w-sm mx-auto md:max-w-none md:mx-0 hidden md:block"
                    style={{ animationDelay: '0.6s' }}>
                   {slide.description}
                 </p>
                 <Link
                   to={slide.buttonLink}
-                  className="btn btn-primary transform translate-y-4 opacity-0 animate-fade-in"
+                  className="btn btn-primary transform translate-y-4 opacity-0 animate-fade-in w-full sm:w-auto inline-flex justify-center"
                   style={{ animationDelay: '0.8s' }}
                 >
                   {slide.buttonText}

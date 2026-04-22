@@ -18,7 +18,7 @@ class CategorySerializer(serializers.ModelSerializer):
     # ModelSerializer discovers it automatically — no explicit field needed.
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'image', 'description', 'parent_id']
+        fields = ['id', 'name', 'slug', 'image', 'mobile_image', 'description', 'parent_id']
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
@@ -70,4 +70,4 @@ class NotificationSerializer(serializers.ModelSerializer):
 class HeroSlideSerializer(serializers.ModelSerializer):
     class Meta:
         model = HeroSlide
-        fields = ['id', 'title', 'subtitle', 'description', 'buttonText', 'buttonLink', 'image']
+        fields = ['id', 'title', 'subtitle', 'description', 'buttonText', 'buttonLink', 'image', 'mobile_image']

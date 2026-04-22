@@ -34,11 +34,18 @@ const CategoryPage: React.FC = () => {
       {/* Hero Banner */}
       <div className="relative w-full h-[220px] sm:h-[280px] overflow-hidden">
         {parentCategory?.image ? (
-          <img
-            src={parentCategory.image}
-            alt={parentCategory.name}
-            className="w-full h-full object-cover"
-          />
+          <>
+            <img
+              src={parentCategory.mobileImage || parentCategory.image}
+              alt={parentCategory.name}
+              className="w-full h-full object-cover md:hidden object-center"
+            />
+            <img
+              src={parentCategory.image}
+              alt={parentCategory.name}
+              className="w-full h-full object-cover hidden md:block object-center"
+            />
+          </>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-brand/20 via-accent/30 to-surface-muted" />
         )}

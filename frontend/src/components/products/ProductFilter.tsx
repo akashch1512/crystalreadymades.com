@@ -91,7 +91,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
         <div className="space-y-6">
           <div>
             <label htmlFor="sidebar-search" className="block text-sm font-medium text-text mb-2">
-              Search uniforms & wear
+              Search products
             </label>
             <input
               id="sidebar-search"
@@ -101,7 +101,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                 ...filterOptions,
                 search: e.target.value || undefined,
               })}
-              placeholder="Search by school, style, fabric..."
+              placeholder="Search by name, brand..."
               className="input w-full rounded-2xl border-line"
             />
           </div>

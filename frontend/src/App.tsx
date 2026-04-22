@@ -7,10 +7,12 @@ import { WishlistProvider } from './contexts/WishlistContext';
 import { ProductProvider } from './contexts/ProductContext';
 import { OrderProvider } from './contexts/OrderContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import ScrollToTop from './components/layout/ScrollToTop';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <ProductProvider>
           <CartProvider>

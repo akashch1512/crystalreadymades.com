@@ -14,6 +14,7 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import AccountPage from './pages/AccountPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import CategoryPage from './pages/CategoryPage';
 import { useAuth } from './contexts/AuthContext';
 import { OurStory } from './pages/OurStory';
 import { TermsAndPolicies } from './pages/Terms';
@@ -58,6 +59,7 @@ const AppRouter: React.FC = () => {
         <Route index element={<HomePage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="product/:slug" element={<ProductDetailPage />} />
+        <Route path="category/:slug" element={<CategoryPage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />

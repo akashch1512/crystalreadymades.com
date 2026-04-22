@@ -18,6 +18,7 @@ from django.conf import settings
 
 from .models import *
 from .serializers import *
+from . import email_service
 
 # --- Auth Views (Matching Schema) ---
 
@@ -64,10 +65,22 @@ class RegisterView(APIView):
             role="user"
         )
         
+        # Send email verification OTP if email provided
+        user_email = request.data.get('email', '').strip()
+        if user_email:
+            otp_code = email_service.generate_otp()
+            EmailVerificationOTP.objects.create(user=user, otp=otp_code)
+            email_service.send_verification_otp(
+                user_name=user.name,
+                to_email=user_email,
+                otp=otp_code,
+            )
+        
         token = create_access_token(user.id)
         return Response({
             "user": UserSerializer(user).data,
-            "token": token
+            "token": token,
+            "email_verification_required": bool(user_email),
         })
 
 class UserMeView(APIView):
@@ -95,6 +108,79 @@ class UserUpdateView(APIView):
         
         user.save()
         return Response(UserSerializer(user).data)
+
+
+class VerifyEmailView(APIView):
+    """POST /api/auth/verify-email  — Validate the OTP sent during registration."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        otp_input = str(request.data.get('otp', '')).strip()
+        if not otp_input:
+            return Response({"detail": "OTP is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+
+        if user.is_email_verified:
+            return Response({"detail": "Email is already verified"})
+
+        # Get the latest unused OTP for this user
+        otp_obj = (
+            EmailVerificationOTP.objects
+            .filter(user=user, used=False)
+            .order_by('-created_at')
+            .first()
+        )
+
+        if not otp_obj:
+            return Response({"detail": "No pending OTP found. Please request a new one."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if otp_obj.is_expired():
+            return Response({"detail": "OTP has expired. Please request a new one."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if otp_obj.otp != otp_input:
+            return Response({"detail": "Invalid OTP. Please try again."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Mark OTP as used and user as verified
+        otp_obj.used = True
+        otp_obj.save()
+        user.is_email_verified = True
+        user.save()
+
+        # Send welcome email
+        email_service.send_welcome_email(
+            user_name=user.name,
+            to_email=user.email or '',
+        )
+
+        return Response({"detail": "Email verified successfully!", "user": UserSerializer(user).data})
+
+
+class ResendOTPView(APIView):
+    """POST /api/auth/resend-otp  — Resend a new OTP to the authenticated user."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if user.is_email_verified:
+            return Response({"detail": "Email is already verified"})
+        if not user.email:
+            return Response({"detail": "No email address on file."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Invalidate old OTPs
+        EmailVerificationOTP.objects.filter(user=user, used=False).update(used=True)
+
+        otp_code = email_service.generate_otp()
+        EmailVerificationOTP.objects.create(user=user, otp=otp_code)
+        email_service.send_verification_otp(
+            user_name=user.name,
+            to_email=user.email,
+            otp=otp_code,
+        )
+        return Response({"detail": "A new OTP has been sent to your email."})
 
 # --- Product Catalog Views ---
 
@@ -190,7 +276,53 @@ class OrderListCreateView(APIView):
             )
 
         serializer = OrderSerializer(order)
+
+        # Send order placed confirmation email
+        user = request.user
+        if user.email:
+            email_service.send_order_placed(
+                user_name=user.name,
+                to_email=user.email,
+                order=order,
+            )
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class OrderStatusUpdateView(APIView):
+    """PATCH /api/orders/<id>/status  — Admin updates order status + notifies user by email."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, order_id):
+        if request.user.role != 'admin':
+            return Response({"detail": "Admin access required"}, status=status.HTTP_403_FORBIDDEN)
+
+        order = get_object_or_404(Order, id=order_id)
+        new_status = request.data.get('status')
+        tracking_number = request.data.get('tracking_number')
+
+        valid_statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
+        if new_status not in valid_statuses:
+            return Response(
+                {"detail": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        order.status = new_status
+        if tracking_number:
+            order.tracking_number = tracking_number
+        order.save()
+
+        # Send status update email
+        user = order.user
+        if user.email:
+            email_service.send_order_status_update(
+                user_name=user.name,
+                to_email=user.email,
+                order=order,
+            )
+
+        return Response(OrderSerializer(order).data)
 
 class PaymentCreateOrderView(APIView):
     authentication_classes = []

@@ -11,6 +11,8 @@ urlpatterns = [
     # Auth
     path('api/auth/login', views.LoginView.as_view()),
     path('api/auth/register', views.RegisterView.as_view()),
+    path('api/auth/verify-email', views.VerifyEmailView.as_view()),
+    path('api/auth/resend-otp', views.ResendOTPView.as_view()),
     path('api/user/me', views.UserMeView.as_view()),
     path('api/user/update', views.UserUpdateView.as_view()),
 
@@ -32,6 +34,7 @@ urlpatterns = [
     # Orders
     path('api/orders', views.OrderListCreateView.as_view()),
     path('api/orders/user/<int:user_id>', views.UserOrderListView.as_view()),
+    path('api/orders/<int:order_id>/status', views.OrderStatusUpdateView.as_view()),
 
     # Payment
     path('api/payment/create-order', views.PaymentCreateOrderView.as_view()),

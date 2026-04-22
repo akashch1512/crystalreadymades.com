@@ -197,3 +197,15 @@ CSRF_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
+
+# ─────────────────────────────────────────────
+# Zoho Mail SMTP Configuration
+# ─────────────────────────────────────────────
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.zoho.in'          # Zoho India server (use smtp.zoho.com for US)
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('ZOHO_EMAIL')        # e.g. support@crystalreadymades.com
+EMAIL_HOST_PASSWORD = os.environ.get('ZOHO_PASSWORD') # Zoho App-specific password
+DEFAULT_FROM_EMAIL = os.environ.get('ZOHO_EMAIL', 'support@crystalreadymades.com')
+SITE_URL = os.environ.get('SITE_URL', 'https://crystalreadymades.com')

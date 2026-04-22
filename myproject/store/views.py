@@ -99,10 +99,10 @@ class UserUpdateView(APIView):
 # --- Product Catalog Views ---
 
 class CategoryListView(generics.ListAPIView):
-    queryset = Category.objects.order_by('parent_id', 'name')
+    queryset = Category.objects.select_related('parent').order_by('parent_id', 'name')
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
-    pagination_class = None  # <--- ADD THIS (FastAPI returned .all())
+    pagination_class = None
 
 class CategoryDetailView(generics.RetrieveAPIView):
     queryset = Category.objects.all()

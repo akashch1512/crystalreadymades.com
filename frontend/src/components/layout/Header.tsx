@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, ShoppingBag, Heart, User, Menu, X, LogOut, Shield, ChevronDown } from 'lucide-react';
+import { Search, ShoppingCart, ShoppingBag, Heart, User, Menu, X, LogOut, Shield, ChevronDown, Home } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import { useProducts } from '../../contexts/ProductContext';
@@ -124,6 +124,14 @@ const Header: React.FC = () => {
 
           {/* Navigation Links - Desktop */}
           <nav className="hidden md:flex items-center text-sm">
+            {/* Home */}
+            <Link to="/" className="px-3 py-2 text-muted hover:text-brand transition-colors font-medium">
+              Home
+            </Link>
+
+            {/* Divider */}
+            <div className="w-px h-4 bg-line mx-1" />
+
             {/* Dynamic Category Dropdowns */}
             {parentCategories.map((parent) => {
               const children = childrenByParent[parent.id] || [];
@@ -242,13 +250,22 @@ const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
+            {/* Home icon — mobile only */}
+            <Link
+              to="/"
+              className="rounded-full p-2 text-muted hover:text-brand transition-colors"
+              aria-label="Home"
+            >
+              <Home size={22} />
+            </Link>
+
             {isAuthenticated && (
               <Link
                 to="/account"
-                className="ml-3 rounded-full p-2 text-muted hover:text-brand transition-colors md:hidden"
+                className="rounded-full p-2 text-muted hover:text-brand transition-colors md:hidden"
                 aria-label="My Account"
               >
-                <User size={24} />
+                <User size={22} />
               </Link>
             )}
 
@@ -321,6 +338,15 @@ const Header: React.FC = () => {
       {showMobileMenu && (
         <div className="md:hidden bg-surface border-t border-line shadow-soft">
           <nav className="flex flex-col px-4 py-2">
+            {/* Home */}
+            <Link
+              to="/"
+              className="py-3 text-muted border-b border-line font-medium hover:text-brand transition-colors"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Home
+            </Link>
+
             {/* Dynamic Category Accordions */}
             {parentCategories.map((parent) => {
               const children = childrenByParent[parent.id] || [];

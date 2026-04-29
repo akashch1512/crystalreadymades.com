@@ -72,7 +72,7 @@ const Header: React.FC = () => {
               <img
                 src="/Logo/Hero_Logo.png"
                 alt="Crystal Readymade Logo"
-                className="h-12 w-auto"
+                className="h-10 md:h-12 w-auto"
               />
             </Link>
           </div>

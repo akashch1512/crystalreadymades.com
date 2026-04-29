@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Star, Heart, ShoppingBag, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductReview from '../components/products/ProductReview';
 import { useProducts } from '../contexts/ProductContext';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import { Review } from '../types';
 
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -12,12 +15,16 @@ const ProductDetailPage: React.FC = () => {
   const { getProductBySlug } = useProducts();
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
+  const { user } = useAuth();
+  const { success, error: showError } = useToast();
   
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
   
   useEffect(() => {
     if (slug) {
@@ -34,6 +41,10 @@ const ProductDetailPage: React.FC = () => {
           }
           
           const foundProduct = await response.json();
+          const savedReviews = JSON.parse(
+            localStorage.getItem(`crystal-product-reviews-${slug}`) || '[]'
+          );
+          foundProduct.reviews = [...savedReviews, ...(foundProduct.reviews || [])];
           setProduct(foundProduct);
           document.title = `${foundProduct.name} | CrystalReadymade`;
         } catch (err) {
@@ -51,7 +62,7 @@ const ProductDetailPage: React.FC = () => {
       fetchProduct();
     }
   }, [slug, navigate]);
-  
+
   const handleQuantityChange = (value: number) => {
     if (value < 1) return;
     if (product && value > product.quantity) return;
@@ -81,6 +92,52 @@ const ProductDetailPage: React.FC = () => {
   
   const handleNextImage = () => {
     setActiveImage(prev => (prev === product.images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleReviewSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!product || !slug) return;
+
+    const trimmedComment = reviewComment.trim();
+
+    if (!user) {
+      showError('Please login to write a review');
+      return;
+    }
+
+    if (!trimmedComment) {
+      showError('Please write a short review');
+      return;
+    }
+
+    const newReview: Review = {
+      id: `local-review-${Date.now()}`,
+      userId: user.id,
+      userName: user.name,
+      rating: reviewRating,
+      comment: trimmedComment,
+      createdAt: new Date().toISOString(),
+    };
+
+    const savedKey = `crystal-product-reviews-${slug}`;
+    const savedReviews = JSON.parse(localStorage.getItem(savedKey) || '[]');
+    localStorage.setItem(savedKey, JSON.stringify([newReview, ...savedReviews]));
+
+    setProduct((current: any) => {
+      const reviews = [newReview, ...(current.reviews || [])];
+      const ratings = reviews.reduce((sum: number, review: Review) => sum + review.rating, 0) / reviews.length;
+
+      return {
+        ...current,
+        reviews,
+        ratings,
+      };
+    });
+
+    setReviewComment('');
+    setReviewRating(5);
+    success('Thanks! Your review has been added');
   };
   
   if (loading) {
@@ -123,8 +180,9 @@ const ProductDetailPage: React.FC = () => {
   const isWishlisted = isInWishlist(product.id);
   
   // Calculate average rating
-  const avgRating = product.reviews.length > 0
-    ? (product.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / product.reviews.length).toFixed(1)
+  const reviews = product.reviews || [];
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : '0.0';
 
   return (
@@ -219,7 +277,7 @@ const ProductDetailPage: React.FC = () => {
                   }`}
                 />
               ))}
-              <span className="ml-2 text-muted">{avgRating} ({product.reviews.length} reviews)</span>
+              <span className="ml-2 text-muted">{avgRating} ({reviews.length} reviews)</span>
             </div>
           </div>
           
@@ -397,9 +455,71 @@ const ProductDetailPage: React.FC = () => {
       
       {/* Customer Reviews */}
       <div className="mt-12">
-        <h2 className="h3 mb-4">Customer Reviews</h2>
+        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="h3 mb-1">Customer Reviews</h2>
+            <p className="text-sm text-muted">Share your experience with this product.</p>
+          </div>
+          {reviews.length > 0 && (
+            <span className="text-sm text-muted">
+              Based on {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+            </span>
+          )}
+        </div>
+
+        {user ? (
+          <form onSubmit={handleReviewSubmit} className="card mb-8 p-5 sm:p-6">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="caption mb-2 text-brand">Write a review</p>
+                <p className="text-sm text-muted">
+                  Posting as <span className="font-medium text-text">{user.name}</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-2" role="radiogroup" aria-label="Review rating">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    className="rounded-full p-1 text-yellow-400 transition hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50"
+                    aria-label={`${star} star${star === 1 ? '' : 's'}`}
+                    aria-pressed={reviewRating === star}
+                  >
+                    <Star
+                      size={22}
+                      className={star <= reviewRating ? 'fill-current' : 'text-line'}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="block">
+              <span className="label mb-2 block">Review</span>
+              <textarea
+                value={reviewComment}
+                onChange={(event) => setReviewComment(event.target.value)}
+                className="textarea min-h-24 resize-y"
+                placeholder="Tell other parents about the fit, fabric, and quality..."
+              />
+            </label>
+            <button type="submit" className="btn btn-primary mt-4 w-full sm:w-fit">
+              Submit Review
+            </button>
+          </form>
+        ) : (
+          <div className="card mb-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div>
+              <p className="font-medium text-text">Login to write a review</p>
+              <p className="text-sm text-muted">Your review will be posted with your account name.</p>
+            </div>
+            <Link to="/login" className="btn btn-primary w-full sm:w-fit">
+              Login
+            </Link>
+          </div>
+        )}
         
-        {product.reviews.length > 0 ? (
+        {reviews.length > 0 ? (
           <div>
             <div className="flex items-center mb-6">
               <div className="flex items-center">
@@ -419,12 +539,12 @@ const ProductDetailPage: React.FC = () => {
                 </div>
               </div>
               <span className="ml-4 text-muted">
-                Based on {product.reviews.length} {product.reviews.length === 1 ? 'review' : 'reviews'}
+                Based on {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
               </span>
             </div>
             
             <div className="space-y-2">
-              {product.reviews.map((review: any) => (
+              {reviews.map((review: any) => (
                 <ProductReview key={review.id} review={review} />
               ))}
             </div>

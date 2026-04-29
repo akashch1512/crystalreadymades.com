@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 
 const BrandStory: React.FC = () => (
-  <section className="section">
+  <section className="section section-muted">
     <div className="container mx-auto">
       <div className="card overflow-hidden p-6 shadow-soft sm:p-8 lg:p-10">
         <div className="grid items-center gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:gap-12">

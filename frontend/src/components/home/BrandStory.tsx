@@ -32,14 +32,23 @@ const BrandStory: React.FC = () => (
             </Link>
           </div>
 
-          <div className="card bg-surface-muted/60 p-6 shadow-none sm:p-8">
-            <p className="caption mb-4 font-semibold text-brand">Discover the journey</p>
-            <h3 className="h3 mb-4 max-w-md">
-              Designed for growing kids and proud families.
-            </h3>
-            <p className="text-sm leading-7 text-muted sm:text-base">
-              Crystal is built on the promise that every outfit should feel as good as it looks, while lasting through every playground, celebration, and school day.
-            </p>
+          <div className="card grid gap-5 bg-surface-muted/60 p-4 shadow-none sm:grid-cols-[0.9fr_1.1fr] sm:items-center sm:p-5 lg:grid-cols-1 lg:p-6 xl:grid-cols-[0.88fr_1.12fr]">
+            <div className="overflow-hidden rounded-xl border border-line bg-surface">
+              <img
+                src="https://images.unsplash.com/photo-1523381294911-8d3cead13475?auto=format&fit=crop&q=80&w=700"
+                alt="Children's clothing neatly arranged"
+                className="h-48 w-full object-cover sm:h-56 lg:h-64 xl:h-full"
+              />
+            </div>
+            <div className="px-1 pb-1 sm:px-0 sm:py-2">
+              <p className="caption mb-4 font-semibold text-brand">Discover the journey</p>
+              <h3 className="h3 mb-4 max-w-md">
+                Designed for growing kids and proud families.
+              </h3>
+              <p className="text-sm leading-7 text-muted sm:text-base">
+                Crystal is built on the promise that every outfit should feel as good as it looks, while lasting through every playground, celebration, and school day.
+              </p>
+            </div>
           </div>
         </div>
       </div>

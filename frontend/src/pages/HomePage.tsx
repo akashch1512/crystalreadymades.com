@@ -7,23 +7,13 @@ import BrandStory from '../components/home/BrandStory';
 // import Newsletter from '../components/home/Newsletter';
 
 const SectionDivider: React.FC = () => (
-  <div className="relative -mb-px overflow-hidden leading-none" style={{ background: 'var(--bg)' }}>
+  <div className="w-full overflow-hidden leading-none bg-bg -mb-px">
     <svg
-      viewBox="0 0 1440 64"
-      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1200 120"
       preserveAspectRatio="none"
-      className="block w-full"
-      style={{ height: '56px' }}
+      className="block w-full h-[60px] md:h-[100px] text-surface-muted fill-current"
     >
-      <path
-        d="M0,32 C240,64 480,0 720,32 C960,64 1200,0 1440,32 L1440,64 L0,64 Z"
-        fill="var(--surface-muted)"
-      />
-      <path
-        d="M0,40 C240,72 480,8 720,40 C960,72 1200,8 1440,40 L1440,64 L0,64 Z"
-        fill="var(--surface-muted)"
-        opacity="0.5"
-      />
+      <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118,152.47,130,222.14,108.7,258.92,97.5,294.61,76.9,321.39,56.44Z"></path>
     </svg>
   </div>
 );

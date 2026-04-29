@@ -16,7 +16,7 @@ const ProductDetailPage: React.FC = () => {
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
   const { user } = useAuth();
-  const { success, error: showError } = useToast();
+  const { success, info, error: showError } = useToast();
   
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -71,8 +71,13 @@ const ProductDetailPage: React.FC = () => {
   
   const handleAddToCart = () => {
     if (product) {
+      if (quantity > product.quantity) {
+        showError(`${product.name} has only ${product.quantity} available`);
+        return;
+      }
+
       addItem(product, quantity);
-      // Show add to cart notification (could be added)
+      success(`${product.name} added to cart`);
     }
   };
   
@@ -81,8 +86,10 @@ const ProductDetailPage: React.FC = () => {
     
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
+      info('Removed from wishlist');
     } else {
       addToWishlist(product.id);
+      success('Added to wishlist');
     }
   };
   

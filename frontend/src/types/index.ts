@@ -8,17 +8,23 @@ export interface User {
   avatar?: string;
   addresses: Address[];
   role: 'user' | 'admin';
+  isEmailVerified?: boolean;
 }
 
 export interface Address {
   id: string;
   name: string;
+  email?: string;
+  contactNo?: string;
+  altContactNo?: string;
   line1: string;
   line2?: string;
+  locality?: string;
   city: string;
   state: string;
   postalCode: string;
   country: string;
+  addressType?: string;
   isDefault: boolean;
 }
 
@@ -62,6 +68,7 @@ export interface CartItem {
   salePrice?: number;
   image: string;
   quantity: number;
+  availableQuantity?: number;
 }
 
 export interface WishlistItem {

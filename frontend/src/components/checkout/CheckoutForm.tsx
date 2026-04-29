@@ -12,7 +12,7 @@ interface CheckoutFormProps {
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
   const { user } = useAuth();
-  const { items, subtotal, tax, shipping, discount, total, clearCart } = useCart();
+  const { items, total, clearCart } = useCart();
   const { createOrder } = useOrders();
   const navigate = useNavigate();
 
@@ -52,6 +52,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
 
     if (items.length === 0) {
       setError('Your cart is empty');
+      return;
+    }
+
+    const invalidItem = items.find(
+      item => typeof item.availableQuantity === 'number' && item.quantity > item.availableQuantity
+    );
+
+    if (invalidItem) {
+      setError(`${invalidItem.name} has only ${invalidItem.availableQuantity} available. Please update your cart.`);
       return;
     }
 
@@ -243,37 +252,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
               <span className="block text-sm text-muted">Pay when you receive your order</span>
             </div>
           </label>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="h3 mb-4">Order Summary</h3>
-
-        <div className="bg-surface-muted p-4 rounded-2xl border border-line">
-          <div className="space-y-2">
-            <div className="flex justify-between text-muted">
-              <span>Subtotal</span>
-              <span>Rs. {subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-muted">
-              <span>Tax</span>
-              <span>Rs. {tax.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-muted">
-              <span>Shipping</span>
-              <span>{shipping === 0 ? 'Free' : `Rs. ${shipping.toFixed(2)}`}</span>
-            </div>
-            {discount > 0 && (
-              <div className="flex justify-between text-green-600">
-                <span>Discount</span>
-                <span>-Rs. {discount.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="divider pt-2 mt-2 flex justify-between font-medium text-text">
-              <span>Total</span>
-              <span>Rs. {total.toFixed(2)}</span>
-            </div>
-          </div>
         </div>
       </div>
 

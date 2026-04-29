@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { X, Plus, Minus } from 'lucide-react';
 import { CartItem as CartItemType } from '../../types';
 import { useCart } from '../../contexts/CartContext';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CartItemProps {
   item: CartItemType;
@@ -10,6 +11,7 @@ interface CartItemProps {
 
 const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const { updateQuantity, removeItem } = useCart();
+  const { info } = useToast();
   
   const handleQuantityChange = (newQuantity: number) => {
     updateQuantity(item.id, newQuantity);
@@ -17,11 +19,15 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
   
   const handleRemove = () => {
     removeItem(item.id);
+    info(`${item.name} removed from cart`);
   };
   
   // Calculate the price (use sale price if available)
   const price = item.salePrice || item.price;
   const totalPrice = price * item.quantity;
+  const maxQuantity = item.availableQuantity;
+  const hasStockLimit = typeof maxQuantity === 'number';
+  const reachedStockLimit = hasStockLimit && item.quantity >= maxQuantity;
   
   // Generate the product slug from the name
   const productSlug = item.name.toLowerCase().replace(/\s+/g, '-');
@@ -60,8 +66,9 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             <div className="flex items-center">
               <button
                 onClick={() => handleQuantityChange(item.quantity - 1)}
-                className="text-muted hover:text-text border border-line rounded-l-lg sm:rounded-l-xl p-1 sm:p-1.5"
+                className="text-muted hover:text-text border border-line rounded-l-lg sm:rounded-l-xl p-1 sm:p-1.5 disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={item.quantity <= 1}
+                aria-label="Decrease quantity"
               >
                 <Minus size={14} className="sm:w-4 sm:h-4" />
               </button>
@@ -70,11 +77,18 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
               </span>
               <button
                 onClick={() => handleQuantityChange(item.quantity + 1)}
-                className="text-muted hover:text-text border border-line rounded-r-lg sm:rounded-r-xl p-1 sm:p-1.5"
+                className="text-muted hover:text-text border border-line rounded-r-lg sm:rounded-r-xl p-1 sm:p-1.5 disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={reachedStockLimit}
+                aria-label="Increase quantity"
               >
                 <Plus size={14} className="sm:w-4 sm:h-4" />
               </button>
             </div>
+            {hasStockLimit && (
+              <p className="text-xs text-muted">
+                {reachedStockLimit ? `Only ${maxQuantity} available` : `${maxQuantity} available`}
+              </p>
+            )}
             
             <div className="flex items-baseline">
               <p className="text-base sm:text-lg font-medium text-text">

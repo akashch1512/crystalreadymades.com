@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { User, MapPin, LogOut, Settings, Shield, Phone } from 'lucide-react';
+import { User, MapPin, LogOut, Settings, Shield, ShoppingBag, Bell } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const AccountSidebar: React.FC = () => {
@@ -14,105 +14,113 @@ const AccountSidebar: React.FC = () => {
 
   if (!user) return null;
 
+  // Generate initials for avatar fallback
+  const initials = user.name
+    ? user.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
+    : 'U';
+
+  const navItems = [
+    { to: '/account', label: 'Profile', icon: User, end: true },
+    { to: '/account/addresses', label: 'My Addresses', icon: MapPin, end: false },
+    { to: '/orders', label: 'My Orders', icon: ShoppingBag, end: false },
+    { to: '/account/settings', label: 'Settings', icon: Settings, end: false },
+  ];
+
   return (
-    <div className="w-full md:w-64 card overflow-hidden">
-      {/* User Info */}
-      <div className="p-6 bg-brand text-white">
-        <div className="flex items-center gap-3">
-          {/* Profile Photo */}
-          {user.avatar ? (
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-brand-strong flex items-center justify-center border-2 border-white/30">
-              <User size={24} className="text-white" />
-            </div>
-          )}
-          <div>
-            <h2 className="text-xl font-semibold">{user.name}</h2>
-            <p className="text-white/80 mt-0.5 flex items-center text-sm">
-              <Phone size={14} className="mr-1" />
-              {user.phone || 'No phone added'}
-            </p>
+    <div className="card overflow-hidden w-full">
+      {/* ── Profile header ── */}
+      <div className="relative p-6" style={{ background: 'var(--brand)' }}>
+        {/* Decorative blob */}
+        <div
+          className="pointer-events-none absolute top-0 right-0 w-32 h-32 rounded-full opacity-10"
+          style={{ background: 'white', transform: 'translate(30%, -30%)' }}
+          aria-hidden="true"
+        />
+
+        <div className="flex items-center gap-4 relative">
+          {/* Avatar */}
+          <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center shrink-0 overflow-hidden">
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white text-lg font-bold">{initials}</span>
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <h2 className="text-white font-semibold text-base leading-tight truncate">{user.name}</h2>
+            {user.email && (
+              <p className="text-white/70 text-xs mt-0.5 truncate">{user.email}</p>
+            )}
+            {user.phone && (
+              <p className="text-white/60 text-xs mt-0.5">{user.phone}</p>
+            )}
           </div>
         </div>
+
+        {/* Member badge */}
+        {user.isEmailVerified && (
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs text-white/90">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-300" />
+            Verified Account
+          </div>
+        )}
       </div>
 
-      {/* Navigation Links */}
-      <nav className="p-4">
-        <ul className="space-y-1">
-          <li>
-            <NavLink
-              to="/account"
-              end
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${isActive
-                  ? 'bg-brand/10 text-brand font-medium'
-                  : 'text-muted hover:bg-surface-muted'
-                }`
-              }
-            >
-              <User size={20} className="mr-3" />
-              Profile
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/account/addresses"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${isActive
-                  ? 'bg-brand/10 text-brand font-medium'
-                  : 'text-muted hover:bg-surface-muted'
-                }`
-              }
-            >
-              <MapPin size={20} className="mr-3" />
-              Addresses
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/account/settings"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${isActive
-                  ? 'bg-brand/10 text-brand font-medium'
-                  : 'text-muted hover:bg-surface-muted'
-                }`
-              }
-            >
-              <Settings size={20} className="mr-3" />
-              Account Settings
-            </NavLink>
-          </li>
+      {/* ── Navigation ── */}
+      <nav className="p-3">
+        <ul className="space-y-0.5">
+          {navItems.map(({ to, label, icon: Icon, end }) => (
+            <li key={to}>
+              <NavLink
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-brand/10 text-brand'
+                      : 'text-muted hover:bg-surface-muted hover:text-text'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon size={17} className={isActive ? 'text-brand' : 'text-muted'} />
+                    {label}
+                  </>
+                )}
+              </NavLink>
+            </li>
+          ))}
 
-          {/* Admin Link */}
           {isAdmin && (
             <li>
               <NavLink
                 to="/admin"
                 className={({ isActive }) =>
-                  `flex items-center px-4 py-2 rounded-md ${isActive
-                    ? 'bg-brand/10 text-brand font-medium'
-                    : 'text-muted hover:bg-surface-muted'
+                  `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-brand/10 text-brand'
+                      : 'text-muted hover:bg-surface-muted hover:text-text'
                   }`
                 }
               >
-                <Shield size={20} className="mr-3" />
-                Admin Dashboard
+                {({ isActive }) => (
+                  <>
+                    <Shield size={17} className={isActive ? 'text-brand' : 'text-muted'} />
+                    Admin Dashboard
+                  </>
+                )}
               </NavLink>
             </li>
           )}
 
-          {/* Logout */}
-          <li className="pt-4 mt-4 border-t border-line">
+          <li className="pt-3 mt-2 border-t border-line">
             <button
               onClick={handleLogout}
-              className="flex items-center w-full px-4 py-2 rounded-md text-muted hover:bg-surface-muted"
+              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-muted hover:bg-red-50 hover:text-red-600 transition-colors"
             >
-              <LogOut size={20} className="mr-3" />
+              <LogOut size={17} />
               Logout
             </button>
           </li>

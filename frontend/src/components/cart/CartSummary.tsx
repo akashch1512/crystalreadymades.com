@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 const CartSummary: React.FC = () => {
-  const { subtotal, tax, shipping, discount, total, applyDiscount } = useCart();
+  const { items, subtotal, tax, shipping, discount, total, applyDiscount } = useCart();
   const { isAuthenticated } = useAuth();
+  const { error } = useToast();
   const navigate = useNavigate();
   
   const [discountCode, setDiscountCode] = useState('');
@@ -31,6 +33,15 @@ const CartSummary: React.FC = () => {
   };
   
   const handleCheckout = () => {
+    const invalidItem = items.find(
+      item => typeof item.availableQuantity === 'number' && item.quantity > item.availableQuantity
+    );
+
+    if (invalidItem) {
+      error(`${invalidItem.name} has only ${invalidItem.availableQuantity} available`);
+      return;
+    }
+
     if (isAuthenticated) {
       navigate('/checkout');
     } else {

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { CartItem, Product } from '../types';
 import { defaultCart } from '../data/mockData';
+import { useProducts } from './ProductContext';
 
 interface CartContextValue {
   items: CartItem[];
@@ -44,6 +45,7 @@ function loadCartFromStorage() {
 }
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { products } = useProducts();
   // Lazy initializers read localStorage BEFORE the first render,
   // so there is no race condition with the save effect.
   const [items, setItems] = useState<CartItem[]>(() => {
@@ -72,19 +74,50 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('cart', JSON.stringify(cartData));
   }, [items, shipping, discount]);
 
+  useEffect(() => {
+    if (products.length === 0 || items.length === 0) return;
+
+    setItems(prevItems =>
+      prevItems
+        .map(item => {
+          const product = products.find(p => p.id === item.productId);
+          if (!product) return item;
+
+          const availableQuantity = Math.max(0, product.quantity ?? product.stock ?? 0);
+          return {
+            ...item,
+            price: product.price,
+            salePrice: product.salePrice,
+            availableQuantity,
+            quantity: Math.min(item.quantity, availableQuantity),
+          };
+        })
+        .filter(item => item.quantity > 0)
+    );
+  }, [products]);
+
   const addItem = (product: Product, quantity: number) => {
+    const availableQuantity = Math.max(0, product.quantity ?? product.stock ?? 0);
+    if (availableQuantity <= 0) return;
+    const requestedQuantity = Math.max(1, quantity);
+
     setItems(prevItems => {
       const existingItemIndex = prevItems.findIndex(
         item => item.productId === product.id
       );
       if (existingItemIndex >= 0) {
         const updatedItems = [...prevItems];
+        const currentQuantity = updatedItems[existingItemIndex].quantity;
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          quantity: updatedItems[existingItemIndex].quantity + quantity
+          price: product.price,
+          salePrice: product.salePrice,
+          availableQuantity,
+          quantity: Math.min(currentQuantity + requestedQuantity, availableQuantity)
         };
         return updatedItems;
       } else {
+        const cartQuantity = Math.min(requestedQuantity, availableQuantity);
         return [
           ...prevItems,
           {
@@ -94,7 +127,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             price: product.price,
             salePrice: product.salePrice,
             image: product.images?.[0] ?? 'https://via.placeholder.com/300',
-            quantity
+            quantity: cartQuantity,
+            availableQuantity
           }
         ];
       }
@@ -108,7 +142,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setItems(prevItems =>
       prevItems.map(item =>
-        item.id === itemId ? { ...item, quantity } : item
+        item.id === itemId
+          ? { ...item, quantity: Math.min(quantity, item.availableQuantity ?? quantity) }
+          : item
       )
     );
   };

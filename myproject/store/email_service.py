@@ -2,7 +2,7 @@
 Crystal Readymade — Unified Email Service (Zoho SMTP)
 Handles all transactional emails: verification OTP, welcome, order events.
 """
-import random
+import secrets
 import string
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
@@ -14,7 +14,7 @@ from django.utils import timezone
 # ─────────────────────────────────────────────
 
 def generate_otp(length=6):
-    return ''.join(random.choices(string.digits, k=length))
+    return f"{secrets.randbelow(1_000_000):06d}"
 
 
 # ─────────────────────────────────────────────

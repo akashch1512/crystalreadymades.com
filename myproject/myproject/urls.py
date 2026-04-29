@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.urls import path
+from django.http import JsonResponse
 from store import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+
     # Root
     path('', lambda request: JsonResponse({"status": "API is running"})),
 
@@ -12,6 +13,7 @@ urlpatterns = [
     path('api/auth/login', views.LoginView.as_view()),
     path('api/auth/register', views.RegisterView.as_view()),
     path('api/auth/verify-email', views.VerifyEmailView.as_view()),
+    path('api/auth/verify-email-change', views.VerifyEmailChangeView.as_view()),
     path('api/auth/resend-otp', views.ResendOTPView.as_view()),
     path('api/user/me', views.UserMeView.as_view()),
     path('api/user/update', views.UserUpdateView.as_view()),
@@ -24,7 +26,8 @@ urlpatterns = [
     path('api/products/brands', views.BrandListView.as_view()),
 
     # Products
-    path('api/products', views.ProductListView.as_view()), # Handles ?skip=0&limit=100
+    path('api/products', views.ProductListView.as_view()),
+    path('api/products/<str:slug>/reviews', views.ProductReviewCreateView.as_view()),
     path('api/products/<str:slug>', views.ProductDetailView.as_view()),
 
     # Users
@@ -47,11 +50,7 @@ urlpatterns = [
     path('api/addresses', views.AddressListCreateView.as_view()),
     path('api/addresses/<int:address_id>', views.AddressDetailView.as_view()),
     path('api/addresses/<int:address_id>/set-default', views.AddressSetDefaultView.as_view()),
-    
+
     # Hero Slides
     path('api/hero-slides', views.HeroSlideListView.as_view()),
-
 ]
-
-# Helper for root
-from django.http import JsonResponse

@@ -8,17 +8,21 @@ import urllib.request
 from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.parsers import JSONParser
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
+from django.db.models import Avg
+from django.db import transaction
 from datetime import datetime, timedelta
+from decimal import Decimal
 import jwt
 from django.conf import settings
 
 from .models import *
 from .serializers import *
 from . import email_service
+from .authentication import JWTAuthenticationAllowUnverified
 
 # --- Auth Views (Matching Schema) ---
 
@@ -46,58 +50,159 @@ class LoginView(APIView):
             return Response({"detail": "Please verify your email before logging in"}, status=status.HTTP_403_FORBIDDEN)
             
         token = create_access_token(user.id)
-        # Manually constructing response to match: {user: {}, token: ""}
         return Response({
             "user": UserSerializer(user).data,
             "token": token
         })
 
+
 class RegisterView(APIView):
+    """POST /api/auth/register — Store pending registration and send OTP.
+    The actual User account is ONLY created after OTP verification."""
     permission_classes = [AllowAny]
 
     def post(self, request):
         user_email = request.data.get('email', '').strip()
         user_phone = request.data.get('phone', '').strip()
+        user_name = request.data.get('name', '').strip()
+        user_password = request.data.get('password', '')
 
         if not user_email:
             return Response({"detail": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not user_phone:
+            return Response({"detail": "Phone is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not user_password:
+            return Response({"detail": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Block if email/phone already belongs to an existing user
         if User.objects.filter(email=user_email).exists():
-            existing = User.objects.get(email=user_email)
-            if existing.is_email_verified:
-                return Response({"detail": "Email is already registered"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                existing.delete()
-
+            return Response({"detail": "Email is already registered"}, status=status.HTTP_400_BAD_REQUEST)
         if User.objects.filter(phone=user_phone).exists():
-            existing = User.objects.get(phone=user_phone)
-            if existing.is_email_verified:
-                return Response({"detail": "Phone number already registered"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                existing.delete()
-        
-        user = User.objects.create_user(
-            username=user_phone, # Django needs username, using phone
-            phone=request.data.get('phone'),
-            password=request.data.get('password'),
-            name=request.data.get('name'),
-            email=user_email,
-            role="user"
-        )
-        
-        # Send email verification OTP
+            return Response({"detail": "Phone number already registered"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Remove any stale pending registrations for this email/phone
+        PendingRegistration.objects.filter(email=user_email).delete()
+        PendingRegistration.objects.filter(phone=user_phone).delete()
+
+        # Hash the password and store pending data — NO User created yet
         otp_code = email_service.generate_otp()
-        EmailVerificationOTP.objects.create(user=user, otp=otp_code)
+        import hashlib
+        otp_hash = hashlib.sha256(otp_code.encode()).hexdigest()
+
+        PendingRegistration.objects.create(
+            name=user_name,
+            phone=user_phone,
+            email=user_email,
+            password_hash=make_password(user_password),
+            otp_hash=otp_hash,
+        )
+
         email_service.send_verification_otp(
-            user_name=user.name,
+            user_name=user_name,
             to_email=user_email,
             otp=otp_code,
         )
-        
+
         return Response({
             "message": "OTP sent successfully",
             "email_verification_required": True,
         })
+
+
+class VerifyEmailView(APIView):
+    """POST /api/auth/verify-email — Validate OTP and CREATE the user account."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email_addr = str(request.data.get('email', '')).strip()
+        otp_input = str(request.data.get('otp', '')).strip()
+
+        if not email_addr or not otp_input:
+            return Response({"detail": "Email and OTP are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Find the pending registration
+        pending = PendingRegistration.objects.filter(email=email_addr).order_by('-created_at').first()
+        if not pending:
+            return Response({"detail": "No pending registration found. Please register again."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        if pending.is_expired():
+            pending.delete()
+            return Response({"detail": "OTP has expired. Please register again."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if not pending.check_otp(otp_input):
+            return Response({"detail": "Invalid OTP. Please try again."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Double-check email/phone not taken (race condition guard)
+        if User.objects.filter(email=email_addr).exists():
+            pending.delete()
+            return Response({"detail": "Email is already registered"}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(phone=pending.phone).exists():
+            pending.delete()
+            return Response({"detail": "Phone number already registered"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # NOW create the real user account
+        user = User(
+            username=pending.phone,
+            phone=pending.phone,
+            name=pending.name,
+            email=pending.email,
+            password=pending.password_hash,   # already hashed by make_password
+            is_email_verified=True,
+            role='user',
+        )
+        user.save()
+
+        # Clean up pending record
+        PendingRegistration.objects.filter(email=email_addr).delete()
+
+        # Send welcome email
+        email_service.send_welcome_email(
+            user_name=user.name,
+            to_email=user.email or '',
+        )
+
+        token = create_access_token(user.id)
+        return Response({
+            "detail": "Email verified successfully!",
+            "user": UserSerializer(user).data,
+            "token": token,
+        })
+
+
+class ResendOTPView(APIView):
+    """POST /api/auth/resend-otp — Resend a new OTP for a pending registration."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email_addr = str(request.data.get('email', '')).strip()
+        if not email_addr:
+            return Response({"detail": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        pending = PendingRegistration.objects.filter(email=email_addr).order_by('-created_at').first()
+        if not pending:
+            return Response({"detail": "No pending registration found. Please register again."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        # Generate new OTP and reset the timestamp
+        otp_code = email_service.generate_otp()
+        import hashlib
+        from django.utils import timezone
+        pending.otp_hash = hashlib.sha256(otp_code.encode()).hexdigest()
+        pending.created_at = timezone.now()
+        pending.save(update_fields=['otp_hash', 'created_at'])
+
+        email_service.send_verification_otp(
+            user_name=pending.name,
+            to_email=pending.email,
+            otp=otp_code,
+        )
+        return Response({"detail": "A new OTP has been sent to your email."})
+
+
+# --- User Profile Views ---
 
 class UserMeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -110,33 +215,63 @@ class UserUpdateView(APIView):
 
     def put(self, request):
         user = request.user
-        
-        # Update fields if provided
+        email_changed = False
+        new_email = None
+
+        # Update name if provided
         if 'name' in request.data:
             user.name = request.data['name']
-        if 'email' in request.data:
-            new_email = request.data['email'].strip()
-            if new_email != user.email and User.objects.filter(email=new_email).exists():
-                return Response({"detail": "Email address already in use"}, status=status.HTTP_400_BAD_REQUEST)
-            user.email = new_email
+
+        # Update phone if provided
         if 'phone' in request.data:
-            # Check if new phone is already in use by another user
             if request.data['phone'] != user.phone and User.objects.filter(phone=request.data['phone']).exists():
                 return Response({"detail": "Phone number already in use"}, status=status.HTTP_400_BAD_REQUEST)
             user.phone = request.data['phone']
-        
+
+        # Handle email change — requires re-verification
+        if 'email' in request.data:
+            new_email = request.data['email'].strip()
+            if new_email != user.email:
+                if User.objects.filter(email=new_email).exclude(id=user.id).exists():
+                    return Response({"detail": "Email address already in use"}, status=status.HTTP_400_BAD_REQUEST)
+                user.email = new_email
+                user.is_email_verified = False
+                email_changed = True
+
         user.save()
+
+        # If email changed, send verification OTP
+        if email_changed and new_email:
+            # Invalidate old OTPs
+            EmailVerificationOTP.objects.filter(user=user, used=False).update(used=True)
+
+            otp_code = email_service.generate_otp()
+            import hashlib
+            otp_hash = hashlib.sha256(otp_code.encode()).hexdigest()
+            EmailVerificationOTP.objects.create(user=user, otp_hash=otp_hash)
+            email_service.send_verification_otp(
+                user_name=user.name,
+                to_email=new_email,
+                otp=otp_code,
+            )
+            return Response({
+                "user": UserSerializer(user).data,
+                "email_verification_required": True,
+                "detail": "A verification OTP has been sent to your new email address.",
+            })
+
         return Response(UserSerializer(user).data)
 
 
-class VerifyEmailView(APIView):
-    """POST /api/auth/verify-email  — Validate the OTP sent during registration."""
-    permission_classes = [AllowAny]
+class VerifyEmailChangeView(APIView):
+    """POST /api/auth/verify-email-change — Verify OTP after an email change. Requires authentication."""
+    authentication_classes = [JWTAuthenticationAllowUnverified]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         email_addr = str(request.data.get('email', '')).strip()
         otp_input = str(request.data.get('otp', '')).strip()
-        
+
         if not email_addr or not otp_input:
             return Response({"detail": "Email and OTP are required"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -145,8 +280,9 @@ class VerifyEmailView(APIView):
         except User.DoesNotExist:
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if user.is_email_verified:
-            return Response({"detail": "Email is already verified"})
+        # Only allow the authenticated user to verify their own new email
+        if user.id != request.user.id:
+            return Response({"detail": "Not allowed"}, status=status.HTTP_403_FORBIDDEN)
 
         # Get the latest unused OTP for this user
         otp_obj = (
@@ -164,7 +300,7 @@ class VerifyEmailView(APIView):
             return Response({"detail": "OTP has expired. Please request a new one."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        if otp_obj.otp != otp_input:
+        if not otp_obj.check_otp(otp_input):
             return Response({"detail": "Invalid OTP. Please try again."},
                             status=status.HTTP_400_BAD_REQUEST)
 
@@ -174,45 +310,13 @@ class VerifyEmailView(APIView):
         user.is_email_verified = True
         user.save()
 
-        # Send welcome email
-        email_service.send_welcome_email(
-            user_name=user.name,
-            to_email=user.email or '',
-        )
-
         token = create_access_token(user.id)
-        return Response({"detail": "Email verified successfully!", "user": UserSerializer(user).data, "token": token})
+        return Response({
+            "detail": "Email verified successfully!",
+            "user": UserSerializer(user).data,
+            "token": token,
+        })
 
-
-class ResendOTPView(APIView):
-    """POST /api/auth/resend-otp  — Resend a new OTP to the authenticated user."""
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        email_addr = str(request.data.get('email', '')).strip()
-        if not email_addr:
-            return Response({"detail": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user = User.objects.get(email=email_addr)
-        except User.DoesNotExist:
-            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        if user.is_email_verified:
-            return Response({"detail": "Email is already verified"})
-        if not user.email:
-            return Response({"detail": "No email address on file."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Invalidate old OTPs
-        EmailVerificationOTP.objects.filter(user=user, used=False).update(used=True)
-
-        otp_code = email_service.generate_otp()
-        EmailVerificationOTP.objects.create(user=user, otp=otp_code)
-        email_service.send_verification_otp(
-            user_name=user.name,
-            to_email=user.email,
-            otp=otp_code,
-        )
-        return Response({"detail": "A new OTP has been sent to your email."})
 
 # --- Product Catalog Views ---
 
@@ -232,93 +336,167 @@ class BrandListView(generics.ListAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     permission_classes = [AllowAny]
-    pagination_class = None  # <--- ADD THIS
+    pagination_class = None
 
 class ProductListView(generics.ListAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related('category', 'brand').prefetch_related('reviews')
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
-    # KEEP PAGINATION HERE (FastAPI used skip/limit on products)
-    # It will use the SkipLimitPagination we fixed in step 1.
 
 class ProductDetailView(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related('category', 'brand').prefetch_related('reviews')
     serializer_class = ProductSerializer
     lookup_field = 'slug'
     permission_classes = [AllowAny]
 
-# --- User & Order Views ---
+class ProductReviewCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser]
 
-# ... User views ...
+    def post(self, request, slug):
+        product = get_object_or_404(Product, slug=slug)
+        rating = request.data.get('rating')
+        comment = str(request.data.get('comment', '')).strip()
+
+        try:
+            rating = float(rating)
+        except (TypeError, ValueError):
+            return Response({"detail": "Please choose a valid rating"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if rating < 1 or rating > 5:
+            return Response({"detail": "Rating must be between 1 and 5"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not comment:
+            return Response({"detail": "Please write a short review"}, status=status.HTTP_400_BAD_REQUEST)
+
+        review = Review.objects.create(
+            user=request.user,
+            product=product,
+            user_name=request.user.name,
+            rating=rating,
+            comment=comment,
+        )
+
+        product.rating_average = (
+            Review.objects
+            .filter(product=product)
+            .aggregate(Avg('rating'))['rating__avg'] or 0
+        )
+        product.save(update_fields=['rating_average'])
+
+        return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
+
+
+# --- Order Views ---
 
 class OrderListCreateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]
 
     def get(self, request):
-        orders = Order.objects.all()
+        # Return only the authenticated user's orders (all for admin)
+        if request.user.role == 'admin':
+            orders = Order.objects.all().order_by('-created_at')
+        else:
+            orders = Order.objects.filter(user=request.user).order_by('-created_at')
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def post(self, request):
         address = get_object_or_404(Address, id=request.data.get('address_id'), user=request.user)
-        items = request.data.get('items', [])
-        if not isinstance(items, list) or len(items) == 0:
+        items_input = request.data.get('items', [])
+        if not isinstance(items_input, list) or len(items_input) == 0:
             return Response({"detail": "Order items are required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        order = Order.objects.create(
-            user=request.user,
-            payment_method=request.data.get('payment_method', 'online'),
-            payment_status=request.data.get('payment_status', 'pending'),
-            subtotal=request.data.get('subtotal', 0.0),
-            tax=request.data.get('tax', 0.0),
-            shipping_cost=request.data.get('shipping_cost', 0.0),
-            discount=request.data.get('discount', 0.0),
-            total=request.data.get('total', 0.0),
-            shipping_address_snapshot={
-                'name': address.name,
-                'email': address.email,
-                'contact_no': address.contact_no,
-                'alt_contact_no': address.alt_contact_no,
-                'line1': address.line1,
-                'line2': address.line2,
-                'locality': address.locality,
-                'city': address.city,
-                'state': address.state,
-                'postal_code': address.postal_code,
-                'country': address.country,
-                'address_type': address.address_type,
-                'is_default': address.is_default,
-            }
-        )
+        payment_method = request.data.get('payment_method', 'online')
 
-        for item in items:
-            if not isinstance(item, dict):
-                continue
+        # --- Server-side total computation ---
+        TAX_RATE = 0.08
+        SHIPPING_COST = Decimal('9.99')
+        computed_subtotal = Decimal('0')
+        order_line_items = []  # (product, ordered_qty, unit_price)
+        should_decrement_stock_now = payment_method == 'cod'
 
-            product_id = item.get('productId') or item.get('product_id')
-            product = Product.objects.filter(id=product_id).first() if product_id else None
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                name=item.get('name', ''),
-                price=item.get('price', 0.0),
-                quantity=item.get('quantity', 1),
-                image=item.get('image', ''),
+        with transaction.atomic():
+            for item in items_input:
+                if not isinstance(item, dict):
+                    continue
+
+                product_id = item.get('productId') or item.get('product_id')
+                ordered_qty = int(item.get('quantity', 1))
+                if ordered_qty < 1:
+                    return Response({"detail": "Quantity must be at least 1"}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Lock row to prevent race conditions
+                try:
+                    product = Product.objects.select_for_update().get(id=product_id)
+                except Product.DoesNotExist:
+                    return Response({"detail": f"Product {product_id} not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+                if ordered_qty > product.quantity:
+                    return Response(
+                        {"detail": f"Insufficient stock for '{product.name}' (available: {product.quantity})"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # Use server price — never trust the client
+                unit_price = Decimal(str(product.sale_price if product.sale_price else product.price))
+                computed_subtotal += unit_price * ordered_qty
+                order_line_items.append((product, ordered_qty, unit_price))
+
+            computed_tax = (computed_subtotal * Decimal(str(TAX_RATE))).quantize(Decimal('0.01'))
+            computed_total = computed_subtotal + computed_tax + SHIPPING_COST
+
+            # payment_status is always 'pending' unless payment verification confirms it
+            order = Order.objects.create(
+                user=request.user,
+                payment_method=payment_method,
+                payment_status='pending',
+                subtotal=computed_subtotal,
+                tax=computed_tax,
+                shipping_cost=SHIPPING_COST,
+                discount=Decimal('0'),
+                total=computed_total,
+                shipping_address_snapshot={
+                    'name': address.name,
+                    'email': address.email,
+                    'contact_no': address.contact_no,
+                    'alt_contact_no': address.alt_contact_no,
+                    'line1': address.line1,
+                    'line2': address.line2,
+                    'locality': address.locality,
+                    'city': address.city,
+                    'state': address.state,
+                    'postal_code': address.postal_code,
+                    'country': address.country,
+                    'address_type': address.address_type,
+                    'is_default': address.is_default,
+                }
             )
 
-        serializer = OrderSerializer(order)
+            for product, ordered_qty, unit_price in order_line_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    name=product.name,
+                    price=unit_price,
+                    quantity=ordered_qty,
+                    image=product.images[0] if product.images else '',
+                )
+                if should_decrement_stock_now:
+                    product.quantity = max(0, product.quantity - ordered_qty)
+                    product.in_stock = product.quantity > 0
+                    product.save(update_fields=['quantity', 'in_stock'])
 
-        # Send order placed confirmation email
         user = request.user
-        if user.email:
+        if should_decrement_stock_now and user.email:
             email_service.send_order_placed(
                 user_name=user.name,
                 to_email=user.email,
                 order=order,
             )
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
 class OrderStatusUpdateView(APIView):
@@ -356,35 +534,40 @@ class OrderStatusUpdateView(APIView):
 
         return Response(OrderSerializer(order).data)
 
+
+# --- Payment Views ---
+
 class PaymentCreateOrderView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
+    """Creates a Razorpay order. Requires auth; derives amount from the server-side Order."""
+    permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]
 
     def post(self, request):
-        amount = request.data.get('amount')
-        if amount is None:
-            return Response({"detail": "Amount is required"}, status=status.HTTP_400_BAD_REQUEST)
+        """Expects { order_id } — looks up our Order and derives the Razorpay amount server-side."""
+        order_id = request.data.get('order_id')
+        if not order_id:
+            return Response({"detail": "order_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            amount = int(amount)
-        except (TypeError, ValueError):
-            return Response({"detail": "Amount must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+        # Only allow the order owner
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+
+        # Convert to paise (Razorpay uses smallest currency unit)
+        amount_paise = int(order.total * 100)
 
         if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
             return Response({"detail": "Razorpay keys are not configured"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         payload = json.dumps({
-            'amount': amount,
+            'amount': amount_paise,
             'currency': 'INR',
             'payment_capture': 1,
-            'receipt': f'receipt_{int(datetime.utcnow().timestamp() * 1000)}',
-            'notes': {
-                'source': 'checkout',
-            },
+            'receipt': f'order_{order.id}',
+            'notes': {'order_id': str(order.id)},
         }).encode('utf-8')
 
-        auth_value = base64.b64encode(f"{settings.RAZORPAY_KEY_ID}:{settings.RAZORPAY_KEY_SECRET}".encode('utf-8')).decode('utf-8')
+        auth_value = base64.b64encode(
+            f"{settings.RAZORPAY_KEY_ID}:{settings.RAZORPAY_KEY_SECRET}".encode('utf-8')
+        ).decode('utf-8')
         req = urllib.request.Request(
             'https://api.razorpay.com/v1/orders',
             data=payload,
@@ -395,7 +578,7 @@ class PaymentCreateOrderView(APIView):
         )
 
         try:
-            with urllib.request.urlopen(req) as response:
+            with urllib.request.urlopen(req, timeout=10) as response:
                 response_data = json.loads(response.read().decode('utf-8'))
             return Response({'order': response_data}, status=status.HTTP_201_CREATED)
         except urllib.error.HTTPError as err:
@@ -409,16 +592,17 @@ class PaymentCreateOrderView(APIView):
             return Response({'detail': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PaymentVerifyView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
+    """Verifies Razorpay payment signature and marks the Order as paid."""
+    permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]
 
     def post(self, request):
         payment_id = request.data.get('razorpay_payment_id')
-        order_id = request.data.get('razorpay_order_id')
+        razorpay_order_id = request.data.get('razorpay_order_id')
         signature = request.data.get('razorpay_signature')
+        our_order_id = request.data.get('order_id')  # our DB order id
 
-        if not payment_id or not order_id or not signature:
+        if not payment_id or not razorpay_order_id or not signature:
             return Response({"detail": "Missing payment verification fields"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not settings.RAZORPAY_KEY_SECRET:
@@ -426,38 +610,94 @@ class PaymentVerifyView(APIView):
 
         expected_signature = hmac.new(
             settings.RAZORPAY_KEY_SECRET.encode('utf-8'),
-            f"{order_id}|{payment_id}".encode('utf-8'),
+            f"{razorpay_order_id}|{payment_id}".encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
 
-        return Response({'success': expected_signature == signature})
+        is_valid = expected_signature == signature
+
+        # Only mark as paid and decrement stock after server-side signature verification.
+        if is_valid and our_order_id:
+            try:
+                with transaction.atomic():
+                    order = Order.objects.select_for_update().get(id=our_order_id, user=request.user)
+
+                    if order.payment_status == 'paid':
+                        return Response({'success': True})
+
+                    order_items = list(OrderItem.objects.select_related('product').filter(order=order))
+                    locked_products = {}
+
+                    for item in order_items:
+                        if not item.product_id:
+                            continue
+                        product = Product.objects.select_for_update().get(id=item.product_id)
+                        locked_products[item.product_id] = product
+                        if item.quantity > product.quantity:
+                            return Response(
+                                {
+                                    'success': False,
+                                    'detail': f"Insufficient stock for '{product.name}' (available: {product.quantity})",
+                                },
+                                status=status.HTTP_400_BAD_REQUEST,
+                            )
+
+                    for item in order_items:
+                        product = locked_products.get(item.product_id)
+                        if not product:
+                            continue
+                        product.quantity = max(0, product.quantity - item.quantity)
+                        product.in_stock = product.quantity > 0
+                        product.save(update_fields=['quantity', 'in_stock'])
+
+                    order.payment_status = 'paid'
+                    order.save(update_fields=['payment_status'])
+
+                if order.user.email:
+                    email_service.send_order_placed(
+                        user_name=order.user.name,
+                        to_email=order.user.email,
+                        order=order,
+                    )
+            except Order.DoesNotExist:
+                return Response({'success': False, 'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'success': is_valid})
+
+
+# --- User & List Views ---
 
 class UserOrderListView(generics.ListAPIView):
+    """Returns orders scoped to the requesting user (admin can query any user_id)."""
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
-    pagination_class = None  # <--- ADD THIS
-    
+    pagination_class = None
+
     def get_queryset(self):
-        return Order.objects.filter(user_id=self.kwargs['user_id'])
+        if self.request.user.role == 'admin':
+            return Order.objects.filter(user_id=self.kwargs['user_id']).order_by('-created_at')
+        return Order.objects.filter(user=self.request.user).order_by('-created_at')
 
 class NotificationListView(generics.ListAPIView):
+    """Returns only the authenticated user's own notifications."""
+    permission_classes = [IsAuthenticated]
     serializer_class = NotificationSerializer
-    pagination_class = None  # <--- ADD THIS (Fixes userNotifications.filter error)
-    
+    pagination_class = None
+
     def get_queryset(self):
-        return Notification.objects.filter(user_id=self.kwargs['user_id'])
-    
-    # Add this inside store/views.py (under the User & Order Views section)
+        return Notification.objects.filter(user=self.request.user)
 
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = None  # Disable pagination for users too (just in case)
+    pagination_class = None
+    permission_classes = [IsAdminUser]
 
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'id'
+    permission_classes = [IsAdminUser]
     
 # --- Address CRUD ---
 
@@ -466,14 +706,12 @@ class AddressListCreateView(APIView):
     parser_classes = [JSONParser]
 
     def get(self, request):
-        # Return the full user object which includes addresses[] nested
         return Response(UserSerializer(request.user).data)
 
     def post(self, request):
         serializer = AddressSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
-            # Return Updated User object so frontend can update state
             return Response(UserSerializer(request.user).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -499,7 +737,6 @@ class AddressSetDefaultView(APIView):
 
     def patch(self, request, address_id):
         address = get_object_or_404(Address, id=address_id, user=request.user)
-        # The model's save() method will automatically unset other defaults
         address.is_default = True
         address.save()
         return Response(UserSerializer(request.user).data)

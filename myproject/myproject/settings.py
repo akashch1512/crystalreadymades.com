@@ -26,13 +26,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG')  == "True"
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 RAZORPAY_KEY_ID = os.environ.get('key_id')
 RAZORPAY_KEY_SECRET = os.environ.get('key_secret')
 
 # ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+
 
 # Application definition
 
@@ -54,17 +55,10 @@ AUTH_USER_MODEL = 'store.User'
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://crystalreadymades.com",
-    "https://www.crystalreadymades.com",
-]
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -168,10 +162,17 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'store.authentication.JWTAuthentication', 
+        'store.authentication.JWTAuthentication',
     ),
-    # Pagination to match skip/limit
     'DEFAULT_PAGINATION_CLASS': 'store.pagination.SkipLimitPagination',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/min',
+        'user': '60/min',
+    },
 }
 
 JSON_CAMEL_CASE = {

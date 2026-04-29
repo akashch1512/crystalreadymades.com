@@ -10,6 +10,8 @@ const getAuthHeaders = (): Record<string, string> => {
 interface RazorpayOrderResponse {
   order: {
     id: string;
+    amount: number;
+    currency: string;
   };
 }
 
@@ -30,33 +32,50 @@ interface RazorpayOptions {
   theme?: {
     color: string;
   };
+  modal?: {
+    ondismiss?: () => void;
+  };
 }
 
-export const createRazorpayOrder = async (amount: number): Promise<string> => {
+/**
+ * Creates a Razorpay order on the backend.
+ * Backend now derives the amount from the DB Order — we pass our order_id.
+ * Returns { razorpayOrderId, amount } so the checkout knows what to pass to Razorpay SDK.
+ */
+export const createRazorpayOrder = async (
+  dbOrderId: string
+): Promise<{ razorpayOrderId: string; amount: number }> => {
   try {
     const response = await axios.post<RazorpayOrderResponse>(
       `${API_BASE_URL}/api/payment/create-order`,
-      { amount: Math.round(amount) },
+      { order_id: dbOrderId },
       { headers: getAuthHeaders() }
     );
 
     const razorpayOrderId = response.data?.order?.id;
+    const amount = response.data?.order?.amount; // amount in paise from Razorpay
+
     if (!razorpayOrderId) {
       console.error('Invalid Razorpay order response:', response.data);
       throw new Error('Invalid Razorpay order response');
     }
 
-    return String(razorpayOrderId);
+    return { razorpayOrderId, amount };
   } catch (error) {
     console.error('Failed to create Razorpay order:', error);
     throw new Error('Could not create Razorpay order');
   }
 };
 
+/**
+ * Verifies the Razorpay payment signature on the backend.
+ * Also passes our DB order_id so backend can mark it as paid.
+ */
 export const verifyPayment = async (
   razorpay_payment_id: string,
   razorpay_order_id: string,
-  razorpay_signature: string
+  razorpay_signature: string,
+  dbOrderId: string
 ): Promise<boolean> => {
   try {
     const response = await axios.post<{ success: boolean }>(
@@ -65,6 +84,7 @@ export const verifyPayment = async (
         razorpay_payment_id,
         razorpay_order_id,
         razorpay_signature,
+        order_id: dbOrderId,
       },
       { headers: getAuthHeaders() }
     );

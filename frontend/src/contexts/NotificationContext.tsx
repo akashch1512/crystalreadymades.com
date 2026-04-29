@@ -31,7 +31,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const loadNotifications = async () => {
         try {
           const notifs = await getNotifications(user.id);
-          setUserNotifications(notifs);
+          setUserNotifications(
+            notifs.map((notif: any) => ({
+              ...notif,
+              read: notif.read ?? notif.isRead ?? false,
+            }))
+          );
         } catch (error) {
           console.error('Failed to load notifications:', error);
           setUserNotifications([]);
@@ -67,6 +72,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     const newNotification: Notification = {
       ...notification,
+      read: notification.read ?? false,
       id: `notif-${Date.now()}`,
       userId: user.id,
       createdAt: new Date().toISOString(),

@@ -72,7 +72,10 @@ export const getOrders = async (): Promise<Order[]> => {
 // 6. Notifications (Specific to a user, example user 1)
 export const getNotifications = async (userId: string): Promise<Notification[]> => {
   try {
-    const response = await fetch(`${BASE_URL}/api/notifications/${userId}`);
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${BASE_URL}/api/notifications/${userId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
     if (!response.ok) throw new Error("Failed to fetch notifications");
     return await response.json();
   } catch (error) {

@@ -25,18 +25,18 @@ const StarRating: React.FC<{ rating: number; count?: number }> = ({ rating, coun
         ))}
         {half && (
           <span className="relative inline-block" style={{ width: 13, height: 13 }}>
-            <Star size={13} className="text-line absolute inset-0" />
+            <Star size={13} className="text-gray-300 fill-gray-200 absolute inset-0" />
             <span className="absolute inset-0 overflow-hidden w-1/2">
               <Star size={13} className="fill-yellow-400 text-yellow-400" />
             </span>
           </span>
         )}
         {[...Array(empty)].map((_, i) => (
-          <Star key={`e${i}`} size={13} className="text-line fill-surface-muted" />
+          <Star key={`e${i}`} size={13} className="text-gray-300 fill-gray-200" />
         ))}
       </div>
       {count !== undefined && (
-        <span className="text-xs text-brand hover:underline cursor-pointer">
+        <span className="text-xs text-muted hover:underline cursor-pointer">
           ({count.toLocaleString()})
         </span>
       )}
@@ -57,7 +57,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout = 'grid' }) =
     : 0;
 
   const displayPrice = product.salePrice ?? product.price;
-  const rating = product.ratings ?? 0;
+  const rating = product.ratingAverage ?? product.ratings ?? 0;
   const reviewCount = product.reviewCount ?? product.reviews?.length ?? 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -174,10 +174,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout = 'grid' }) =
             </div>
 
             {/* Rating */}
-            <div className="flex items-center gap-1">
-              <div className="text-sm font-medium text-text">{rating.toFixed(1)}</div>
-              <Star size={14} className="fill-yellow-400 text-yellow-400" />
-            </div>
+            <StarRating rating={rating} count={reviewCount} />
           </div>
         </div>
 

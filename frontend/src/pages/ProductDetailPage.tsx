@@ -41,10 +41,6 @@ const ProductDetailPage: React.FC = () => {
           }
           
           const foundProduct = await response.json();
-          const savedReviews = JSON.parse(
-            localStorage.getItem(`crystal-product-reviews-${slug}`) || '[]'
-          );
-          foundProduct.reviews = [...savedReviews, ...(foundProduct.reviews || [])];
           setProduct(foundProduct);
           document.title = `${foundProduct.name} | CrystalReadymade`;
         } catch (err) {
@@ -101,7 +97,7 @@ const ProductDetailPage: React.FC = () => {
     setActiveImage(prev => (prev === product.images.length - 1 ? 0 : prev + 1));
   };
 
-  const handleReviewSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleReviewSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!product || !slug) return;
@@ -118,33 +114,47 @@ const ProductDetailPage: React.FC = () => {
       return;
     }
 
-    const newReview: Review = {
-      id: `local-review-${Date.now()}`,
-      userId: user.id,
-      userName: user.name,
-      rating: reviewRating,
-      comment: trimmedComment,
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/api/products/${slug}/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          rating: reviewRating,
+          comment: trimmedComment,
+        }),
+      });
 
-    const savedKey = `crystal-product-reviews-${slug}`;
-    const savedReviews = JSON.parse(localStorage.getItem(savedKey) || '[]');
-    localStorage.setItem(savedKey, JSON.stringify([newReview, ...savedReviews]));
+      const data = await response.json().catch(() => null);
 
-    setProduct((current: any) => {
-      const reviews = [newReview, ...(current.reviews || [])];
-      const ratings = reviews.reduce((sum: number, review: Review) => sum + review.rating, 0) / reviews.length;
+      if (!response.ok) {
+        throw new Error(data?.detail || data?.message || 'Unable to submit review');
+      }
 
-      return {
-        ...current,
-        reviews,
-        ratings,
-      };
-    });
+      const newReview: Review = data;
 
-    setReviewComment('');
-    setReviewRating(5);
-    success('Thanks! Your review has been added');
+      setProduct((current: any) => {
+        const reviews = [newReview, ...(current.reviews || [])];
+        const ratingAverage = reviews.reduce((sum: number, review: Review) => sum + review.rating, 0) / reviews.length;
+
+        return {
+          ...current,
+          reviews,
+          ratings: ratingAverage,
+          ratingAverage,
+        };
+      });
+
+      setReviewComment('');
+      setReviewRating(5);
+      success('Thanks! Your review has been added');
+    } catch (err: any) {
+      showError(err?.message || 'Unable to submit review');
+    }
   };
   
   if (loading) {

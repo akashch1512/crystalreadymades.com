@@ -22,14 +22,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!user?.addresses?.length) {
-      return;
-    }
+    if (!user?.addresses?.length) return;
 
-    const defaultAddress = user.addresses.find((addr) => addr.isDefault);
+    const defaultAddress = user.addresses.find((addr: any) => addr.isDefault || addr.is_default);
     const fallbackAddress = user.addresses[0];
 
-    if (!selectedAddress || !user.addresses.some((address) => String(address.id) === String(selectedAddress))) {
+    if (!selectedAddress || !user.addresses.some((a) => String(a.id) === String(selectedAddress))) {
       setSelectedAddress(String(defaultAddress?.id || fallbackAddress.id));
     }
   }, [selectedAddress, user?.addresses]);
@@ -58,7 +56,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
     const invalidItem = items.find(
       item => typeof item.availableQuantity === 'number' && item.quantity > item.availableQuantity
     );
-
     if (invalidItem) {
       setError(`${invalidItem.name} has only ${invalidItem.availableQuantity} available. Please update your cart.`);
       return;
@@ -68,10 +65,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
       setLoading(true);
       setError('');
 
+      // ─── COD Flow ────────────────────────────────────────
       if (paymentMethod === 'cod') {
-        const { success, orderId } = await createOrder('cod', selectedAddress, {
-          paymentStatus: 'pending',
-        });
+        const { success, orderId } = await createOrder('cod', selectedAddress);
 
         if (success && orderId) {
           clearCart();
@@ -79,57 +75,58 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
         } else {
           setError('Failed to create order. Please try again.');
         }
-
         return;
       }
 
-      const razorpayLoaded = await loadRazorpayScript();
+      // ─── Online Payment Flow ─────────────────────────────
+      // Step 1: Create the DB order first (payment_status = 'pending')
+      const { success: orderCreated, orderId: dbOrderId } = await createOrder('online', selectedAddress);
 
+      if (!orderCreated || !dbOrderId) {
+        setError('Failed to create order. Please try again.');
+        return;
+      }
+
+      // Step 2: Load Razorpay SDK
+      const razorpayLoaded = await loadRazorpayScript();
       if (!razorpayLoaded || !(window as any).Razorpay) {
         setError('Failed to load Razorpay. Please try again later.');
         return;
       }
 
-      const razorpayValue = Math.round(total * 100);
-      const razorpayOrderId = await createRazorpayOrder(razorpayValue);
+      // Step 3: Create Razorpay order using our DB order ID (backend derives amount)
+      const { razorpayOrderId, amount: razorpayAmount } = await createRazorpayOrder(dbOrderId);
 
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!razorpayKey) throw new Error('Razorpay key is not configured.');
+
+      // Build prefill
       const prefill: any = {};
       if (user?.name) prefill.name = user.name;
       if (user?.email) prefill.email = user.email;
       if (user?.phone) {
-        let contact = String(user.phone).replace(/\D/g, '');
-        if (contact.length > 10 && contact.endsWith(contact.slice(-10))) {
-          contact = contact.slice(-10);
-        }
-        if (contact.length === 10) {
-          prefill.contact = contact;
-        }
+        const contact = String(user.phone).replace(/\D/g, '').slice(-10);
+        if (contact.length === 10) prefill.contact = contact;
       }
 
-      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
-      if (!razorpayKey) {
-        throw new Error('Razorpay key is not configured.');
-      }
-
+      // Step 4: Open Razorpay checkout
       const options = {
         key: razorpayKey,
-        amount: razorpayValue,
+        amount: razorpayAmount,       // amount in paise from Razorpay (server-authoritative)
         currency: 'INR',
         name: 'CrystalReadymade',
         description: 'Payment for your order',
         order_id: razorpayOrderId,
         prefill,
-        notes: {
-          address_id: selectedAddress,
-        },
-        theme: {
-          color: '#ec4899',
-        },
+        notes: { db_order_id: dbOrderId },
+        theme: { color: '#ec4899' },
         handler: async (response: any) => {
+          // Step 5: Verify signature + mark DB order as paid
           const verified = await verifyPayment(
             response.razorpay_payment_id,
             response.razorpay_order_id,
-            response.razorpay_signature
+            response.razorpay_signature,
+            dbOrderId          // ← backend uses this to mark order.payment_status = 'paid'
           );
 
           if (!verified) {
@@ -137,19 +134,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
             return;
           }
 
-          const { success, orderId } = await createOrder('online', selectedAddress, {
-            paymentStatus: 'paid',
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-          });
-
-          if (success && orderId) {
-            clearCart();
-            onSuccess(orderId);
-          } else {
-            setError('Failed to create order. Please try again.');
-          }
+          clearCart();
+          onSuccess(dbOrderId);
         },
         modal: {
           ondismiss: () => {
@@ -163,7 +149,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
     } catch (err) {
       console.error('Checkout error:', err);
       setError('An error occurred during checkout. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
@@ -172,6 +157,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && <div className="alert alert-error">{error}</div>}
 
+      {/* Shipping Address */}
       <div>
         <h3 className="h3 mb-4">Shipping Address</h3>
 
@@ -187,8 +173,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
               <option value="">Select an address</option>
               {user.addresses.map((address: any) => (
                 <option key={address.id} value={String(address.id)}>
-                  {address.address_type || 'Address'} ({address.name}): {address.line1}, {address.city},{' '}
-                  {address.state} {address.postalCode}
+                  {address.addressType || address.address_type || 'Address'} ({address.name}):{' '}
+                  {address.line1}, {address.city}, {address.state} {address.postalCode || address.postal_code}
                 </option>
               ))}
             </select>
@@ -217,6 +203,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
         )}
       </div>
 
+      {/* Payment Method */}
       <div>
         <h3 className="h3 mb-4">Payment Method</h3>
 
@@ -261,7 +248,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess }) => {
           disabled={loading || !selectedAddress || items.length === 0}
           className="btn btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {loading ? 'Processing...' : paymentMethod === 'cod' ? 'Place Order' : `Pay Rs. ${total.toFixed(2)}`}
+          {loading
+            ? 'Processing...'
+            : paymentMethod === 'cod'
+            ? 'Place Order'
+            : `Pay ₹${total.toFixed(2)}`}
         </button>
       </div>
     </form>

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { User, Mail, Phone, CheckCircle, Edit2, Save, X } from 'lucide-react';
+import { User, Mail, Phone, CheckCircle, Edit2, Save, X, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
 
 const ProfileForm: React.FC = () => {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, setUser } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -15,6 +15,13 @@ const ProfileForm: React.FC = () => {
     email: user?.email || '',
     phone: user?.phone || '',
   });
+
+  // Email change OTP verification state
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -27,11 +34,26 @@ const ProfileForm: React.FC = () => {
       setIsSaving(true);
       const apiUrl = import.meta.env.VITE_API_URL;
       const token = localStorage.getItem('token');
-      await axios.put(
+      const res = await axios.put(
         `${apiUrl}/api/user/update`,
         { name: formData.name, email: formData.email, phone: formData.phone },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      const data = res.data;
+
+      // If the backend says email verification is required, show OTP step
+      if (data.emailVerificationRequired || data.email_verification_required) {
+        setPendingEmail(formData.email);
+        setIsVerifyingEmail(true);
+        setIsEditing(false);
+        setMessage({
+          type: 'success',
+          text: data.detail || 'A verification OTP has been sent to your new email address.',
+        });
+        return;
+      }
+
       await refreshUser();
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       setIsEditing(false);
@@ -45,9 +67,67 @@ const ProfileForm: React.FC = () => {
     }
   };
 
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp.trim()) {
+      setOtpError('Please enter the OTP sent to your new email');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const res = await axios.post(`${apiUrl}/api/auth/verify-email-change`, {
+        email: pendingEmail,
+        otp,
+      });
+
+      const data = res.data;
+
+      // Save the new token (if returned)
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+
+      await refreshUser();
+      setIsVerifyingEmail(false);
+      setOtp('');
+      setPendingEmail('');
+      setMessage({ type: 'success', text: 'Email verified and updated successfully!' });
+    } catch (error: any) {
+      setOtpError(error.response?.data?.detail || 'Invalid OTP. Please try again.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem('token');
+      // Re-trigger the update to resend OTP
+      await axios.put(
+        `${apiUrl}/api/user/update`,
+        { email: pendingEmail },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setMessage({ type: 'success', text: 'A new OTP has been sent to your email.' });
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.detail || 'Failed to resend OTP.',
+      });
+    }
+  };
+
   const handleCancel = () => {
     setIsEditing(false);
+    setIsVerifyingEmail(false);
     setMessage(null);
+    setOtp('');
+    setOtpError('');
+    setPendingEmail('');
     setFormData({
       name: user?.name || '',
       email: user?.email || '',
@@ -98,7 +178,7 @@ const ProfileForm: React.FC = () => {
             )}
           </div>
 
-          {!isEditing && (
+          {!isEditing && !isVerifyingEmail && (
             <button
               onClick={() => setIsEditing(true)}
               className="btn btn-secondary text-brand border-brand hover:bg-brand/5 self-start sm:self-center shrink-0"
@@ -110,95 +190,168 @@ const ProfileForm: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Profile form card ── */}
-      <div className="card p-6 sm:p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="caption text-brand font-semibold mb-1">Personal Details</p>
-            <h2 className="h3">Profile Information</h2>
-          </div>
-        </div>
-
-        {message && (
-          <div className={`alert mb-6 ${message.type === 'success' ? 'alert-success' : 'alert-error'}`}>
-            {message.text}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Full Name */}
-          <div>
-            <label htmlFor="name" className="label mb-1.5 flex items-center gap-1.5">
-              <User size={14} className="text-muted" />
-              Full Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`input ${!isEditing ? 'opacity-70 cursor-default' : ''}`}
-              placeholder="Your full name"
-            />
+      {/* ── OTP Verification card (shown after email change) ── */}
+      {isVerifyingEmail && (
+        <div className="card p-6 sm:p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
+              <ShieldCheck size={20} className="text-brand" />
+            </div>
+            <div>
+              <h2 className="h3">Verify New Email</h2>
+              <p className="text-sm text-muted">
+                We sent an OTP to <strong className="text-text">{pendingEmail}</strong>
+              </p>
+            </div>
           </div>
 
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="label mb-1.5 flex items-center gap-1.5">
-              <Mail size={14} className="text-muted" />
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`input ${!isEditing ? 'opacity-70 cursor-default' : ''}`}
-              placeholder="your@email.com"
-            />
-          </div>
+          {message && (
+            <div className={`alert mb-5 ${message.type === 'success' ? 'alert-success' : 'alert-error'}`}>
+              {message.text}
+            </div>
+          )}
 
-          {/* Phone */}
-          <div>
-            <label htmlFor="phone" className="label mb-1.5 flex items-center gap-1.5">
-              <Phone size={14} className="text-muted" />
-              Phone Number
-              <span className="text-xs text-muted font-normal">(used to login)</span>
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`input ${!isEditing ? 'opacity-70 cursor-default' : ''}`}
-              placeholder="+91 XXXXX XXXXX"
-            />
-          </div>
+          <form onSubmit={handleVerifyOtp} className="space-y-5 max-w-md">
+            <div>
+              <label htmlFor="otp" className="label mb-1.5">Enter OTP Code</label>
+              <input
+                id="otp"
+                type="text"
+                maxLength={6}
+                value={otp}
+                onChange={e => { setOtp(e.target.value); if (otpError) setOtpError(''); }}
+                className={`input text-center text-xl tracking-widest ${otpError ? 'border-red-500' : ''}`}
+                placeholder="• • • • • •"
+                autoComplete="off"
+              />
+              {otpError && <p className="mt-2 text-sm text-red-600">{otpError}</p>}
+            </div>
 
-          {isEditing && (
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-wrap gap-3">
               <button
                 type="submit"
-                disabled={isSaving}
+                disabled={otpLoading || otp.length < 4}
                 className="btn btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <Save size={15} className="mr-1.5" />
-                {isSaving ? 'Saving…' : 'Save Changes'}
+                {otpLoading ? 'Verifying…' : 'Verify Email'}
               </button>
               <button type="button" onClick={handleCancel} className="btn btn-secondary">
                 <X size={15} className="mr-1.5" />
                 Cancel
               </button>
             </div>
+
+            <p className="text-sm text-muted">
+              Didn't receive the email?{' '}
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                className="text-brand hover:text-brand-strong font-medium underline-offset-2 hover:underline"
+              >
+                Resend OTP
+              </button>
+            </p>
+          </form>
+        </div>
+      )}
+
+      {/* ── Profile form card ── */}
+      {!isVerifyingEmail && (
+        <div className="card p-6 sm:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="caption text-brand font-semibold mb-1">Personal Details</p>
+              <h2 className="h3">Profile Information</h2>
+            </div>
+          </div>
+
+          {message && (
+            <div className={`alert mb-6 ${message.type === 'success' ? 'alert-success' : 'alert-error'}`}>
+              {message.text}
+            </div>
           )}
-        </form>
-      </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Full Name */}
+            <div>
+              <label htmlFor="name" className="label mb-1.5 flex items-center gap-1.5">
+                <User size={14} className="text-muted" />
+                Full Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className={`input ${!isEditing ? 'opacity-70 cursor-default' : ''}`}
+                placeholder="Your full name"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="label mb-1.5 flex items-center gap-1.5">
+                <Mail size={14} className="text-muted" />
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className={`input ${!isEditing ? 'opacity-70 cursor-default' : ''}`}
+                placeholder="your@email.com"
+              />
+              {isEditing && formData.email !== (user?.email || '') && (
+                <p className="mt-1.5 text-xs text-amber-600 flex items-center gap-1">
+                  <ShieldCheck size={12} />
+                  Changing your email will require re-verification via OTP.
+                </p>
+              )}
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label htmlFor="phone" className="label mb-1.5 flex items-center gap-1.5">
+                <Phone size={14} className="text-muted" />
+                Phone Number
+                <span className="text-xs text-muted font-normal">(used to login)</span>
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className={`input ${!isEditing ? 'opacity-70 cursor-default' : ''}`}
+                placeholder="+91 XXXXX XXXXX"
+              />
+            </div>
+
+            {isEditing && (
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="btn btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Save size={15} className="mr-1.5" />
+                  {isSaving ? 'Saving…' : 'Save Changes'}
+                </button>
+                <button type="button" onClick={handleCancel} className="btn btn-secondary">
+                  <X size={15} className="mr-1.5" />
+                  Cancel
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+      )}
     </div>
   );
 };

@@ -84,9 +84,12 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
           ...p,
           id: p.id || p._id,
           category: p.category || p.category_name || p.category?.name || '',
-          categorySlug: p.category_slug || p.category?.slug || '',
+          categorySlug: p.categorySlug || p.category_slug || p.category?.slug || '',
           brand: p.brand || p.brand_name || p.brand?.name || '',
-          brandSlug: p.brand_slug || p.brand?.slug || '',
+          brandSlug: p.brandSlug || p.brand_slug || p.brand?.slug || '',
+          ratings: p.ratingAverage ?? p.ratings ?? 0,
+          ratingAverage: p.ratingAverage ?? p.ratings ?? 0,
+          reviewCount: p.reviewCount ?? p.reviews?.length ?? 0,
         })));
         setCategories(categoryData.map((c: any) => {
           // API may return 'parentId' (camelCase) or 'parent_id' (snake_case)

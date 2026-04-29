@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { MapPin, Navigation } from 'lucide-react';
 
@@ -23,14 +23,21 @@ interface AddressFormProps {
   onSubmit: (updatedUser: any) => void;
 }
 
-const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
+const AddressForm: React.FC<AddressFormProps> = ({ address: addressProp, onSubmit }) => {
   const navigate = useNavigate();
   const { user, setUser, refreshUser } = useAuth();
+  const { addressId } = useParams<{ addressId: string }>();
+
+  // If no address prop is passed but we have an addressId from the URL, find it from user data
+  const address = addressProp || (addressId
+    ? user?.addresses?.find((a: any) => String(a.id) === String(addressId))
+    : undefined);
+
   const [formData, setFormData] = useState({
     name: address?.name || '',
     email: address?.email || '',
-    contact_no: address?.contact_no || '',
-    alt_contact_no: address?.alt_contact_no || '',
+    contact_no: address?.contactNo || address?.contact_no || '',
+    alt_contact_no: address?.altContactNo || address?.alt_contact_no || '',
     line1: address?.line1 || '',
     line2: address?.line2 || '',
     locality: address?.locality || '',
@@ -38,7 +45,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit }) => {
     state: address?.state || '',
     postalCode: address?.postalCode || (address as any)?.postal_code || '',
     country: address?.country || 'India',
-    address_type: address?.address_type || 'Home',
+    address_type: address?.addressType || address?.address_type || 'Home',
     isDefault: address?.isDefault || false,
   });
 

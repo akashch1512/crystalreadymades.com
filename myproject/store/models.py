@@ -81,8 +81,8 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     description = models.TextField(null=True, blank=True)
-    price = models.FloatField()
-    sale_price = models.FloatField(null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
     # Postgres specific fields
     images = models.JSONField(default=list, blank=True)
@@ -102,7 +102,7 @@ class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
     user_name = models.CharField(max_length=255)
-    rating = models.FloatField()
+    rating = models.DecimalField(max_digits=3, decimal_places=1)
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -115,11 +115,11 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=50)
     payment_status = models.CharField(max_length=50, default="pending")
     tracking_number = models.CharField(max_length=100, null=True, blank=True)
-    subtotal = models.FloatField(default=0.0)
-    tax = models.FloatField(default=0.0)
-    shipping_cost = models.FloatField(default=0.0)
-    discount = models.FloatField(default=0.0)
-    total = models.FloatField(default=0.0)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     shipping_address_snapshot = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -131,7 +131,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='order_items')
     name = models.CharField(max_length=255)
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField(default=1)
     image = models.CharField(max_length=500, null=True, blank=True)
 
@@ -171,11 +171,11 @@ class Terms(models.Model):
 
 
 class EmailVerificationOTP(models.Model):
-    """Stores a 6-digit OTP for email verification. Expires in 10 minutes."""
+    """Stores a SHA-256 hash of a 6-digit OTP for email verification. Expires in 10 minutes."""
     user = models.ForeignKey(
         'User', on_delete=models.CASCADE, related_name='email_otps'
     )
-    otp = models.CharField(max_length=6)
+    otp_hash = models.CharField(max_length=64)  # SHA-256 hex digest
     created_at = models.DateTimeField(auto_now_add=True)
     used = models.BooleanField(default=False)
 
@@ -184,5 +184,32 @@ class EmailVerificationOTP(models.Model):
         from datetime import timedelta
         return timezone.now() > self.created_at + timedelta(minutes=10)
 
+    def check_otp(self, otp_input: str) -> bool:
+        import hashlib
+        return self.otp_hash == hashlib.sha256(otp_input.encode()).hexdigest()
+
     def __str__(self):
         return f"OTP for {self.user.phone} — {'used' if self.used else 'active'}"
+
+
+class PendingRegistration(models.Model):
+    """Temporary store for registration data until OTP is verified.
+    The actual User account is only created after email verification."""
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=50)
+    email = models.EmailField()
+    password_hash = models.CharField(max_length=255)
+    otp_hash = models.CharField(max_length=64)  # SHA-256 hex digest — NOT the raw OTP
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        from django.utils import timezone
+        from datetime import timedelta
+        return timezone.now() > self.created_at + timedelta(minutes=10)
+
+    def check_otp(self, otp_input: str) -> bool:
+        import hashlib
+        return self.otp_hash == hashlib.sha256(otp_input.encode()).hexdigest()
+
+    def __str__(self):
+        return f"Pending: {self.phone} ({self.email})"

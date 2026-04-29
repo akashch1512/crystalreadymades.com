@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'name', 'phone', 'email', 'role', 'addresses']
+        fields = ['id', 'name', 'phone', 'email', 'role', 'is_email_verified', 'addresses']
 
 class CategorySerializer(serializers.ModelSerializer):
     # parent_id is a real DB column Django auto-creates for ForeignKey(parent).

@@ -48,7 +48,7 @@ const Footer: React.FC = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <img
-                src="/Logo/Hero_Logo.gif"
+                src="/Logo/Hero_Logo.png"
                 alt="Crystal Readymade Logo"
                 className="h-12 w-auto"
               />

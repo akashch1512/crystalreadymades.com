@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, ShoppingBag, Heart, Bell, User, Menu, X, LogOut, Shield, ChevronDown } from 'lucide-react';
+import { Search, ShoppingCart, ShoppingBag, Heart, User, Menu, X, LogOut, Shield, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
-import { useWishlist } from '../../contexts/WishlistContext';
-import { useNotifications } from '../../contexts/NotificationContext';
 import { useProducts } from '../../contexts/ProductContext';
 
 const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { itemCount: cartItemCount } = useCart();
-  const { itemCount: wishlistItemCount } = useWishlist();
-  const { unreadCount: notificationCount } = useNotifications();
   const { searchProducts, categories } = useProducts();
   const navigate = useNavigate();
 
@@ -70,15 +66,16 @@ const Header: React.FC = () => {
     <header className="sticky top-0 bg-surface/90 backdrop-blur border-b border-line z-50 transition-all duration-300">
       <div className="container mx-auto">
         <div className="flex items-center justify-between py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img
-              src="/Logo/Hero_Logo.gif"
-              alt="Crystal Readymade Logo"
-              className="h-12 w-auto"
-            />
-          </Link>
-
+          <div className="flex items-center">
+            {/* Logo */}
+            <Link to="/" className="flex items-center">
+              <img
+                src="/Logo/Hero_Logo.png"
+                alt="Crystal Readymade Logo"
+                className="h-12 w-auto"
+              />
+            </Link>
+          </div>
 
           {/* Search Bar - Desktop */}
           <div className="hidden md:block relative flex-grow max-w-md mx-8">
@@ -179,14 +176,15 @@ const Header: React.FC = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <Link to="/wishlist" className="relative text-muted hover:text-brand">
+                {/* Desktop wishlist icon moved into the account dropdown menu */}
+                {/* <Link to="/wishlist" className="relative text-muted hover:text-brand">
                   <Heart size={22} />
                   {wishlistItemCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-brand text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {wishlistItemCount}
                     </span>
                   )}
-                </Link>
+                </Link> */}
                 <Link to="/cart" className="relative text-muted hover:text-brand">
                   <ShoppingCart size={22} />
                   {cartItemCount > 0 && (
@@ -195,14 +193,15 @@ const Header: React.FC = () => {
                     </span>
                   )}
                 </Link>
-                <Link to="/notifications" className="relative text-muted hover:text-brand">
+                {/* Top notification icon hidden on desktop */}
+                {/* <Link to="/notifications" className="relative text-muted hover:text-brand">
                   <Bell size={22} />
                   {notificationCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-brand text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {notificationCount}
                     </span>
                   )}
-                </Link>
+                </Link> */}
                 <div className="relative group py-2"> {/* Added padding to bridge the gap for hover */}
                   <button className="flex items-center text-muted hover:text-brand transition-all duration-200">
                     <User size={22} />
@@ -218,6 +217,9 @@ const Header: React.FC = () => {
                     </Link>
                     <Link to="/orders" className="flex items-center px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
                       <ShoppingBag size={16} className="mr-2" /> My Orders
+                    </Link>
+                    <Link to="/wishlist" className="flex items-center px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
+                      <Heart size={16} className="mr-2" /> Wishlist
                     </Link>
                     {user?.role === 'admin' && (
                       <Link to="/admin" className="flex items-center px-4 py-2.5 text-sm text-muted hover:bg-surface-muted hover:text-brand">
@@ -240,6 +242,16 @@ const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
+            {isAuthenticated && (
+              <Link
+                to="/account"
+                className="ml-3 rounded-full p-2 text-muted hover:text-brand transition-colors md:hidden"
+                aria-label="My Account"
+              >
+                <User size={24} />
+              </Link>
+            )}
+
             {isAuthenticated && (
               <Link to="/cart" className="relative mr-4 text-muted">
                 <ShoppingCart size={22} />
@@ -368,13 +380,6 @@ const Header: React.FC = () => {
             {isAuthenticated ? (
               <>
                 <Link
-                  to="/account"
-                  className="py-3 text-muted border-b border-line"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  My Account
-                </Link>
-                <Link
                   to="/orders"
                   className="py-3 text-muted border-b border-line"
                   onClick={() => setShowMobileMenu(false)}
@@ -388,7 +393,8 @@ const Header: React.FC = () => {
                 >
                   Wishlist
                 </Link>
-                <Link
+                {/* Notifications hidden from mobile top menu */}
+                {/* <Link
                   to="/notifications"
                   className="py-3 text-muted border-b border-line"
                   onClick={() => setShowMobileMenu(false)}
@@ -399,7 +405,7 @@ const Header: React.FC = () => {
                       {notificationCount}
                     </span>
                   )}
-                </Link>
+                </Link> */}
                 {user?.role === 'admin' && (
                   <Link
                     to="/admin"

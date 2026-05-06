@@ -50,17 +50,45 @@ type StoreSettingsData = {
 const adminFetch = async <T,>(path: string, options: RequestInit = {}): Promise<T> => {
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
-  const response = await fetch(`${apiUrl}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(options.headers || {}),
-    },
-  });
-  const data = await response.json().catch(() => null);
+  if (!apiUrl) {
+    throw new Error("VITE_API_URL is not configured for the frontend.");
+  }
+  if (!token) {
+    throw new Error("Admin login token is missing. Please log in again.");
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${apiUrl}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        ...(options.headers || {}),
+      },
+    });
+  } catch {
+    throw new Error(`Cannot reach backend at ${apiUrl}. Start or restart the Django server.`);
+  }
+
+  const rawText = await response.text();
+  let data: any = null;
+  try {
+    data = rawText ? JSON.parse(rawText) : null;
+  } catch {
+    data = null;
+  }
+
   if (!response.ok) {
-    throw new Error(data?.detail || data?.message || "Request failed");
+    const looksLikeHtml = /^\s*<!doctype html|^\s*<html/i.test(rawText);
+    const fallback =
+      looksLikeHtml && response.status === 404
+        ? `Backend route not found: ${path}. Restart/update the Django server behind ${apiUrl}.`
+        :
+      response.status === 401 || response.status === 403
+        ? "Admin access denied. Log out and log in with an admin account."
+        : `Request failed with HTTP ${response.status}.`;
+    throw new Error(data?.detail || data?.message || (looksLikeHtml ? fallback : rawText) || fallback);
   }
   return data;
 };

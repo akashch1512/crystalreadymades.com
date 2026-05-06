@@ -18,13 +18,13 @@ function App() {
         <ProductProvider>
           <CartProvider>
             <WishlistProvider>
-              <OrderProvider>
-                <NotificationProvider>
+              <NotificationProvider>
+                <OrderProvider>
                   <ToastProvider>
                     <AppRouter />
                   </ToastProvider>
-                </NotificationProvider>
-              </OrderProvider>
+                </OrderProvider>
+              </NotificationProvider>
             </WishlistProvider>
           </CartProvider>
         </ProductProvider>
@@ -33,4 +33,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;

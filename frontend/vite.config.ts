@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: 'auto',
-        includeAssets: ['Flower_Logo.svg', 'Logo/Hero_Logo.png'],
+        includeAssets: ['Logo/Hero_Logo.png'],
         manifest: {
           name: 'CrystalReadymade',
           short_name: 'CrystalApp',
@@ -30,12 +30,6 @@ export default defineConfig(({ mode }) => {
               src: 'Logo/Hero_Logo.png',
               sizes: '512x512',
               type: 'image/png',
-            },
-            {
-              src: 'Flower_Logo.svg',
-              sizes: 'any',
-              type: 'image/svg+xml',
-              purpose: 'any maskable',
             },
           ],
         },

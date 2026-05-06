@@ -522,6 +522,15 @@ class OrderListCreateView(APIView):
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
+class AdminOrderListView(generics.ListAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [IsStoreAdmin]
+    pagination_class = None
+
+    def get_queryset(self):
+        return Order.objects.all().order_by('-created_at')
+
+
 class OrderStatusUpdateView(APIView):
     """PATCH /api/orders/<id>/status  — Admin updates order status + notifies user by email."""
     permission_classes = [IsAuthenticated]

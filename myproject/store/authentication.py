@@ -22,7 +22,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
             if not user.is_active:
                 raise exceptions.AuthenticationFailed('Account is disabled')
 
-            if not user.is_email_verified:
+            if not user.is_email_verified and not (user.is_staff or user.is_superuser or user.role == 'admin'):
                 raise exceptions.AuthenticationFailed('Email not verified')
 
             return (user, None)

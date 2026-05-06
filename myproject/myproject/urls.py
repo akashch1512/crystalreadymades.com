@@ -21,6 +21,7 @@ urlpatterns = [
     path('api/admin/support-tickets', views.SupportTicketListCreateView.as_view()),
     path('api/admin/support-tickets/<int:id>', views.SupportTicketDetailView.as_view()),
     path('api/admin/store-settings', views.AdminStoreSettingsView.as_view()),
+    path('api/admin/orders', views.AdminOrderListView.as_view()),
     path('api/support-tickets', views.SupportTicketListCreateView.as_view()),
 
     # Categories

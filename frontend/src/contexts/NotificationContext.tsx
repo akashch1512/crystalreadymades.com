@@ -24,9 +24,15 @@ export const useNotifications = () => useContext(NotificationContext);
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userNotifications, setUserNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
+    if (isAdmin) {
+      setUserNotifications([]);
+      setLoading(false);
+      return;
+    }
+
     if (user) {
       const loadNotifications = async () => {
         try {
@@ -49,7 +55,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setUserNotifications([]);
       setLoading(false);
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   const unreadCount = userNotifications.filter(notif => !notif.read).length;
 

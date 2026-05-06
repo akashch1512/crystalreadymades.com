@@ -49,6 +49,9 @@ export const getUsers = async (): Promise<User[]> => {
 // 5. Orders
 export const getOrders = async (): Promise<Order[]> => {
   const token = localStorage.getItem('token');
+  const storedUser = localStorage.getItem('user');
+  const isAdmin = storedUser ? JSON.parse(storedUser)?.role === 'admin' : false;
+  const endpoint = isAdmin ? '/api/admin/orders' : '/api/orders';
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -58,9 +61,9 @@ export const getOrders = async (): Promise<Order[]> => {
   }
 
   try {
-    const response = await fetch(`${BASE_URL}/api/orders`, { headers });
+    const response = await fetch(`${BASE_URL}${endpoint}`, { headers });
     if (!response.ok) {
-      throw new Error(`Failed to fetch /api/orders: ${response.statusText}`);
+      throw new Error(`Failed to fetch ${endpoint}: ${response.status} ${response.statusText}`);
     }
     return await response.json();
   } catch (error) {

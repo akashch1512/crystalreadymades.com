@@ -89,6 +89,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
           brandSlug: p.brandSlug || p.brand_slug || p.brand?.slug || '',
           price: Number(p.price || 0),
           salePrice: p.salePrice ? Number(p.salePrice) : undefined,
+          stock: p.stock ?? p.in_stock ?? p.inStock ?? (Number(p.quantity) > 0),
+          quantity: Number(p.quantity || 0),
           ratings: Number(p.ratingAverage ?? p.ratings ?? 0),
           ratingAverage: Number(p.ratingAverage ?? p.ratings ?? 0),
           reviewCount: p.reviewCount ?? p.reviews?.length ?? 0,

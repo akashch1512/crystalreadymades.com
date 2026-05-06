@@ -22,6 +22,7 @@ interface OrderContextValue {
   getOrderById: (orderId: string) => Order | undefined;
   getOrdersByUser: () => Order[];
   updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<boolean>;
+  batchUpdateOrderStatus: (orderIds: string[], status: OrderStatus) => Promise<boolean>;
 }
 
 const OrderContext = createContext<OrderContextValue>({
@@ -31,6 +32,7 @@ const OrderContext = createContext<OrderContextValue>({
   getOrderById: () => undefined,
   getOrdersByUser: () => [],
   updateOrderStatus: async () => false,
+  batchUpdateOrderStatus: async () => false,
 });
 
 const normalizeOrder = (order: any): Order => ({
@@ -220,9 +222,16 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     try {
-      // This would be an API call in a real app
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.patch(
+        `${apiUrl}/api/orders/${orderId}/status`,
+        { status },
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      );
 
+      // If backend call succeeds, update local state
       setAllOrders(prev => 
         prev.map(order => 
           order.id === orderId 
@@ -231,7 +240,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 status,
                 updatedAt: new Date().toISOString(),
                 ...(status === 'shipped' ? { 
-                  trackingNumber: `TRK${Math.floor(Math.random() * 90000000) + 10000000}` 
+                  trackingNumber: response.data.tracking_number || `TRK${Math.floor(Math.random() * 90000000) + 10000000}` 
                 } : {})
               } 
             : order
@@ -268,6 +277,33 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const batchUpdateOrderStatus = async (orderIds: string[], status: OrderStatus): Promise<boolean> => {
+    if (!isAdmin || orderIds.length === 0) return false;
+    
+    try {
+      // Run updates in parallel
+      const results = await Promise.all(
+        orderIds.map(id => updateOrderStatus(id, status))
+      );
+      
+      const successCount = results.filter(r => r).length;
+      if (successCount > 0) {
+         // Show a combined notification for admin
+         addNotification({
+          userId: user?.id || '',
+          title: 'Batch Update Complete',
+          message: `Successfully updated ${successCount} orders to ${status}.`,
+          type: 'system',
+          read: false,
+        });
+      }
+      return successCount === orderIds.length;
+    } catch (error) {
+      console.error('Error in batch update:', error);
+      return false;
+    }
+  };
+
   return (
     <OrderContext.Provider value={{
       orders: allOrders,
@@ -275,7 +311,8 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       cancelOrder,
       getOrderById,
       getOrdersByUser,
-      updateOrderStatus
+      updateOrderStatus,
+      batchUpdateOrderStatus
     }}>
       {children}
     </OrderContext.Provider>

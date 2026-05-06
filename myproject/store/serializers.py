@@ -8,10 +8,16 @@ class AddressSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True, read_only=True)
+    role = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = ['id', 'name', 'phone', 'email', 'role', 'is_email_verified', 'addresses']
+    
+    def get_role(self, obj):
+        if obj.is_staff or obj.is_superuser:
+            return 'admin'
+        return obj.role
 
 class CategorySerializer(serializers.ModelSerializer):
     # parent_id is a real DB column Django auto-creates for ForeignKey(parent).
@@ -26,9 +32,17 @@ class BrandSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'logo', 'description']
 
 class ReviewSerializer(serializers.ModelSerializer):
+    product_id = serializers.IntegerField(source='product.id', read_only=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_slug = serializers.CharField(source='product.slug', read_only=True)
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+
     class Meta:
         model = Review
-        fields = ['id', 'user_id', 'user_name', 'rating', 'comment', 'created_at']
+        fields = [
+            'id', 'user_id', 'user_name', 'user_email', 'product_id',
+            'product_name', 'product_slug', 'rating', 'comment', 'created_at'
+        ]
 
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
@@ -66,6 +80,16 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ['id', 'title', 'message', 'type', 'is_read', 'created_at']
+
+class SupportTicketSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+
+    class Meta:
+        model = SupportTicket
+        fields = [
+            'id', 'user_id', 'name', 'email', 'phone', 'subject', 'message',
+            'status', 'priority', 'source', 'created_at', 'updated_at'
+        ]
 
 class HeroSlideSerializer(serializers.ModelSerializer):
     class Meta:

@@ -137,20 +137,34 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit }) => {
 
     try {
       setLoading(true);
+      const categoryObj = categories.find(c => c.name === formData.category);
+      const brandObj = brands.find(b => b.name === formData.brand);
+
       const slug = formData.name
         .toLowerCase()
         .replace(/\s+/g, "-")
         .replace(/[^\w-]+/g, "");
+
       const productData = {
         ...formData,
         slug,
+        category_id: categoryObj ? categoryObj.id : undefined,
+        brand_id: brandObj ? brandObj.id : undefined,
+        sale_price: formData.salePrice,
+        in_stock: formData.stock,
       };
 
       const token = localStorage.getItem("token");
       const apiUrl = import.meta.env.VITE_API_URL;
 
-      const response = await fetch(`${apiUrl}/api/products`, {
-        method: "POST",
+      const url = product 
+        ? `${apiUrl}/api/products/${product.id}` 
+        : `${apiUrl}/api/products`;
+
+      const method = product ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -160,7 +174,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit }) => {
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.message || "Failed to create product");
+        throw new Error(result.message || `Failed to ${product ? "update" : "create"} product`);
       }
 
       onSubmit(result);

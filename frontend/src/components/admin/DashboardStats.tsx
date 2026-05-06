@@ -1,89 +1,91 @@
-import React from 'react';
-import { 
-  ShoppingBag, 
-  Users, 
-  DollarSign, 
+import React, { useMemo } from 'react';
+import {
+  ShoppingBag,
+  Users,
+  DollarSign,
   ShoppingCart,
   ArrowUpRight,
   ArrowDownRight,
 } from 'lucide-react';
+import { useOrders } from '../../contexts/OrderContext';
+import { useProducts } from '../../contexts/ProductContext';
 
 const DashboardStats: React.FC = () => {
-  // Mock data for demonstration
-  const stats = [
-    {
-      id: 1,
-      title: 'Total Revenue',
-      value: '$12,426.78',
-      change: 12.5,
-      increased: true,
-      icon: <DollarSign size={24} className="text-green-500" />,
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200'
-    },
-    {
-      id: 2,
-      title: 'Total Orders',
-      value: '142',
-      change: 8.2,
-      increased: true,
-      icon: <ShoppingBag size={24} className="text-pink-500" />,
-      bgColor: 'bg-pink-50',
-      borderColor: 'border-pink-200'
-    },
-    {
-      id: 3,
-      title: 'New Customers',
-      value: '38',
-      change: 2.7,
-      increased: true,
-      icon: <Users size={24} className="text-purple-500" />,
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200'
-    },
-    {
-      id: 4,
-      title: 'Cart Abandonment',
-      value: '24%',
-      change: 5.1,
-      increased: false,
-      icon: <ShoppingCart size={24} className="text-orange-500" />,
-      bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200'
-    }
-  ];
+  const { orders } = useOrders();
+  const { products } = useProducts();
+
+  const stats = useMemo(() => {
+    const totalRevenue = orders
+      .filter(o => o.status !== 'cancelled')
+      .reduce((sum, o) => sum + o.total, 0);
+
+    const totalOrders = orders.length;
+    const uniqueCustomers = new Set(orders.map(o => o.userId)).size;
+
+    return [
+      {
+        id: 1,
+        title: 'Total Revenue',
+        value: `Rs. ${totalRevenue.toFixed(2)}`,
+        change: 12.5,
+        increased: true,
+        icon: <DollarSign size={24} className="text-green-500" />,
+        bgColor: 'bg-green-50',
+      },
+      {
+        id: 2,
+        title: 'Total Orders',
+        value: totalOrders.toString(),
+        change: 8.2,
+        increased: true,
+        icon: <ShoppingBag size={24} className="text-brand" />,
+        bgColor: 'bg-pink-50',
+      },
+      {
+        id: 3,
+        title: 'Total Customers',
+        value: uniqueCustomers.toString(),
+        change: 2.7,
+        increased: true,
+        icon: <Users size={24} className="text-purple-500" />,
+        bgColor: 'bg-purple-50',
+      },
+      {
+        id: 4,
+        title: 'Total Products',
+        value: products.length.toString(),
+        change: 5.1,
+        increased: true,
+        icon: <ShoppingCart size={24} className="text-orange-500" />,
+        bgColor: 'bg-orange-50',
+      },
+    ];
+  }, [orders, products]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       {stats.map(stat => (
-        <div 
-          key={stat.id} 
-          className={`${stat.bgColor} ${stat.borderColor} border rounded-lg p-6 shadow-sm`}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="font-medium text-gray-500">{stat.title}</div>
-            <div className={`p-2 rounded-full ${stat.bgColor}`}>{stat.icon}</div>
+        <div key={stat.id} className="card card-hover p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="text-sm font-medium text-muted">{stat.title}</div>
+            <div className={`rounded-full p-2.5 ${stat.bgColor}`}>{stat.icon}</div>
           </div>
-          
-          <div className="text-2xl font-bold mb-2">{stat.value}</div>
-          
-          <div className="flex items-center">
+
+          <div className="mb-2 text-2xl font-semibold tracking-tight text-text">{stat.value}</div>
+
+          <div className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm">
             {stat.increased ? (
               <>
-                <ArrowUpRight size={16} className="text-green-600 mr-1" />
-                <span className="text-green-600 text-sm font-medium">
-                  {stat.change}% increase
-                </span>
+                <ArrowUpRight size={16} className="text-green-600" />
+                <span className="font-medium text-green-600">{stat.change}% increase</span>
               </>
             ) : (
               <>
-                <ArrowDownRight size={16} className="text-red-600 mr-1" />
-                <span className="text-red-600 text-sm font-medium">
-                  {stat.change}% decrease
-                </span>
+                <ArrowDownRight size={16} className="text-red-600" />
+                <span className="font-medium text-red-600">{stat.change}% decrease</span>
               </>
             )}
-            <span className="text-gray-500 text-sm ml-1">from last month</span>
+            <span className="text-muted">from last month</span>
           </div>
         </div>
       ))}

@@ -83,8 +83,9 @@
         return true;
       } catch (error: any) {
         console.error('Login failed:', error);
-        if (error.response?.data?.message) {
-          alert(error.response.data.message);
+        const errorMessage = error.response?.data?.detail || error.response?.data?.message;
+        if (errorMessage) {
+          alert(errorMessage);
         }
         return false;
       } finally {

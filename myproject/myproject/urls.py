@@ -17,6 +17,11 @@ urlpatterns = [
     path('api/auth/resend-otp', views.ResendOTPView.as_view()),
     path('api/user/me', views.UserMeView.as_view()),
     path('api/user/update', views.UserUpdateView.as_view()),
+    path('api/admin/reviews', views.AdminReviewListView.as_view()),
+    path('api/admin/support-tickets', views.SupportTicketListCreateView.as_view()),
+    path('api/admin/support-tickets/<int:id>', views.SupportTicketDetailView.as_view()),
+    path('api/admin/store-settings', views.AdminStoreSettingsView.as_view()),
+    path('api/support-tickets', views.SupportTicketListCreateView.as_view()),
 
     # Categories
     path('api/products/categories', views.CategoryListView.as_view()),
@@ -27,6 +32,7 @@ urlpatterns = [
 
     # Products
     path('api/products', views.ProductListView.as_view()),
+    path('api/products/<int:id>', views.ProductAdminDetailView.as_view()),
     path('api/products/<str:slug>/reviews', views.ProductReviewCreateView.as_view()),
     path('api/products/<str:slug>', views.ProductDetailView.as_view()),
 

@@ -22,171 +22,137 @@ const AdminSidebar: React.FC = () => {
     navigate('/');
   };
 
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors xl:gap-3 xl:px-4 ${
+      isActive
+        ? 'bg-brand text-white shadow-soft'
+        : 'text-text hover:bg-surface-muted hover:text-brand'
+    }`;
+
   return (
-    <div className="w-full md:w-64 bg-gray-800 text-white rounded-lg overflow-hidden shadow-lg">
-      {/* Admin Header */}
-      <div className="p-6 bg-gray-900">
-        <h2 className="text-xl font-bold tracking-wide">Admin Panel</h2>
-        <p className="text-gray-400 text-sm mt-1">Crystaleadymade</p>
+    <aside className="card w-full overflow-hidden md:sticky md:top-24">
+      <div className="border-b border-line bg-surface-muted px-4 py-5 xl:px-5">
+        <p className="caption">CrystalReadymade</p>
+        <h2 className="mt-1 text-xl font-semibold tracking-tight text-text">Admin Panel</h2>
       </div>
       
-      {/* Navigation Links */}
-      <nav className="p-4">
-        <div className="mb-2 text-xs uppercase tracking-wider text-gray-500 font-semibold pl-4">
+      <nav className="max-h-[calc(100vh-8rem)] overflow-y-auto p-3">
+        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-widest text-muted">
           Main
         </div>
-        <ul className="space-y-1 mb-6">
+        <ul className="mb-6 space-y-1">
           <li>
             <NavLink
               to="/admin"
               end
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${
-                  isActive
-                    ? 'bg-pink-600 text-white font-medium'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
+              className={navLinkClass}
             >
-              <LayoutDashboard size={18} className="mr-3" />
+              <LayoutDashboard size={18} />
               Dashboard
             </NavLink>
           </li>
           <li>
             <NavLink
               to="/admin/analytics"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${
-                  isActive
-                    ? 'bg-pink-600 text-white font-medium'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
+              className={navLinkClass}
             >
-              <BarChart size={18} className="mr-3" />
+              <BarChart size={18} />
               Analytics
             </NavLink>
           </li>
         </ul>
         
-        <div className="mb-2 text-xs uppercase tracking-wider text-gray-500 font-semibold pl-4">
+        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-widest text-muted">
           Management
         </div>
-        <ul className="space-y-1 mb-6">
+        <ul className="mb-6 space-y-1">
           <li>
             <NavLink
               to="/admin/products"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${
-                  isActive
-                    ? 'bg-pink-600 text-white font-medium'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
+              className={navLinkClass}
             >
-              <Package size={18} className="mr-3" />
+              <Package size={18} />
               Products
             </NavLink>
           </li>
           <li>
             <NavLink
               to="/admin/orders"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${
-                  isActive
-                    ? 'bg-pink-600 text-white font-medium'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
+              className={navLinkClass}
             >
-              <ShoppingBag size={18} className="mr-3" />
+              <ShoppingBag size={18} />
               Orders
             </NavLink>
           </li>
           <li>
             <NavLink
-              to="/admin/customers"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${
-                  isActive
-                    ? 'bg-pink-600 text-white font-medium'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
+              to="/admin/returns"
+              className={navLinkClass}
             >
-              <Users size={18} className="mr-3" />
+              <Package size={18} />
+              Return Orders
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/admin/customers"
+              className={navLinkClass}
+            >
+              <Users size={18} />
               Customers
             </NavLink>
           </li>
         </ul>
         
-        <div className="mb-2 text-xs uppercase tracking-wider text-gray-500 font-semibold pl-4">
+        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-widest text-muted">
           Customer Support
         </div>
-        <ul className="space-y-1 mb-6">
+        <ul className="mb-6 space-y-1">
           <li>
             <NavLink
               to="/admin/support-tickets"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${
-                  isActive
-                    ? 'bg-pink-600 text-white font-medium'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
+              className={navLinkClass}
             >
-              <Ticket size={18} className="mr-3" />
+              <Ticket size={18} />
               Support Tickets
             </NavLink>
           </li>
           <li>
             <NavLink
               to="/admin/reviews"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${
-                  isActive
-                    ? 'bg-pink-600 text-white font-medium'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
+              className={navLinkClass}
             >
-              <MessageSquare size={18} className="mr-3" />
+              <MessageSquare size={18} />
               Reviews
             </NavLink>
           </li>
         </ul>
         
-        <div className="mb-2 text-xs uppercase tracking-wider text-gray-500 font-semibold pl-4">
+        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-widest text-muted">
           Settings
         </div>
         <ul className="space-y-1">
           <li>
             <NavLink
               to="/admin/settings"
-              className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md ${
-                  isActive
-                    ? 'bg-pink-600 text-white font-medium'
-                    : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
+              className={navLinkClass}
             >
-              <Settings size={18} className="mr-3" />
+              <Settings size={18} />
               Store Settings
             </NavLink>
           </li>
           <li>
             <button
               onClick={handleLogout}
-              className="flex items-center w-full px-4 py-2 rounded-md text-gray-300 hover:bg-gray-700"
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-surface-muted hover:text-text"
             >
-              <LogOut size={18} className="mr-3" />
+              <LogOut size={18} />
               Logout
             </button>
           </li>
         </ul>
       </nav>
-    </div>
+    </aside>
   );
 };
 

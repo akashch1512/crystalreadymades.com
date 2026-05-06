@@ -8,7 +8,7 @@ import urllib.request
 from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
 from rest_framework.parsers import JSONParser
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import check_password, make_password
@@ -25,6 +25,15 @@ from . import email_service
 from .authentication import JWTAuthenticationAllowUnverified
 
 # --- Auth Views (Matching Schema) ---
+
+class IsStoreAdmin(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        return bool(
+            user
+            and user.is_authenticated
+            and (user.is_staff or user.is_superuser or getattr(user, 'role', '') == 'admin')
+        )
 
 def create_access_token(user_id):
     expire = datetime.utcnow() + timedelta(days=30)
@@ -338,16 +347,30 @@ class BrandListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     pagination_class = None
 
-class ProductListView(generics.ListAPIView):
+class ProductListView(generics.ListCreateAPIView):
     queryset = Product.objects.select_related('category', 'brand').prefetch_related('reviews')
     serializer_class = ProductSerializer
-    permission_classes = [AllowAny]
+    
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAdminUser()]
+        return [AllowAny()]
 
 class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.select_related('category', 'brand').prefetch_related('reviews')
     serializer_class = ProductSerializer
     lookup_field = 'slug'
     permission_classes = [AllowAny]
+
+class ProductAdminDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.select_related('category', 'brand').prefetch_related('reviews')
+    serializer_class = ProductSerializer
+    lookup_field = 'id'
+    
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [AllowAny()]
 
 class ProductReviewCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -359,8 +382,8 @@ class ProductReviewCreateView(APIView):
         comment = str(request.data.get('comment', '')).strip()
 
         try:
-            rating = float(rating)
-        except (TypeError, ValueError):
+            rating = Decimal(str(rating))
+        except (TypeError, ValueError, Exception):
             return Response({"detail": "Please choose a valid rating"}, status=status.HTTP_400_BAD_REQUEST)
 
         if rating < 1 or rating > 5:
@@ -377,7 +400,7 @@ class ProductReviewCreateView(APIView):
             comment=comment,
         )
 
-        product.rating_average = (
+        product.rating_average = float(
             Review.objects
             .filter(product=product)
             .aggregate(Avg('rating'))['rating__avg'] or 0
@@ -511,7 +534,7 @@ class OrderStatusUpdateView(APIView):
         new_status = request.data.get('status')
         tracking_number = request.data.get('tracking_number')
 
-        valid_statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
+        valid_statuses = ['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled', 'returned']
         if new_status not in valid_statuses:
             return Response(
                 {"detail": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"},
@@ -698,6 +721,102 @@ class UserDetailView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     lookup_field = 'id'
     permission_classes = [IsAdminUser]
+
+
+# --- Admin Sources ---
+
+class AdminReviewListView(generics.ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsStoreAdmin]
+    pagination_class = None
+
+    def get_queryset(self):
+        return Review.objects.select_related('user', 'product').order_by('-created_at')
+
+
+class SupportTicketListCreateView(generics.ListCreateAPIView):
+    serializer_class = SupportTicketSerializer
+    pagination_class = None
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [AllowAny()]
+        return [IsStoreAdmin()]
+
+    def get_queryset(self):
+        return SupportTicket.objects.select_related('user').order_by('-created_at')
+
+    def perform_create(self, serializer):
+        user = self.request.user if self.request.user and self.request.user.is_authenticated else None
+        serializer.save(user=user)
+
+
+class SupportTicketDetailView(generics.RetrieveUpdateAPIView):
+    queryset = SupportTicket.objects.select_related('user')
+    serializer_class = SupportTicketSerializer
+    lookup_field = 'id'
+    permission_classes = [IsStoreAdmin]
+
+
+class AdminStoreSettingsView(APIView):
+    permission_classes = [IsStoreAdmin]
+
+    def get(self, request):
+        latest_terms = Terms.objects.order_by('-updated_at').first()
+        support_counts = {
+            'open': SupportTicket.objects.filter(status='open').count(),
+            'in_progress': SupportTicket.objects.filter(status='in_progress').count(),
+            'resolved': SupportTicket.objects.filter(status='resolved').count(),
+            'closed': SupportTicket.objects.filter(status='closed').count(),
+        }
+
+        return Response({
+            'store': {
+                'name': 'CrystalReadymade',
+                'site_url': getattr(settings, 'SITE_URL', ''),
+                'support_email': getattr(settings, 'DEFAULT_FROM_EMAIL', 'support@crystalreadymade.com'),
+                'location': 'Aurangapura Rd, Gulmandi, Chhatrapati Sambhajinagar',
+                'phone': '+91 91300 94080',
+                'currency': 'INR',
+            },
+            'payment': {
+                'provider': 'Razorpay',
+                'configured': bool(settings.RAZORPAY_KEY_ID and settings.RAZORPAY_KEY_SECRET),
+                'key_id_present': bool(settings.RAZORPAY_KEY_ID),
+            },
+            'email': {
+                'provider': getattr(settings, 'EMAIL_HOST', ''),
+                'configured': bool(getattr(settings, 'EMAIL_HOST_USER', None) and getattr(settings, 'EMAIL_HOST_PASSWORD', None)),
+                'from_email': getattr(settings, 'DEFAULT_FROM_EMAIL', ''),
+            },
+            'catalog': {
+                'products': Product.objects.count(),
+                'categories': Category.objects.count(),
+                'brands': Brand.objects.count(),
+                'hero_slides': HeroSlide.objects.count(),
+            },
+            'customers': {
+                'total': User.objects.count(),
+                'admins': User.objects.filter(role='admin').count(),
+                'verified_email': User.objects.filter(is_email_verified=True).count(),
+            },
+            'orders': {
+                'total': Order.objects.count(),
+                'pending': Order.objects.filter(status='pending').count(),
+                'processing': Order.objects.filter(status='processing').count(),
+                'delivered': Order.objects.filter(status='delivered').count(),
+                'cancelled': Order.objects.filter(status='cancelled').count(),
+            },
+            'support': {
+                'total': SupportTicket.objects.count(),
+                'by_status': support_counts,
+            },
+            'content': {
+                'terms_updated_at': latest_terms.updated_at if latest_terms else None,
+                'terms_preview': latest_terms.content[:240] if latest_terms else '',
+                'hero_slides': HeroSlideSerializer(HeroSlide.objects.all(), many=True).data,
+            },
+        })
     
 # --- Address CRUD ---
 

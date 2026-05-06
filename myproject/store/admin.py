@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
     User, Address, Category, Brand, Product, 
-    Review, Order, OrderItem, Notification, HeroSlide, Terms
+    Review, Order, OrderItem, Notification, SupportTicket, HeroSlide, Terms
 )
 
 # 1. Custom User Admin
@@ -85,6 +85,12 @@ class OrderItemAdmin(admin.ModelAdmin):
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'title', 'type', 'is_read', 'created_at')
+
+@admin.register(SupportTicket)
+class SupportTicketAdmin(admin.ModelAdmin):
+    list_display = ('id', 'subject', 'email', 'status', 'priority', 'created_at')
+    list_filter = ('status', 'priority', 'source', 'created_at')
+    search_fields = ('subject', 'message', 'name', 'email', 'phone')
 
 @admin.register(Terms)
 class TermsAdmin(admin.ModelAdmin):

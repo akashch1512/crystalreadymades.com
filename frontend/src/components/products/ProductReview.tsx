@@ -15,8 +15,9 @@ const ProductReview: React.FC<ProductReviewProps> = ({ review }) => {
   });
   
   // Generate stars array based on rating
-  const fullStars = Math.floor(review.rating);
-  const hasHalfStar = review.rating % 1 >= 0.5;
+  const safeRating = Number(review.rating || 0);
+  const fullStars = Math.floor(safeRating);
+  const hasHalfStar = safeRating % 1 >= 0.5;
   
   return (
     <div className="border-b border-line py-4">
@@ -36,7 +37,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ review }) => {
             />
           ))}
         </div>
-        <span className="text-muted ml-2 font-medium">{review.rating.toFixed(1)}</span>
+        <span className="text-muted ml-2 font-medium">{safeRating.toFixed(1)}</span>
       </div>
       
       <div className="flex items-center mb-2">

@@ -41,7 +41,17 @@ const ProductDetailPage: React.FC = () => {
           }
           
           const foundProduct = await response.json();
-          setProduct(foundProduct);
+          setProduct({
+            ...foundProduct,
+            price: Number(foundProduct.price || 0),
+            salePrice: foundProduct.salePrice ? Number(foundProduct.salePrice) : undefined,
+            ratings: Number(foundProduct.ratingAverage ?? foundProduct.ratings ?? 0),
+            ratingAverage: Number(foundProduct.ratingAverage ?? foundProduct.ratings ?? 0),
+            reviews: (foundProduct.reviews || []).map((r: any) => ({
+              ...r,
+              rating: Number(r.rating || 0)
+            })),
+          });
           document.title = `${foundProduct.name} | CrystalReadymade`;
         } catch (err) {
           console.error('Error fetching product:', err);
@@ -135,11 +145,14 @@ const ProductDetailPage: React.FC = () => {
         throw new Error(data?.detail || data?.message || 'Unable to submit review');
       }
 
-      const newReview: Review = data;
+      const newReview: Review = {
+        ...data,
+        rating: Number(data.rating || 0)
+      };
 
       setProduct((current: any) => {
         const reviews = [newReview, ...(current.reviews || [])];
-        const ratingAverage = reviews.reduce((sum: number, review: Review) => sum + review.rating, 0) / reviews.length;
+        const ratingAverage = reviews.reduce((sum: number, review: Review) => sum + Number(review.rating), 0) / reviews.length;
 
         return {
           ...current,

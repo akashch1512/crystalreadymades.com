@@ -36,7 +36,11 @@ const OrderContext = createContext<OrderContextValue>({
 const normalizeOrder = (order: any): Order => ({
   id: String(order.id),
   userId: String(order.user_id ?? order.userId ?? ''),
-  items: order.items ?? [],
+  items: (order.items ?? []).map((item: any) => ({
+    ...item,
+    price: Number(item.price ?? 0),
+    quantity: Number(item.quantity ?? 1)
+  })),
   status: order.status ?? 'pending',
   shippingAddress: order.shipping_address_snapshot ?? order.shippingAddress ?? null,
   paymentMethod: order.payment_method ?? order.paymentMethod ?? 'cod',

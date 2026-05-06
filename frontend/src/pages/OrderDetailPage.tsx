@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Truck, Check, X } from 'lucide-react';
 import { useOrders } from '../contexts/OrderContext';
+import { useToast } from '../contexts/ToastContext';
 import { Order, OrderStatus } from '../types';
 
 const OrderDetailPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { getOrderById, cancelOrder } = useOrders();
+  const { success, error: showError } = useToast();
   
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   
   useEffect(() => {
     if (orderId) {
@@ -32,28 +35,31 @@ const OrderDetailPage: React.FC = () => {
     }
   }, [orderId, getOrderById, navigate]);
   
-  const handleCancelOrder = async () => {
+  const confirmCancelOrder = async () => {
     if (!order) return;
     
-    if (window.confirm('Are you sure you want to cancel this order?')) {
-      setCancelling(true);
+    setCancelling(true);
+    
+    try {
+      const isSuccess = await cancelOrder(order.id);
       
-      try {
-        const success = await cancelOrder(order.id);
-        
-        if (success) {
-          // Update the local order state
-          setOrder(prev => prev ? { ...prev, status: 'cancelled' as OrderStatus } : null);
-        } else {
-          alert('Failed to cancel order. It may be too late to cancel.');
-        }
-      } catch (error) {
-        console.error('Error cancelling order:', error);
-        alert('An error occurred while trying to cancel the order.');
-      } finally {
-        setCancelling(false);
+      if (isSuccess) {
+        setOrder(prev => prev ? { ...prev, status: 'cancelled' as OrderStatus } : null);
+        success('Order has been cancelled successfully.');
+        setShowCancelModal(false);
+      } else {
+        showError('Failed to cancel order. It may be too late to cancel.');
       }
+    } catch (err) {
+      console.error('Error cancelling order:', err);
+      showError('An error occurred while trying to cancel the order.');
+    } finally {
+      setCancelling(false);
     }
+  };
+  
+  const handleCancelClick = () => {
+    setShowCancelModal(true);
   };
   
   const formatDate = (dateString: string) => {
@@ -246,7 +252,7 @@ const OrderDetailPage: React.FC = () => {
                   {canCancel && (
                     <div className="mt-8 flex justify-end">
                       <button
-                        onClick={handleCancelOrder}
+                        onClick={handleCancelClick}
                         disabled={cancelling}
                         className="flex items-center text-red-600 hover:text-red-800"
                       >
@@ -377,6 +383,40 @@ const OrderDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Custom Cancel Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-surface rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4 text-red-600">
+                <X size={24} />
+              </div>
+              <h3 className="h3 mb-2 text-text">Cancel Order?</h3>
+              <p className="text-muted mb-6">
+                Are you sure you want to cancel Order #{String(order.id).slice(-8)}? This action cannot be undone.
+              </p>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  disabled={cancelling}
+                  className="flex-1 btn bg-surface-muted text-text hover:bg-line border border-line"
+                >
+                  Keep Order
+                </button>
+                <button
+                  onClick={confirmCancelOrder}
+                  disabled={cancelling}
+                  className="flex-1 btn bg-red-600 text-white hover:bg-red-700"
+                >
+                  {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
